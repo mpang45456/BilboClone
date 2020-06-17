@@ -1,11 +1,13 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 const CONFIG = require('./config');
 
 app.use(bodyParser.json());
+app.use(cookieParser());
 const accessTokenSecret = '123456';
 const refreshTokenSecret = 'asdfgh';
 
@@ -77,23 +79,25 @@ app.post('/login', function(req, res) {
 
         const accessToken = jwt.sign({ username: user.username, role: user.role }, 
                                      accessTokenSecret,
-                                     { expiresIn: '10000' }); //FIXME: DEBUG
+                                     { expiresIn: '20m' }); //FIXME: DEBUG
         const refreshToken = jwt.sign({ username: user.username, role: user.role }, 
                                       refreshTokenSecret);
 
         // TODO: Encapsulate this into a class. So that the data store can be hot swapped
         refreshTokens.push(refreshToken);
 
+        res.cookie('accessToken', accessToken);
+        res.cookie('refreshToken', refreshToken);
         res.json({
             accessToken,
             refreshToken
         })
     })
-    
 });
 
 app.post('/token', function(req, res) {
-    const { refreshToken } = req.body; 
+    // const { refreshToken } = req.body; 
+    const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken) {
         return res.sendStatus(401);
@@ -112,28 +116,79 @@ app.post('/token', function(req, res) {
                                         accessTokenSecret,
                                         { expiresIn: '20m'});
         
+        res.cookie('accessToken', newAccessToken);
+        // TODO: Must set refresh token too?
         return res.json({ newAccessToken });
     })
 })
 
+// TODO: This should be mounted on the /api/v1 route
 function authenticateJWT(req, res, next) {
-    const authHeader = req.headers.authorization;
+    // const authHeader = req.headers.authorization;
 
-    if (authHeader) {
-        const token = authHeader.split(' ')[1];
+    // if (authHeader) {
+    //     const token = authHeader.split(' ')[1];
 
-        jwt.verify(token, accessTokenSecret, function(err, user) {
-            if (err) {
-                return res.sendStatus(403);
-            }
+    //     jwt.verify(token, accessTokenSecret, function(err, user) {
+    //         if (err) {
+    //             return res.sendStatus(403);
+    //         }
 
-            req.user = user;
-            next();
-        })
-    } else {
+    //         req.user = user;
+    //         next();
+    //     })
+    // } else {
+    //     return res.sendStatus(401);
+    // }
+
+    accessToken = req.cookies.accessToken;
+    if (!accessToken) {
         return res.sendStatus(401);
     }
+
+    jwt.verify(accessToken, accessTokenSecret, function(err, user) {
+        if (err) {
+            return res.sendStatus(403);
+        }
+
+        req.user = user;
+        next();
+    })    
 }
+
+function authenticateJWTAdmin(req, res, next) {
+    accessToken = req.cookies.accessToken;
+    if (!accessToken) {
+        return res.sendStatus(401);
+    }
+
+    jwt.verify(accessToken, accessTokenSecret, function(err, user) {
+        if (err) {
+            return res.sendStatus(403);
+        }
+
+        // Additional Check
+        if (user.role !== "admin") {
+            return res.sendStatus(403);
+        }
+
+        req.user = user;
+        next();
+    })
+}
+
+app.post('/signup', authenticateJWTAdmin, function(req, res) {
+    const { username, password, role } = req.body;
+    const newUser = new UsersModel({ username: username , role: role });
+    newUser.setPassword(password);
+    newUser.save(function(err, newUser) {
+        if (err) {
+            console.log("Could not save newUser");
+            return res.sendStatus(501); //TODO: Change status code?
+        }
+    });
+    return res.send("Successfully created new user: " + username);
+});
 
 app.get('/test', authenticateJWT, function(req, res) {
     res.send("Accessing a protected resource!");
