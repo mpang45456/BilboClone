@@ -1,7 +1,17 @@
 const express = require('express');
-const app = express(); // FIXME: Shift this later
+const jwt = require('jsonwebtoken');
+const bodyParser = require('body-parser');
+
+const app = express();
 const CONFIG = require('./config');
 
+app.use(bodyParser.json());
+const accessTokenSecret = '123456';
+const refreshTokenSecret = 'asdfgh';
+
+/**
+ * MongoDB
+ */
 const mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/testing', {useNewUrlParser: true, useUnifiedTopology: true});
 const db = mongoose.connection;
@@ -10,16 +20,15 @@ db.once('open', function() {
     console.log("DB connection is ready!"); //FIXME: DEBUG
 })
 
-/**
- * MongoDB
- */
 const crypto = require('crypto');
+const { access } = require('fs');
 const { Schema } = mongoose;
 
 const UsersSchema = new Schema({
     username: {type: String, unique: true}, 
-    hash: String, 
-    salt: String
+    hash: String,
+    salt: String,
+    role: String,
 })
 
 // TODO: Note: This isn't used yet
@@ -35,118 +44,101 @@ UsersSchema.methods.isValidPassword = function(password) {
 
 const UsersModel = mongoose.model('Users', UsersSchema);
 
-const admin = new UsersModel({ username: "admin" });
+const admin = new UsersModel({ username: "admin", role: "admin" });
 admin.setPassword("123");
 admin.save(function(err, admin) {
     if (err) {
         console.log("Could not save admin");
     }
-
-    console.log(admin);
 })
 
 
 
-/**
- * Passport
- */
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
+let refreshTokens = [];
 
-passport.use(new LocalStrategy(function(username, password, done) {
+app.post('/login', function(req, res) {
+    const { username, password } = req.body;
+
+    // FIXME: Be careful of messages being sent.
+    // TODO: Send with status code
+    // TODO: Deal with issue of multiple usernames? Or because username is unique then...?
     UsersModel.findOne({ username: username }, function(err, user) {
         if (err) {
-            return done(err);
+            return res.send("Oops, something went wrong!");
         }
 
         if (!user) {
-            return done(null, false, { message: "Incorrect username."});
+            return res.send("Invalid username");
         }
 
         if (!user.isValidPassword(password)) {
-            return done(null, false, { message: "Incorrect password."});
+            return res.send("Invalid password");
         }
 
-        return done(null, user);
+        const accessToken = jwt.sign({ username: user.username, role: user.role }, 
+                                     accessTokenSecret,
+                                     { expiresIn: '10000' }); //FIXME: DEBUG
+        const refreshToken = jwt.sign({ username: user.username, role: user.role }, 
+                                      refreshTokenSecret);
+
+        // TODO: Encapsulate this into a class. So that the data store can be hot swapped
+        refreshTokens.push(refreshToken);
+
+        res.json({
+            accessToken,
+            refreshToken
+        })
     })
-}));
+    
+});
 
-/**
- * Express
- */
-const session = require('express-session');
-const bodyParser = require('body-parser');
-// app.use(session({ secret: "SECRETPLSCHANGE ",
-//                   saveUninitialized: false, 
-//                   resave: false })); //FIXME: Change
-app.use(session({ secret: 'passport-tutorial', cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false }));
-app.use(bodyParser.urlencoded({ extended: false}));
-app.use(passport.initialize());
-app.use(passport.session());
+app.post('/token', function(req, res) {
+    const { refreshToken } = req.body; 
 
-passport.serializeUser(function(user, done) {
-    done(null, user.id);
-})
+    if (!refreshToken) {
+        return res.sendStatus(401);
+    }
 
-passport.deserializeUser(function(id, done) {
-    UsersModel.findById(id, function(err, user) {
-        done(err, user);
-    })
-})
+    if (!refreshTokens.includes(refreshToken)) {
+        return res.sendStatus(403);
+    }
 
-/**
- * Server
- */
-app.use(express.static(__dirname + '/../client/dist'));
-
-app.post('/login', passport.authenticate('local', { failureRedirect: '/login' }), function(req, res) {
-    let redirectTo = req.session.returnTo || '/';
-    delete req.session.returnTo;
-    console.log('received');
-    res.redirect(redirectTo);
-})
-
-app.post('/signup', ensureAuthenticated, function(req, res) {
-    console.log("HERE");
-    console.log(req.body);
-
-    // TODO: Add validation (check for existence)
-    // TODO: Add logging for requests and responses
-    const newUser = new UsersModel({ username: req.body.username });
-    newUser.setPassword(req.body.password);
-    newUser.save(function(err, newUser) {
+    jwt.verify(refreshToken, refreshTokenSecret, function(err, user) {
         if (err) {
-            console.log("Could not save newUser: " + err);
+            return res.sendStatus(403);
         }
-    })
 
-    res.send("signed up!");
+        const newAccessToken = jwt.sign({ username: user.username, role: user.role },
+                                        accessTokenSecret,
+                                        { expiresIn: '20m'});
+        
+        return res.json({ newAccessToken });
+    })
 })
 
-function ensureAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
-        return next();
+function authenticateJWT(req, res, next) {
+    const authHeader = req.headers.authorization;
+
+    if (authHeader) {
+        const token = authHeader.split(' ')[1];
+
+        jwt.verify(token, accessTokenSecret, function(err, user) {
+            if (err) {
+                return res.sendStatus(403);
+            }
+
+            req.user = user;
+            next();
+        })
     } else {
-        console.log("req.url: " + req.url);
-        req.session.returnTo = req.url;
-        res.redirect('/login.html');
+        return res.sendStatus(401);
     }
 }
 
-const path = require('path');
-app.get('/login', function(req, res) {
-    res.sendFile(path.resolve(__dirname + "/../client/dist/login.html"));
+app.get('/test', authenticateJWT, function(req, res) {
+    res.send("Accessing a protected resource!");
 })
 
-app.get('/protected', ensureAuthenticated, function(req, res) {
-    res.send("Able to access protected resource");
-})
-
-app.get('/signup', function(req, res) {
-    res.sendFile(path.resolve(__dirname + "/../client/dist/signup.html"));
-})
-
-
-app.listen(CONFIG.PORT_NUMBER, function() {
-    console.log("Server listening on port " + CONFIG.PORT_NUMBER);
+app.listen(CONFIG.PORT_NUMBER, () => {
+    console.log("Server listening on Port " + CONFIG.PORT_NUMBER);
 })
