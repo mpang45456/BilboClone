@@ -3,50 +3,18 @@ const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 
-const app = express();
 const CONFIG = require('./config');
 
+const app = express();
 app.use(bodyParser.json());
 app.use(cookieParser());
 const accessTokenSecret = '123456';
 const refreshTokenSecret = 'asdfgh';
 
-/**
- * MongoDB
- */
-const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/testing', {useNewUrlParser: true, useUnifiedTopology: true});
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'Connection Error: '));
-db.once('open', function() {
-    console.log("DB connection is ready!"); //FIXME: DEBUG
-})
 
-const crypto = require('crypto');
-const { access } = require('fs');
-const { Schema } = mongoose;
+const { UserModel } = require('./database');
 
-const UsersSchema = new Schema({
-    username: {type: String, unique: true}, 
-    hash: String,
-    salt: String,
-    role: String,
-})
-
-// TODO: Note: This isn't used yet
-UsersSchema.methods.setPassword = function(password) {
-    this.salt = crypto.randomBytes(16).toString('hex');
-    this.hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex');
-};
-
-UsersSchema.methods.isValidPassword = function(password) {
-    const hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex');
-    return this.hash === hash;
-};
-
-const UsersModel = mongoose.model('Users', UsersSchema);
-
-const admin = new UsersModel({ username: "admin", role: "admin" });
+const admin = new UserModel({ username: "admin", role: "admin" });
 admin.setPassword("123");
 admin.save(function(err, admin) {
     if (err) {
@@ -64,7 +32,7 @@ app.post('/login', function(req, res) {
     // FIXME: Be careful of messages being sent.
     // TODO: Send with status code
     // TODO: Deal with issue of multiple usernames? Or because username is unique then...?
-    UsersModel.findOne({ username: username }, function(err, user) {
+    UserModel.findOne({ username: username }, function(err, user) {
         if (err) {
             return res.send("Oops, something went wrong!");
         }
@@ -179,15 +147,15 @@ function authenticateJWTAdmin(req, res, next) {
 
 app.post('/signup', authenticateJWTAdmin, function(req, res) {
     const { username, password, role } = req.body;
-    const newUser = new UsersModel({ username: username , role: role });
+    const newUser = new UserModel({ username: username , role: role });
     newUser.setPassword(password);
     newUser.save(function(err, newUser) {
         if (err) {
             console.log("Could not save newUser");
             return res.sendStatus(501); //TODO: Change status code?
         }
+        return res.send("Successfully created new user: " + username);
     });
-    return res.send("Successfully created new user: " + username);
 });
 
 app.get('/test', authenticateJWT, function(req, res) {
