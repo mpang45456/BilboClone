@@ -13,6 +13,7 @@ const refreshTokenSecret = 'asdfgh';
 
 
 const { UserModel } = require('./database');
+const { authenticate } = require('passport');
 
 const admin = new UserModel({ username: "admin", role: "admin" });
 admin.setPassword("123");
@@ -47,7 +48,7 @@ app.post('/login', function(req, res) {
 
         const accessToken = jwt.sign({ username: user.username, role: user.role }, 
                                      accessTokenSecret,
-                                     { expiresIn: '20m' }); //FIXME: DEBUG
+                                     { expiresIn: '10000' }); //FIXME: DEBUG
         const refreshToken = jwt.sign({ username: user.username, role: user.role }, 
                                       refreshTokenSecret);
 
@@ -82,7 +83,7 @@ app.post('/token', function(req, res) {
 
         const newAccessToken = jwt.sign({ username: user.username, role: user.role },
                                         accessTokenSecret,
-                                        { expiresIn: '20m'});
+                                        { expiresIn: '10000'});
         
         res.cookie('accessToken', newAccessToken);
         // TODO: Must set refresh token too?
@@ -125,7 +126,7 @@ function authenticateJWT(req, res, next) {
 }
 
 function authenticateJWTAdmin(req, res, next) {
-    accessToken = req.cookies.accessToken;
+    let accessToken = req.cookies.accessToken;
     if (!accessToken) {
         return res.sendStatus(401);
     }
@@ -157,6 +158,12 @@ app.post('/signup', authenticateJWTAdmin, function(req, res) {
         return res.send("Successfully created new user: " + username);
     });
 });
+
+app.post('/logout', function(req, res) {
+    let refreshToken = req.cookies.refreshToken;
+    refreshTokens = refreshTokens.filter(token => token !== refreshToken);
+    res.send("Logout successful");
+})
 
 app.get('/test', authenticateJWT, function(req, res) {
     res.send("Accessing a protected resource!");
