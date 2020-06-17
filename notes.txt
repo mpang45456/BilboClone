@@ -1,0 +1,15 @@
+// Using MongoDB Shell
+// Start Mongo Shell
+mongo
+
+// Show databases
+show dbs
+
+// Use database
+use <db_name>
+
+// Show collections
+show collections
+
+// Delete an entire collection
+db.<collection_name>.drop()

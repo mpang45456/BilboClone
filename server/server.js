@@ -17,7 +17,7 @@ const crypto = require('crypto');
 const { Schema } = mongoose;
 
 const UsersSchema = new Schema({
-    username: String, 
+    username: {type: String, unique: true}, 
     hash: String, 
     salt: String
 })
@@ -99,21 +99,53 @@ passport.deserializeUser(function(id, done) {
  */
 app.use(express.static(__dirname + '/../client/dist'));
 
-app.post('/login', passport.authenticate('local', { successRedirect: "/", failureRedirect: "/login.html"}), function(req, res) {
+app.post('/login', passport.authenticate('local', { failureRedirect: '/login' }), function(req, res) {
+    let redirectTo = req.session.returnTo || '/';
+    delete req.session.returnTo;
     console.log('received');
+    res.redirect(redirectTo);
+})
+
+app.post('/signup', ensureAuthenticated, function(req, res) {
+    console.log("HERE");
+    console.log(req.body);
+
+    // TODO: Add validation (check for existence)
+    // TODO: Add logging for requests and responses
+    const newUser = new UsersModel({ username: req.body.username });
+    newUser.setPassword(req.body.password);
+    newUser.save(function(err, newUser) {
+        if (err) {
+            console.log("Could not save newUser: " + err);
+        }
+    })
+
+    res.send("signed up!");
 })
 
 function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return next();
     } else {
+        console.log("req.url: " + req.url);
+        req.session.returnTo = req.url;
         res.redirect('/login.html');
     }
 }
 
-app.get('/protected', ensureAuthenticated, function(req, res) {
-    console.log("protected");
+const path = require('path');
+app.get('/login', function(req, res) {
+    res.sendFile(path.resolve(__dirname + "/../client/dist/login.html"));
 })
+
+app.get('/protected', ensureAuthenticated, function(req, res) {
+    res.send("Able to access protected resource");
+})
+
+app.get('/signup', function(req, res) {
+    res.sendFile(path.resolve(__dirname + "/../client/dist/signup.html"));
+})
+
 
 app.listen(CONFIG.PORT_NUMBER, function() {
     console.log("Server listening on port " + CONFIG.PORT_NUMBER);
