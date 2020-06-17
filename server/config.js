@@ -1,5 +1,5 @@
 // Config file for the server
 CONFIG = {};
-CONFIG.PORT_NUMBER = 3000;
+CONFIG.PORT_NUMBER = process.env.PORT || 3000;
 
 module.exports = CONFIG;
