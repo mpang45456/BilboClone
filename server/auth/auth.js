@@ -108,27 +108,24 @@ router.post('/user', isAuthenticated, isAdmin, function(req, res) {
     });
 })
 
-//TODO: For now, only the admin can update a user's credentials
+/**
+ * Mounted: /auth/user/:username
+ * 
+ * Patches the fields (password and role) of a user.
+ * 
+ * Note: The current implementation only allows 
+ * the admin to update a user's credentials and role
+ */
 router.patch('/user/:username', isAuthenticated, isAdmin, function(req, res) {
     const username = req.params.username;
     const { password, role } = req.body;
 
     UserModel.findOne({ username: username }, function(err, user) {
-        if (err) {
-            return res.status(500).send("Oops, something went wrong");
-        }
+        if (err) { return res.status(500).send("Oops, something went wrong"); }
+        if (!user) { return res.status(400).send("User does not exist"); }
 
-        if (!user) {
-            return res.status(400).send("User does not exist");
-        }
-
-        if (password) {
-            user.setPassword(password);
-        }
-
-        if (role) {
-            user.role = role;
-        }
+        if (password) { user.setPassword(password); }
+        if (role) { user.role = role; }
 
         user.save()
             .then(() => res.status(200).send("Updated User Details"))
@@ -136,6 +133,15 @@ router.patch('/user/:username', isAuthenticated, isAdmin, function(req, res) {
     })
 })
 
+/**
+ * Mounted: /auth/user/:username
+ * 
+ * Deletes the user `:username`. If `:username`
+ * does not exist in the database, a success status
+ * is still sent (because the outcome of a DELETE 
+ * request is to make sure the resource does not exist
+ * at the end of a request)
+ */
 router.delete('/user/:username', isAuthenticated, isAdmin, function(req, res) {
     const username = req.params.username;
 
@@ -148,6 +154,20 @@ router.delete('/user/:username', isAuthenticated, isAdmin, function(req, res) {
     })
 })
 
+/**
+ * Mounted: /auth/user
+ * 
+ * Gets the collection of users (returns as JSON)
+ * 
+ * Note: JSON Format: 
+ * [
+ *      {
+ *          "username": username
+ *          "role": role
+ *      }
+ *      ...
+ * ]
+ */
 router.get('/user', isAuthenticated, isAdmin, function(req, res) {
     let ret = [];
 
@@ -159,6 +179,17 @@ router.get('/user', isAuthenticated, isAdmin, function(req, res) {
     })
 })
 
+/**
+ * Mounted: /auth/user
+ * 
+ * Gets the user (`:username`) (returns as JSON)
+ * 
+ * Note: JSON Format: 
+ * {
+ *      "username": username,
+ *      "role": role
+ * }
+ */
 router.get('/user/:username', isAuthenticated, isAdmin, function(req, res) {
     const username = req.params.username;
 
