@@ -4,15 +4,13 @@ const cookieParser = require('cookie-parser');
 
 const CONFIG = require('./config');
 
+// Configure App
 const app = express();
 app.use(bodyParser.json());
 app.use(cookieParser());
-const accessTokenSecret = '123456';
-const refreshTokenSecret = 'asdfgh';
 
-
+// FIXME: Temporary Database (User) Bootstrap
 const { UserModel } = require('./database');
-
 const admin = new UserModel({ username: "admin", role: "admin" });
 admin.setPassword("123");
 admin.save(function(err, admin) {
@@ -21,12 +19,11 @@ admin.save(function(err, admin) {
     }
 })
 
-
-
+// Authentication Endpoint
 const { authRouter, isAuthenticated } = require('./auth/auth');
 app.use('/auth', authRouter);
 
-
+// FIXME: Temporary Protected Endpoint
 app.get('/test', isAuthenticated, function(req, res) {
     res.send("Accessing a protected resource!");
 })
