@@ -13,7 +13,6 @@ const refreshTokenSecret = 'asdfgh';
 
 
 const { UserModel } = require('./database');
-const { authenticate } = require('passport');
 
 const admin = new UserModel({ username: "admin", role: "admin" });
 admin.setPassword("123");
@@ -27,42 +26,42 @@ admin.save(function(err, admin) {
 
 let refreshTokens = [];
 
-app.post('/login', function(req, res) {
-    const { username, password } = req.body;
+// app.post('/login', function(req, res) {
+//     const { username, password } = req.body;
 
-    // FIXME: Be careful of messages being sent.
-    // TODO: Send with status code
-    // TODO: Deal with issue of multiple usernames? Or because username is unique then...?
-    UserModel.findOne({ username: username }, function(err, user) {
-        if (err) {
-            return res.send("Oops, something went wrong!");
-        }
+//     // FIXME: Be careful of messages being sent.
+//     // TODO: Send with status code
+//     // TODO: Deal with issue of multiple usernames? Or because username is unique then...?
+//     UserModel.findOne({ username: username }, function(err, user) {
+//         if (err) {
+//             return res.send("Oops, something went wrong!");
+//         }
 
-        if (!user) {
-            return res.send("Invalid username");
-        }
+//         if (!user) {
+//             return res.send("Invalid username");
+//         }
 
-        if (!user.isValidPassword(password)) {
-            return res.send("Invalid password");
-        }
+//         if (!user.isValidPassword(password)) {
+//             return res.send("Invalid password");
+//         }
 
-        const accessToken = jwt.sign({ username: user.username, role: user.role }, 
-                                     accessTokenSecret,
-                                     { expiresIn: '10000' }); //FIXME: DEBUG
-        const refreshToken = jwt.sign({ username: user.username, role: user.role }, 
-                                      refreshTokenSecret);
+//         const accessToken = jwt.sign({ username: user.username, role: user.role }, 
+//                                      accessTokenSecret,
+//                                      { expiresIn: '10000' }); //FIXME: DEBUG
+//         const refreshToken = jwt.sign({ username: user.username, role: user.role }, 
+//                                       refreshTokenSecret);
 
-        // TODO: Encapsulate this into a class. So that the data store can be hot swapped
-        refreshTokens.push(refreshToken);
+//         // TODO: Encapsulate this into a class. So that the data store can be hot swapped
+//         refreshTokens.push(refreshToken);
 
-        res.cookie('accessToken', accessToken);
-        res.cookie('refreshToken', refreshToken);
-        res.json({
-            accessToken,
-            refreshToken
-        })
-    })
-});
+//         res.cookie('accessToken', accessToken);
+//         res.cookie('refreshToken', refreshToken);
+//         res.json({
+//             accessToken,
+//             refreshToken
+//         })
+//     })
+// });
 
 app.post('/token', function(req, res) {
     // const { refreshToken } = req.body; 
