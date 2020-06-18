@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 
 const { UserModel } = require('../database');
-const CONFIG = require('../config');
 const { TokenManager } = require('./authUtils');
 
 // Configure Router
@@ -109,6 +108,72 @@ router.post('/user', isAuthenticated, isAdmin, function(req, res) {
     });
 })
 
+//TODO: For now, only the admin can update a user's credentials
+router.patch('/user/:username', isAuthenticated, isAdmin, function(req, res) {
+    const username = req.params.username;
+    const { password, role } = req.body;
+
+    UserModel.findOne({ username: username }, function(err, user) {
+        if (err) {
+            return res.status(500).send("Oops, something went wrong");
+        }
+
+        if (!user) {
+            return res.status(400).send("User does not exist");
+        }
+
+        if (password) {
+            user.setPassword(password);
+        }
+
+        if (role) {
+            user.role = role;
+        }
+
+        user.save()
+            .then(() => res.status(200).send("Updated User Details"))
+            .catch((error) => console.error("ERROR: ", error));
+    })
+})
+
+router.delete('/user/:username', isAuthenticated, isAdmin, function(req, res) {
+    const username = req.params.username;
+
+    UserModel.deleteOne({ username: username}, function(err) {
+        if (err) {
+            return res.status(500).send("Oops, something went wrong");
+        }
+
+        res.status(200).send("Deleted User");
+    })
+})
+
+router.get('/user', isAuthenticated, isAdmin, function(req, res) {
+    let ret = [];
+
+    UserModel.find({}, function(err, users) {
+        users.forEach(user => {
+            ret.push({ username: user.username, role: user.role });
+        })
+        res.status(200).json(ret);
+    })
+})
+
+router.get('/user/:username', isAuthenticated, isAdmin, function(req, res) {
+    const username = req.params.username;
+
+    UserModel.findOne({ username: username }, function(err, user) {
+        if (err) {
+            return res.status(500).send("Oops, something went wrong");
+        }
+
+        if (!user) {
+            return res.status(400).send("User does not exist");
+        }
+
+        res.status(200).json({ username: username, role: user.role });
+    })
+})
 
 // Authentication Middleware
 /**

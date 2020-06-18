@@ -18,6 +18,7 @@ db.once('open', () => console.log("INFO: Connection to MongoDB is Open"));
 const crypto = require('crypto');
 
 // TODO: Update each field to specify more attributes if necessary
+// TODO: Add enum to role
 const UserSchema = new Schema({
     username: { type: String, unique: true, index: true }, 
     hash: String,
