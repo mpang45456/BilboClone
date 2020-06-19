@@ -1,9 +1,10 @@
 // Config file for the server
-CONFIG = {};
+let CONFIG = {};
 CONFIG.PORT_NUMBER = process.env.PORT || 3000;
+CONFIG.NODE_ENV = process.env.NODE_ENV || "dev";
 
 // Database
-CONFIG.DATABASE_URL = 'mongodb://localhost/testing';
+CONFIG.DATABASE_URL = `mongodb://localhost/${CONFIG.NODE_ENV}`;
 
 // Authentication/Authorization
 CONFIG.ACCESS_TOKEN_SECRET = 'accessTokenSecret';

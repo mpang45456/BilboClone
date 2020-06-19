@@ -26,7 +26,7 @@ router.post('/login', function(req, res) {
 
     UserModel.findOne({ username: username }, function(err, user) {
         if (err) {
-            return res.status(501).send("Oops, something went wrong");
+            return res.status(500).send("Oops, something went wrong");
         }
 
         if (!user || !user.isValidPassword(password)) {

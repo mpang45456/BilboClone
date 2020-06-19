@@ -31,3 +31,5 @@ app.get('/test', isAuthenticated, function(req, res) {
 app.listen(CONFIG.PORT_NUMBER, () => {
     console.log("Server listening on Port " + CONFIG.PORT_NUMBER);
 })
+
+module.exports = app;

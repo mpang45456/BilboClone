@@ -13,3 +13,6 @@ show collections
 
 // Delete an entire collection
 db.<collection_name>.drop()
+
+// Collection-specific actions
+db.<collection_name>.<action>()
