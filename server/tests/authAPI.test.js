@@ -3,7 +3,7 @@ const app = require('../app');
 const { UserModel } = require('../database');
 const { expect } = require('chai');
 const cookie = require('cookie');
-const { CookieAccessInfo } = require('cookiejar');
+const { CookieAccessInfo, Cookie } = require('cookiejar');
 
 // Configure Test
 const testUsers = [
@@ -156,23 +156,39 @@ describe('Testing /auth/login', () => {
 describe("Testing /auth/token", () => {
     let endpoint = '/auth/token';
     
-    it("Valid refresh token provided", (done) => {
-        let accessInfo = CookieAccessInfo();
-        const accessToken = authenticatedAgent.jar.getCookie("accessToken", accessInfo).value;
-        const refreshToken = authenticatedAgent.jar.getCookie("refreshToken", accessInfo).value;
-
+    it("No tokens provided", (done) => {
+        request(server)
+        .post(endpoint)
+        .expect(401);
+        done();
+    })
+    
+    it("Valid refresh and access tokens provided", (done) => {
         authenticatedAgent.post(endpoint)
-                          .expect(200)
-                          .end((err, res) => {
-                              if (err) {
-                                  return done(err);
-                              }
-                            
-                              let cookies = parseCookiesFromResponse(res);
-                              expect(cookies.accessToken).not.equal(accessToken);
-                              expect(cookies.refreshToken).to.equal(refreshToken);
-                              return done();
-                          })
+                          .expect(200);
+        done();
+    })
+
+    it("Invalid refresh token and valid access token provided", (done) => {
+        const accessInfo = CookieAccessInfo();
+        const accessToken = authenticatedAgent.jar.getCookie('accessToken', accessInfo);
+
+        request(server)
+            .post(endpoint)
+            .set('Cookie', [`accessToken=${accessToken};refreshToken=INVALIDVALUE`])
+            .expect(403);
+        done();
+    })
+
+    it("Valid refresh token and invalid access token provided", (done) => {
+        const accessInfo = CookieAccessInfo();
+        const refreshToken = authenticatedAgent.jar.getCookie('refreshToken', accessInfo);
+
+        request(server)
+            .post(endpoint)
+            .set('Cookie', [`accessToken=INVALIDVALUE;refreshToken=${refreshToken}`])
+            .expect(200);
+        done();
     })
 })
 
