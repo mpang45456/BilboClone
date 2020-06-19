@@ -1,7 +1,11 @@
 const request = require('supertest');
-const server = require('../server');
+const app = require('../app');
 const { UserModel } = require('../database');
+const { expect } = require('chai');
+const cookie = require('cookie');
+const { CookieAccessInfo } = require('cookiejar');
 
+// Configure Test
 const testUsers = [
     {
         "username": "testAdmin",
@@ -15,33 +19,41 @@ const testUsers = [
     }
 ]
 
+let authenticatedAgent = null;
+let protectedEndpoint = '/protected';
+let serverPortNumber = 3000;
+let server = null;
+
+// Helper Functions
 function addUserToDatabase(user) {
     const userObj = new UserModel({ username: user.username, role: user.role});
     userObj.setPassword(user.password);
     return userObj.save();
 }
 
-let authenticatedAgent = null;
+/**
+ * Returns JSON object after parsing cookies in 
+ * `res`'s header
+ * 
+ * The alternative method of retrieving the cookies
+ * is to obtain them via the `getCookie` method
+ * in `supertest.agent.jar`.
+ * @param {Object} res 
+ */
+function parseCookiesFromResponse(res) {
+    return cookie.parse(res.header['set-cookie'].join('; '));
+}
+
+beforeAll(async (done) => {
+    // Set up server before all tests
+    server = app.listen(serverPortNumber, function() {
+        done();
+    })
+})
 
 beforeEach(async (done) => {
-    // // Reset Database
-    // UserModel.deleteMany({}, function(err) {
-    //     if (err) { throw new Error(err) };
-    //     let promises = [];
-    //     testUsers.forEach(user => promises.push(addUserToDatabase(user)));
-    //     Promise.all(promises)
-    //            .then(() => done());
-    // })
-
-    // // Login
-    // const res = await request.agent(app)
-    //     .post('/auth/login')
-    //     .send( { username: "testAdmin", password: "testAdminPassword" })
-    
-    // console.log(res);
-
+    // Reset Database
     await UserModel.deleteMany({});
-    console.log('deleted');
     testUsers.forEach(async (user) => {
         try {
             await addUserToDatabase(user);
@@ -49,55 +61,126 @@ beforeEach(async (done) => {
             console.error("Error occured: " + error);
         }
     })
-
-    // try {
-    //     testUsers.forEach(async (user) => await addUserToDatabase(user));
-    // } catch(error) {
-    //     console.log("ERROR");
-    // }
     
+    // Login and Authenticate
     authenticatedAgent = request.agent(server);
-    authenticatedAgent.post('/auth/login')
-                      .send({ username: "testAdmin", password: "testAdminPassword" });
-
-    console.log("HERE:" + authenticatedAgent);
+    await authenticatedAgent.post('/auth/login')
+                            .send({ username: "testAdmin", password: "testAdminPassword" });
     done();
-
-
-    // let promises = [];
-    // testUsers.forEach(user => promises.push(addUserToDatabase(user)));
-    // await Promise.all(promises)
-    //         .then(() => {
-    //             // Invoke `.agent()` method to create a copy of SuperAgent that saves cookies
-    //             authenticatedAgent = request.agent(app)
-    //                           .post('/auth/login')
-    //                           .send( { username: "testAdmin", password: "testAdminPassword" })
-    //         })
-    //         .then((res) => {
-    //             console.log(res);
-    //             done();
-    //         })
-    //         .catch((err) => console.log(err));
-    // console.log("HERE: " + authenticatedAgent);
 })
 
 afterAll((done) => {
-    return server && server.close(done);
+    // Close server after all tests
+    server && server.close(done);
 })
 
-
-
-
-describe('Sample Test', () => {
-
-    it("Should test that true === true", () => {
-        expect(true).toBe(true);
+// Tests
+describe('Testing /auth/login', () => {
+    let endpoint = '/auth/login';
+    
+    it("Incorrect username", (done) => {
+        request(server)
+               .post(endpoint)
+               .send({ username: "wrongUsername", password: "testAdminPassword"})
+               .expect(401)
+               .end((err, res) => {
+                   if (err) {
+                       return done(err);
+                   }
+                   expect(res.text).to.be.equal('Invalid credentials');
+                   return done();
+               })
     })
 
-    it("Should be able to access protected resource", () => {
-        authenticatedAgent.get('/protected')
-                          .expect(200);
+    it("Incorrect password", (done) => {
+        request(server)
+               .post(endpoint)
+               .send({ username: "testAdmin", password: "wrongPassword"})
+               .expect(401)
+               .end((err, res) => {
+                   if (err) {
+                       return done(err);
+                   }
+                   expect(res.text).to.be.equal('Invalid credentials');
+                   return done();
+               })
+    })
 
-        // console.log("THERE: " + authenticatedAgent);
+    it("Incorrect username and password", (done) => {
+        request(server)
+               .post(endpoint)
+               .send({ username: "wrongUsername", password: "wrongPassword"})
+               .expect(401)
+               .end((err, res) => {
+                   if (err) {
+                       return done(err);
+                   }
+                   expect(res.text).to.be.equal('Invalid credentials');
+                   return done();
+               })
+    })
+
+    it("No credentials provided", (done) => {
+        request(server)
+               .post(endpoint)
+               .expect(401)
+               .end((err, res) => {
+                   if (err) {
+                       return done(err);
+                   }
+                   expect(res.text).to.be.equal('Invalid credentials');
+                   return done();
+               })
+    })
+
+    it("Valid credentials provided", (done) => {
+        request(server)
+               .post(endpoint)
+               .send({ username: testUsers[0].username, 
+                       password: testUsers[0].password })
+               .expect(200)
+               .end((err, res) => {
+                   if (err) {
+                       return done(err);
+                   }
+
+                   console.log(typeof res); //FIXME:
+                   let cookies = parseCookiesFromResponse(res);
+                   expect(cookies.accessToken).to.exist;
+                   expect(cookies.refreshToken).to.exist;
+                   return done();
+               })
+    })
+})
+
+describe("Testing /auth/token", () => {
+    let endpoint = '/auth/token';
+    
+    it("Valid refresh token provided", (done) => {
+        let accessInfo = CookieAccessInfo();
+        const accessToken = authenticatedAgent.jar.getCookie("accessToken", accessInfo).value;
+        const refreshToken = authenticatedAgent.jar.getCookie("refreshToken", accessInfo).value;
+
+        authenticatedAgent.post(endpoint)
+                          .expect(200)
+                          .end((err, res) => {
+                              if (err) {
+                                  return done(err);
+                              }
+                            
+                              let cookies = parseCookiesFromResponse(res);
+                              expect(cookies.accessToken).not.equal(accessToken);
+                              expect(cookies.refreshToken).to.equal(refreshToken);
+                              return done();
+                          })
+    })
+})
+
+describe('Authentication Endpoint Tests', () => {
+    
+    it("Access Protected Resource", (done) => {
+        authenticatedAgent.get(protectedEndpoint)
+                          .expect(200);
+        done();
     })
 })
