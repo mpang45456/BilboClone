@@ -28,8 +28,8 @@ app.get('/test', isAuthenticated, function(req, res) {
     res.send("Accessing a protected resource!");
 })
 
-app.listen(CONFIG.PORT_NUMBER, () => {
+let server = app.listen(CONFIG.PORT_NUMBER, () => {
     console.log("Server listening on Port " + CONFIG.PORT_NUMBER);
 })
 
-module.exports = app;
+module.exports = server;

@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../server');
+const server = require('../server');
 const { UserModel } = require('../database');
 
 const testUsers = [
@@ -56,7 +56,7 @@ beforeEach(async (done) => {
     //     console.log("ERROR");
     // }
     
-    authenticatedAgent = request.agent(app);
+    authenticatedAgent = request.agent(server);
     authenticatedAgent.post('/auth/login')
                       .send({ username: "testAdmin", password: "testAdminPassword" });
 
@@ -81,9 +81,8 @@ beforeEach(async (done) => {
     // console.log("HERE: " + authenticatedAgent);
 })
 
-afterEach((done) => {
-    app.close();
-    done();
+afterAll((done) => {
+    return server && server.close(done);
 })
 
 
