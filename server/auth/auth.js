@@ -109,7 +109,7 @@ router.post('/user', isAuthenticated, isAdmin, function(req, res) {
     newUser.save(function(error, newUser) {
         if (error) {
             console.log("Could not save newUser"); // FIXME: Use pino?
-            return res.status(500).send("New User Not Saved");
+            return res.status(400).send("Unable to create new user");
         }
         return res.status(200).send("Successfully created new user: " + username);
     });
