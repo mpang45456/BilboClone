@@ -69,20 +69,27 @@ router.post('/token', function(req, res) {
 
 /**
  * Mounted: /auth/logout
- * Logs user out by invalidating refresh token.
+ * Logs user out by invalidating refresh 
+ * and access tokens.
  * 
- * Note: The access token held by the user is 
- * still valid if not expired. This means that 
- * while the user will no longer be able to obtain
- * a new access token at the /token endpoint, the
- * access token can still be used to access protected
- * resources until expiration. Hence, the client 
- * must implement an appropriate mechanism to prevent
- * the use of the access token after contacting /logout.
+ * Note: The refresh and access tokens are
+ * invalidated differently:
+ * - The refresh token is invalidated 
+ * by removing it from the store of valid 
+ * refresh tokens.
+ * - The access token is invalidated by 
+ * generating an access token past its
+ * expiration and sending it back in the
+ * response's cookies.
  */
 router.post('/logout', function(req, res) {
+    // Invalidate Refresh Token
     let refreshToken = req.cookies.refreshToken;
     tm.invalidateRefreshToken(refreshToken);
+
+    // Generate a new (but invalid) Access Token
+    let invalidatAccessToken = tm.getInvalidAccessToken();
+    res.cookie('accessToken', invalidatAccessToken);
     res.status(200).send("Logout Successful");
 })
 

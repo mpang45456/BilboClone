@@ -40,6 +40,16 @@ class TokenManager {
             return { error: error, user: null};
         }
     }
+
+    /**
+     * Returns an invalid access token (past its
+     * expiration)
+     */
+    getInvalidAccessToken() {
+        return jwt.sign({ username: "invalid", role: "invalid" }, 
+                        CONFIG.ACCESS_TOKEN_SECRET,
+                        { expiresIn: -CONFIG.ACCESS_TOKEN_EXPIRY });
+    }
     
     /**
      * Get a new refresh token. Only the username 

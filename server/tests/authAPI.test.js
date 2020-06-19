@@ -20,7 +20,15 @@ const testUsers = [
 ]
 
 let authenticatedAgent = null;
-let protectedEndpoint = '/protected';
+const accessInfo = CookieAccessInfo();
+let accessToken = null;
+let refreshToken = null;
+
+let protectedEndpoint = '/test';
+let loginEndpoint = '/auth/login';
+let logoutEndpoint = '/auth/logout';
+let tokenEndpoint = '/auth/token';
+
 let serverPortNumber = 3000;
 let server = null;
 
@@ -66,6 +74,8 @@ beforeEach(async (done) => {
     authenticatedAgent = request.agent(server);
     await authenticatedAgent.post('/auth/login')
                             .send({ username: "testAdmin", password: "testAdminPassword" });
+    accessToken = authenticatedAgent.jar.getCookie('accessToken', accessInfo).value;
+    refreshToken = authenticatedAgent.jar.getCookie('refreshToken', accessInfo).value; 
     done();
 })
 
@@ -76,11 +86,9 @@ afterAll((done) => {
 
 // Tests
 describe('Testing /auth/login', () => {
-    let endpoint = '/auth/login';
-    
     it("Incorrect username", (done) => {
         request(server)
-               .post(endpoint)
+               .post(loginEndpoint)
                .send({ username: "wrongUsername", password: "testAdminPassword"})
                .expect(401)
                .end((err, res) => {
@@ -94,7 +102,7 @@ describe('Testing /auth/login', () => {
 
     it("Incorrect password", (done) => {
         request(server)
-               .post(endpoint)
+               .post(loginEndpoint)
                .send({ username: "testAdmin", password: "wrongPassword"})
                .expect(401)
                .end((err, res) => {
@@ -108,7 +116,7 @@ describe('Testing /auth/login', () => {
 
     it("Incorrect username and password", (done) => {
         request(server)
-               .post(endpoint)
+               .post(loginEndpoint)
                .send({ username: "wrongUsername", password: "wrongPassword"})
                .expect(401)
                .end((err, res) => {
@@ -122,7 +130,7 @@ describe('Testing /auth/login', () => {
 
     it("No credentials provided", (done) => {
         request(server)
-               .post(endpoint)
+               .post(loginEndpoint)
                .expect(401)
                .end((err, res) => {
                    if (err) {
@@ -135,7 +143,7 @@ describe('Testing /auth/login', () => {
 
     it("Valid credentials provided", (done) => {
         request(server)
-               .post(endpoint)
+               .post(loginEndpoint)
                .send({ username: testUsers[0].username, 
                        password: testUsers[0].password })
                .expect(200)
@@ -144,7 +152,6 @@ describe('Testing /auth/login', () => {
                        return done(err);
                    }
 
-                   console.log(typeof res); //FIXME:
                    let cookies = parseCookiesFromResponse(res);
                    expect(cookies.accessToken).to.exist;
                    expect(cookies.refreshToken).to.exist;
@@ -154,38 +161,73 @@ describe('Testing /auth/login', () => {
 })
 
 describe("Testing /auth/token", () => {
-    let endpoint = '/auth/token';
-    
     it("No tokens provided", (done) => {
         request(server)
-        .post(endpoint)
+        .post(tokenEndpoint)
         .expect(401);
         done();
     })
     
     it("Valid refresh and access tokens provided", (done) => {
-        authenticatedAgent.post(endpoint)
-                          .expect(200);
-        done();
+        authenticatedAgent
+            .post(tokenEndpoint)
+            .expect(200)
+            .end(function(err, res) {
+                authenticatedAgent
+                    .get(protectedEndpoint)
+                    .expect(200)
+                    .end((err, res) => {
+                        console.log('1');
+                        if (err) {
+                            console.log('2')
+                            console.log(err);
+                            return done(err);
+                        }
+                        console.log('3')
+                        done();
+                    })
+            })
+
+
+
+            // .then((err, res) => {
+            //     console.log(err)
+            //     console.log(res)
+            //     done();
+            // })
+
+        // authenticatedAgent.post(tokenEndpoint).expect(200).then(() => {
+        //     return authenticatedAgent.get(protectedEndpoint).expect(200);
+        // })
+        //                   .then(() => {
+        //                       authenticatedAgent
+        //                   })
+
+        // await authenticatedAgent.get(protectedEndpoint)
+        //                         .expect(200);
+
+        // done();
+
+        // authenticatedAgent.get('/protected')
+        //                   .expect(200)
+        //                   .end(function() )
+
+
+        // await authenticatedAgent.post(tokenEndpoint)
+        //                         .expect(200);
     })
 
     it("Invalid refresh token and valid access token provided", (done) => {
-        const accessInfo = CookieAccessInfo();
-        const accessToken = authenticatedAgent.jar.getCookie('accessToken', accessInfo);
-
         request(server)
-            .post(endpoint)
+            .post(tokenEndpoint)
             .set('Cookie', [`accessToken=${accessToken};refreshToken=INVALIDVALUE`])
             .expect(403);
         done();
     })
 
     it("Valid refresh token and invalid access token provided", (done) => {
-        const accessInfo = CookieAccessInfo();
-        const refreshToken = authenticatedAgent.jar.getCookie('refreshToken', accessInfo);
-
         request(server)
-            .post(endpoint)
+            .post(tokenEndpoint)
             .set('Cookie', [`accessToken=INVALIDVALUE;refreshToken=${refreshToken}`])
             .expect(200);
         done();
