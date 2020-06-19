@@ -168,26 +168,25 @@ describe("Testing /auth/token", () => {
         done();
     })
     
-    it("Valid refresh and access tokens provided", (done) => {
-        authenticatedAgent
-            .post(tokenEndpoint)
-            .expect(200)
-            .end(function(err, res) {
-                authenticatedAgent
-                    .get(protectedEndpoint)
-                    .expect(200)
-                    .end((err, res) => {
-                        console.log('1');
-                        if (err) {
-                            console.log('2')
-                            console.log(err);
-                            return done(err);
-                        }
-                        console.log('3')
-                        done();
-                    })
-            })
+    it("Valid refresh and access tokens provided", async (done) => {
+        // authenticatedAgent
+        //     .post(tokenEndpoint)
+        //     .expect(200)
+        //     .end(function(err, res) {
+        //         authenticatedAgent
+        //             .get(protectedEndpoint)
+        //             .expect(200)
+        //     })
 
+        await authenticatedAgent
+                .post(tokenEndpoint)
+                .expect(200)
+
+        await authenticatedAgent
+                .get(protectedEndpoint)
+                .expect(200)
+        
+        return done();
 
 
             // .then((err, res) => {
