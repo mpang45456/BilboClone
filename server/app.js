@@ -7,6 +7,14 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cookieParser());
 
+// FIXME: For testing purposes with `npm run react-start`
+const cors = require('cors');
+let corsOptions = {
+    origin: 'http://localhost:8080',
+    credentials: true
+}
+app.use(cors(corsOptions));
+
 // FIXME: Temporary Database (User) Bootstrap
 const { UserModel } = require('./database');
 const admin = new UserModel({ username: "admin", role: "admin" });
@@ -25,5 +33,12 @@ app.use('/auth', authRouter);
 app.get('/test', isAuthenticated, function(req, res) {
     res.send("Accessing a protected resource!");
 })
+
+// Set Up Static File Server
+const path = require('path');
+app.use(express.static(path.join(__dirname, '../client/dist')));
+// app.get('*', function(req, res) {
+//     res.sendFile(path.join(__dirname, 'public', 'dist', 'index.html'));
+// })
 
 module.exports = app;
