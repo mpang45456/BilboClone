@@ -54,7 +54,7 @@ export function LoginPage(props) {
                 console.log("SUCCESS: :", res.status);
             }).catch((err => {
                 // FIXME: Add UI response when credentials invalid
-                console.log("ERROR: ", err.response.status)
+                console.log("ERROR: ", err);
             }))
     }
 
@@ -71,7 +71,13 @@ export function LoginPage(props) {
 
     // Redirect back to original location after authentication
     // `props.location.state.referer` is set in `PrivateRoute`
-    const referer = props.location.state.referer || '/';
+    let referer = null;
+    try {
+        referer = props.location.state.referer || '/';
+    } catch(err) {
+        referer = '/'
+    }
+    // const referer = props.location.state.referer || '/';
     if (isAuthenticated) {
         return <Redirect to={referer} />
     }
