@@ -1,14 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from 'antd';
-import { bax, LoginPage } from './LoginPage';
+import React from 'react';
+import { LoginPage } from './LoginPage';
 import HomePage from './HomePage';
-// import "antd/dist/antd.css"; //FIXME: Is this necessary?
 import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute';
-import { AuthContext } from '../context/AuthContext';
-
-// FIXME: DEBUG
-import { Home, Admin } from './TestPages';
+import { bax, AuthContext } from '../context/AuthContext';
 
 export default class App extends React.Component {
     constructor(props) {
