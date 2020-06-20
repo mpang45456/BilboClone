@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-// const pino = require('pino'); //FIXME:
 const expressPino = require('express-pino-logger');
 
 // Configure App

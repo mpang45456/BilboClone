@@ -31,7 +31,6 @@ export function LoginPage({location, setIsAuthenticated}) {
                 setIsAuthenticated(true);
                 setValidateStatus('success');
             }).catch((err => {
-                // FIXME: Add UI response when credentials invalid
                 setIsLoading(false);
                 setValidateStatus('error');
                 setHelpMessage('Incorrect credentials. Please try again!')
