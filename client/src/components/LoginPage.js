@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { EyeInvisibleOutlined, EyeTwoTone, ArrowRightOutlined } from '@ant-design/icons';
 import { Input, Space, Button } from 'antd';
 import axios from 'axios';
+import { Redirect, withRouter } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import P from 'pino';
 
-const bax = axios.create();
+export const bax = axios.create();
 bax.defaults.withCredentials = true; // FIXME: Required for react webpack-dev-server
 bax.defaults.baseURL = 'http://localhost:3000';
 bax.interceptors.response.use(
@@ -31,10 +34,13 @@ bax.interceptors.response.use(
     }
 )
 
-export default function LoginPage(props) {
+// TODO: explicitly destructure props?
+export function LoginPage(props) {
     const [isLoading, setIsLoading] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const setIsAuthenticated = props.setIsAuthenticated;
+    const { isAuthenticated } = useAuth();
 
     let tryLogin = () => {
         setIsLoading(true);
@@ -44,8 +50,10 @@ export default function LoginPage(props) {
                    { username: username, 
                      password: password})
             .then((res) => {
+                setIsAuthenticated(true);
                 console.log("SUCCESS: :", res.status);
             }).catch((err => {
+                // FIXME: Add UI response when credentials invalid
                 console.log("ERROR: ", err.response.status)
             }))
     }
@@ -59,6 +67,13 @@ export default function LoginPage(props) {
                 console.log('there')
                 console.log("err: " , err);
             })
+    }
+
+    // Redirect back to original location after authentication
+    // `props.location.state.referer` is set in `PrivateRoute`
+    const referer = props.location.state.referer || '/';
+    if (isAuthenticated) {
+        return <Redirect to={referer} />
     }
 
     return (
