@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { EyeInvisibleOutlined, EyeTwoTone, ArrowRightOutlined } from '@ant-design/icons';
 import { Input, Space, Button } from 'antd';
 import axios from 'axios';
+// import { response } from '../../../server/app';
 
 const bax = axios.create();
 bax.defaults.withCredentials = true; // FIXME: Required for react webpack-dev-server
@@ -14,29 +15,62 @@ bax.interceptors.response.use(
 
     }, function(err) {
         const originalReq = err.config;
-        console.log('using interceptor: error'); //FIXME: DEBUG
-        // Status Code falls outside 2xx
 
-        return new Promise((resolve, reject) => {
-            if ((err.response.status === 401) || (err.response.status === 403)) {
-                // Not baxios (to avoid the token refresh call from going
-                // through the interceptor)
-                // FIXME: Must be able to change and specify baseURL
-                let res = axios.post('http://localhost:3000/auth/token', { withCredentials: true})
-                    .then((res) => {
-                        return axios(originalReq);
-                    }).then((res) => {
-                        resolve(res);
-                    }).catch((err) => {
-                        reject(err);
-                    })
-                // 
-                // resolve(res);
+        if ((err.response.status === 401 || err.response.status === 403) && (!originalReq._retry)) {
+            console.log('a')
+            originalReq._retry = true;
+
+            return axios.post('http://localhost:3000/auth/token', { withCredentials: true})
+                        .then(res => {
+                            console.log('1')
+                            if (res.status === 200) {
+                                console.log('2')
+                                return axios(originalReq);
+                            }
+                        })
+        }
+        console.log('b')
+        return Promise.reject(err);
+
+        // if ((err.response.status === 401) || (err.response.status === 403)) {
+        //     console.log('inside err function');
+
+        //     try {
+        //         await axios.post('http://localhost:3000/auth/token', { withCredentials: true });
+        //         const originalReq = err.config;
+        //         console.log("err.config: ", err.config);
+        //         return axios(originalReq)
+
+        //     } catch(err) {
+        //         console.log("Error during axios: ", err);
+        //         throw err;
+        //     }
+        // }
+
+        // const originalReq = err.config;
+        // console.log('using interceptor: error'); //FIXME: DEBUG
+        // // Status Code falls outside 2xx
+
+        // return new Promise((resolve, reject) => {
+        //     if ((err.response.status === 401) || (err.response.status === 403)) {
+        //         // Not baxios (to avoid the token refresh call from going
+        //         // through the interceptor)
+        //         // FIXME: Must be able to change and specify baseURL
+        //         let res = axios.post('http://localhost:3000/auth/token', { withCredentials: true})
+        //             .then((res) => {
+        //                 return axios(originalReq);
+        //             }).then((res) => {
+        //                 resolve(res);
+        //             }).catch((err) => {
+        //                 reject(err);
+        //             })
+        //         // 
+        //         // resolve(res);
                 
-            } else {
-                reject(err); // FIXME: Promise.reject?
-            }
-        });
+        //     } else {
+        //         reject(err); // FIXME: Promise.reject?
+        //     }
+        // });
     }
 )
 
@@ -62,8 +96,10 @@ export default function LoginPage(props) {
     let tryGetProtectedSource = () => {
         bax.get('/auth/user')
             .then((res) => {
-                console.log(res.text);
+                console.log('here')
+                console.log(res);
             }).catch(err => {
+                console.log('there')
                 console.log("err: " , err);
             })
     }
