@@ -1,11 +1,18 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const pino = require('pino');
+const expressPino = require('express-pino-logger');
+
 
 // Configure App
 const app = express();
 app.use(bodyParser.json());
 app.use(cookieParser());
+
+const logger = pino({ level: process.env.LOG_LEVEL || 'debug' });
+const expressLogger = expressPino({ logger });
+app.use(expressLogger);
 
 // FIXME: For testing purposes with `npm run react-start`
 const cors = require('cors');
