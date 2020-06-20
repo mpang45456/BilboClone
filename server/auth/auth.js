@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
+const logger = require('../utils');
 const { UserModel } = require('../database');
 const { TokenManager } = require('./authUtils');
 
@@ -108,7 +109,7 @@ router.post('/user', isAuthenticated, isAdmin, function(req, res) {
 
     newUser.save(function(error, newUser) {
         if (error) {
-            console.log("Could not save newUser"); // FIXME: Use pino?
+            logger.error("/auth/user: Could not save newUser");
             return res.status(400).send("Unable to create new user");
         }
         return res.status(200).send("Successfully created new user: " + username);
@@ -136,7 +137,7 @@ router.patch('/user/:username', isAuthenticated, isAdmin, function(req, res) {
 
         user.save()
             .then(() => res.status(200).send("Updated User Details"))
-            .catch((error) => console.error("ERROR: ", error));
+            .catch((error) => logger.error(`/user/:username: ${error}`));
     })
 })
 

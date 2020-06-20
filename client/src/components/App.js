@@ -5,6 +5,9 @@ import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute';
 import { bax, AuthContext } from '../context/AuthContext';
 
+/**
+ * Root React Component Class for Bilbo App
+ */
 export default class App extends React.Component {
     constructor(props) {
         super(props);
@@ -16,6 +19,20 @@ export default class App extends React.Component {
         this.setIsFetching = this.setIsFetching.bind(this);
     }
 
+    /**
+     * Makes an async call to check if the user
+     * has previously logged in.
+     * 
+     * This is done by making a call to the /auth/token
+     * endpoint. If the refresh token is valid, the response
+     * status code will be 200, and `isAuthenticated` can be
+     * set to `true`. Otherwise, the tokens are no longer
+     * valid and `isAuthenticated` is set to false.
+     * 
+     * The Routes in the Router determine whether LoginPage
+     * or the app's different authenticated views are rendered
+     * depending on the value of `isAuthenticated`.
+     */
     componentDidMount() {
         bax.post('/auth/token', { withCredentials: true})
         .then(res => {
@@ -39,6 +56,9 @@ export default class App extends React.Component {
 
     render() {
         if (this.state.isFetching) {
+            // Async call made at `componentDidMount` to check
+            // if user is already authenticated. Loading animation
+            // is displayed before async call returns.
             // TODO: Update this
             return <h1>THIS IS THE FETCHING ANIMATION</h1>
         } else {
@@ -60,71 +80,3 @@ export default class App extends React.Component {
         }
     }
 }
-
-
-// export default function App(props) {
-//     const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-//     // useEffect(async () => {
-//     //     await bax.post('/auth/token', { withCredentials: true})
-//     //     .then(res => {
-//     //         if (res.status === 200) {
-//     //             setIsAuthenticated(true);
-//     //         }
-//     //         console.log('after')
-//     //     }).catch(err => {
-//     //         setIsAuthenticated(false);
-//     //     })
-//     // })
-
-
-
-//     checkInitialAuthentication(setIsAuthenticated);
-//     return (
-//         <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated }}>
-//             <Button>Helloworld</Button>
-//             <Router>
-//                 <Switch>
-//                     <Route
-//                         exact path='/login'
-//                         render={(props) => (
-//                             <LoginPage {...props} setIsAuthenticated={setIsAuthenticated} />
-//                         )}
-//                     />
-//                     <PrivateRoute path='/' component={HomePage} />
-//                 </Switch>
-//             </Router>
-//         </AuthContext.Provider>
-//     );
-// }
-
-// If valid refresh token is still present in cookies, simply
-// contact the /auth/token endpoint to refresh the access token.
-// If successful, user is still authenticated (this enables persistent login
-// session that is only cleared if the user clears the cookies)
-// TODO: Remember to clear the cookies on logout
-function checkInitialAuthentication(setIsAuthenticated) {
-    console.log('before')
-    bax.post('/auth/token', { withCredentials: true})
-        .then(res => {
-            if (res.status === 200) {
-                setIsAuthenticated(true);
-            }
-            console.log('after')
-        }).catch(err => {
-            setIsAuthenticated(false);
-        })
-}
-
-// function checkInitialAuthentication(setIsAuthenticated) {
-//     console.log('before')
-//     bax.post('/auth/token', { withCredentials: true})
-//         .then(res => {
-//             if (res.status === 200) {
-//                 return true;
-//             }
-//             return false
-//         }).catch(err => {
-//             return false;
-//         })
-// }

@@ -2,13 +2,15 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const CONFIG = require('./config');
+const logger = require('./utils');
 
 // Set Up Database Connection
 mongoose.connect(CONFIG.DATABASE_URL, 
                  {useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.set('useCreateIndex', true);
 const db = mongoose.connection;
-db.on('error', () => console.error("ERROR: Unable to Connect to MongoDB"));
-db.once('open', () => console.log("INFO: Connection to MongoDB is Open"));
+db.on('error', () => logger.error("Unable to Connect to MongoDB"));
+db.once('open', () => logger.info("Connection to MongoDB is Open"));
 
 /**
  * -----------

@@ -1,16 +1,15 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const pino = require('pino');
+// const pino = require('pino'); //FIXME:
 const expressPino = require('express-pino-logger');
-
 
 // Configure App
 const app = express();
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-const logger = pino({ level: process.env.LOG_LEVEL || 'debug' });
+const logger = require('./utils');
 const expressLogger = expressPino({ logger });
 app.use(expressLogger);
 
@@ -28,7 +27,7 @@ const admin = new UserModel({ username: "admin", role: "admin" });
 admin.setPassword("123");
 admin.save(function(err, admin) {
     if (err) {
-        console.log("Could not save admin");
+        logger.warn("Could not save admin");
     }
 })
 
@@ -44,8 +43,5 @@ app.get('/test', isAuthenticated, function(req, res) {
 // Set Up Static File Server
 const path = require('path');
 app.use(express.static(path.join(__dirname, '../client/dist')));
-// app.get('*', function(req, res) {
-//     res.sendFile(path.join(__dirname, 'public', 'dist', 'index.html'));
-// })
 
 module.exports = app;

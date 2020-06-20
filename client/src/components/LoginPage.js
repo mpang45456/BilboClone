@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
-import { EyeInvisibleOutlined, EyeTwoTone, ArrowRightOutlined } from '@ant-design/icons';
-// import { Input, Space, Button } from 'antd';
-
-import { Form, Input, Button, Checkbox } from 'antd';
+import { Form, Input, Button } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 
 import { Redirect } from 'react-router-dom';
@@ -27,8 +24,6 @@ export function LoginPage({location, setIsAuthenticated}) {
     // Send User-entered Credentials to /auth/login API
     let tryLogin = () => {
         setIsLoading(true);
-
-        // TODO: Factor out the variables
         bax.post('/auth/login',
                    { username: username, 
                      password: password})
