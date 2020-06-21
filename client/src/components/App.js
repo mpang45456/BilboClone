@@ -1,7 +1,7 @@
 import React from 'react';
 import { LoginPage } from './LoginPage';
-import HomePage from './HomePage';
-import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
+import AppScaffold from './AppScaffold';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute';
 import { bax, AuthContext } from '../context/AuthContext';
 
@@ -76,7 +76,7 @@ export default class App extends React.Component {
                                         <LoginPage {...props} setIsAuthenticated={this.setIsAuthenticated} />
                                     )}
                                 />
-                                <PrivateRoute path='/' component={HomePage} />
+                                <PrivateRoute path='/' component={AppScaffold} />
                             </Switch>
                         </Router>
                     </AuthContext.Provider>
