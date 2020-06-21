@@ -6,9 +6,10 @@ import {
   BarChartOutlined,
   ShoppingCartOutlined,
   SettingOutlined,
-  LogoutOutlined
+  LogoutOutlined,
+  BellOutlined
 } from '@ant-design/icons';
-import { Layout, Menu, Row, Col } from 'antd';
+import { Layout, Menu, Row, Col, Tooltip } from 'antd';
 
 import HomePage from './HomePage';
 import SalesPage from './SalesPage';
@@ -29,6 +30,35 @@ const SidebarTopSpace = styled.div`
   height: ${props => props.theme.settings.layoutHeaderHeight};
 `;
 
+const IconDiv = styled.div`
+  color: ${props => props.theme.colors.salmon};
+  background: ${props => props.theme.colors.darkerRed};
+  width: ${props => props.theme.settings.layoutHeaderHeight};
+  height: ${props => props.theme.settings.layoutHeaderHeight};
+  font-size: ${props => props.theme.settings.headerIconFontSize};
+  text-align: center;
+
+  &:hover {
+    ${'' /* background: ${props => props.theme.colors.darkerRed}; */}
+    color: ${props => props.theme.colors.white};
+  }
+`;
+
+function HeaderIconButton(props) {
+  return (
+    <Tooltip placement='bottom' title={props.tooltipTitle}>
+      <IconDiv onClick={props.onClick}>
+        {props.iconComponent}
+      </IconDiv>
+    </Tooltip>
+  );
+}
+
+const BilboHeader = styled(Header)`
+  padding-right: 0px;
+`;
+
+// TODO: Refactor into BilboSider, BilboHeader, BilboContent?
 /**
  * Scaffold Component that serves as the point of
  * entry for any authenticated user. The routes 
@@ -55,6 +85,7 @@ export default class AppScaffold extends React.Component {
   render() {
     return (
       <Layout style={{ minHeight: '100vh' }}>
+
         <Sider collapsible
           collapsed={this.state.collapsed}
           onCollapse={this.onCollapse}
@@ -76,12 +107,27 @@ export default class AppScaffold extends React.Component {
             </SubMenu>
           </Menu>
         </Sider>
+
         <Layout>
-          <Header>
-            <Row>
-              
+          <BilboHeader>
+            <Row justify='end'>
+              <HeaderIconButton 
+                  tooltipTitle='Logout' 
+                  iconComponent={<LogoutOutlined/>}
+                  onClick={() => alert('Clicked on logout')}>
+              </HeaderIconButton>
+              <HeaderIconButton 
+                  tooltipTitle='Settings' 
+                  iconComponent={<SettingOutlined/>}
+                  onClick={() => alert('Clicked on settings')}>
+              </HeaderIconButton>
+              <HeaderIconButton 
+                  tooltipTitle='Notifications' 
+                  iconComponent={<BellOutlined/>}
+                  onClick={() => alert('Clicked on notifications')}>
+              </HeaderIconButton>
             </Row>
-          </Header>
+          </BilboHeader>
           <Content style={{ margin: '10px 10px', background: 'green', height:'100px', overflowY:'scroll' }}>
             <Switch>
               <Route exact path='/' component={HomePage} />

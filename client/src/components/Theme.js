@@ -33,6 +33,7 @@ const theme = {
     },
     settings: {
         layoutHeaderHeight: '45px',
+        headerIconFontSize: '20px',
     }
 }
 
