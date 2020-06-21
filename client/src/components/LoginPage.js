@@ -34,6 +34,7 @@ const Wrapper = styled.div`
     max-width: 450px;
 `;
 
+// Simple footer for the Login Page
 const Footer = styled.div`
     position: fixed;
     left: 0;

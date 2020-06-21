@@ -24,12 +24,15 @@ const theme = {
         salmon: "#DD8779",
         marble: "#F3F2F0",
         black: "#0E0E0E",
-        white: "FFFFFF",
+        white: "#FFFFFF",
         // Supplementary Colour Scheme
         darkRed: "#6b0501",
         darkerRed: '#570501',
         darkestRed: '#450401',
         brightRed: '#C93835',
+    },
+    settings: {
+        layoutHeaderHeight: '45px',
     }
 }
 
