@@ -66,10 +66,7 @@ export default class App extends React.Component {
             return <h1>THIS IS THE FETCHING ANIMATION</h1>
         } else {
             return (
-
-                //FIXME: Check if ThemeWrapper works
                 <ThemeWrapper>
-
                     <AuthContext.Provider value={{ isAuthenticated: this.state.isAuthenticated }}>
                         <Router>
                             <Switch>
@@ -83,7 +80,6 @@ export default class App extends React.Component {
                             </Switch>
                         </Router>
                     </AuthContext.Provider>
-
                 </ThemeWrapper>
 
             );
