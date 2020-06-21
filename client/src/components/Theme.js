@@ -18,13 +18,18 @@ import { ThemeProvider } from 'styled-components';
  */
 const theme = {
     colors: {
+        // Main Colour Scheme
         powderPink: "#D6AFA6",
         deepRed: "#A41304",
         salmon: "#DD8779",
         marble: "#F3F2F0",
         black: "#0E0E0E",
         white: "FFFFFF",
-        redGraphite: "#8B7E7E",
+        // Supplementary Colour Scheme
+        darkRed: "#6b0501",
+        darkerRed: '#570501',
+        darkestRed: '#450401',
+        brightRed: '#C93835',
     }
 }
 

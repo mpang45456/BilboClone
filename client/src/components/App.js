@@ -6,8 +6,7 @@ import PrivateRoute from './PrivateRoute';
 import { bax, AuthContext } from '../context/AuthContext';
 
 import ThemeWrapper from './Theme';
-// import "antd/dist/antd.less"; //FIXME: Is this necessary?
-import "./test.less"; //FIXME: DEBUG
+import "../styles/styles.less";
 
 /**
  * Root React Component Class for Bilbo App
