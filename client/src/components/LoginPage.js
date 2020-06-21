@@ -6,44 +6,52 @@ import { Redirect } from 'react-router-dom';
 import { useAuth, bax } from '../context/AuthContext';
 
 import styled from 'styled-components';
-const StyledButton = styled.button`
-  display: inline-block;
-  color: palevioletred;
-  backgroundColor: red;
-  font-size: 1em;
-  margin: 1em;
-  padding: 0.25em 1em;
-  border: 2px solid palevioletred;
-  border-radius: 3px;
-  display: block;
+const StyledButton = styled(Button)`
+    color: ${props => props.theme.colors.powderPink };
+    backgroundColor: ${props => props.theme.colors.powderPink };
+    font-size: 1em;
+    padding: 0.25em 1em;
+    border: 2px solid palevioletred;
+    border-radius: 3px;
+    display: block;
+
+    &.ant-btn {
+        background: ${props => props.theme.colors.powderPink };
+    }
 `;
 
 const Title = styled.h1`
-  font-size: 6em;
-  text-align: center;
-  color: palevioletred;
-  position: absolute;
-  top: 20%;
-  left: 50%;
-  -webkit-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
+    font-size: 6em;
+    text-align: center;
+    color: ${props => props.theme.colors.deepRed };
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
 
-  margin-bottom: 20px;
+    margin-bottom: 20px;
 
 `;
 
 const Wrapper = styled.div`
-  padding: 2em;
-  width: 30%;
-  background: papayawhip;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  -webkit-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
+    padding: 2em;
+    width: 30%;
+    background: ${props => props.theme.colors.marble};
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
 
-  min-width: 300px;
-  max-width: 450px;
+    min-width: 300px;
+    max-width: 450px;
+
+    ${'' /* .ant-btn-primary {
+        border: 2px solid ${props => props.theme.colors.powderPink };
+        background: ${props => props.theme.colors.powderPink};
+        color: ${props => props.theme.colors.deepRed };
+    } */}
 `;
 
 // const Link = ({ className, children, onClick }) => (
@@ -140,13 +148,13 @@ export function LoginPage({location, setIsAuthenticated}) {
                 />
             </Form.Item>
             <Form.Item>
-                <Button type="primary" 
+                <StyledButton type="primary" 
                         block
                         htmlType="submit" 
                         className="login-form-button"
                         loading={isLoading}>
                 Log in
-                </Button>
+                </StyledButton>
             </Form.Item>
 
         </Form>

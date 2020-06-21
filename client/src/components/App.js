@@ -5,6 +5,9 @@ import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute';
 import { bax, AuthContext } from '../context/AuthContext';
 
+import ThemeWrapper from './Theme';
+import "antd/dist/antd.less"; //FIXME: Is this necessary?
+
 /**
  * Root React Component Class for Bilbo App
  */
@@ -63,19 +66,26 @@ export default class App extends React.Component {
             return <h1>THIS IS THE FETCHING ANIMATION</h1>
         } else {
             return (
-                <AuthContext.Provider value={{ isAuthenticated: this.state.isAuthenticated }}>
-                    <Router>
-                        <Switch>
-                            <Route
-                                exact path='/login'
-                                render={(props) => (
-                                    <LoginPage {...props} setIsAuthenticated={this.setIsAuthenticated} />
-                                )}
-                            />
-                            <PrivateRoute path='/' component={HomePage} />
-                        </Switch>
-                    </Router>
-                </AuthContext.Provider>
+
+                //FIXME: Check if ThemeWrapper works
+                <ThemeWrapper>
+
+                    <AuthContext.Provider value={{ isAuthenticated: this.state.isAuthenticated }}>
+                        <Router>
+                            <Switch>
+                                <Route
+                                    exact path='/login'
+                                    render={(props) => (
+                                        <LoginPage {...props} setIsAuthenticated={this.setIsAuthenticated} />
+                                    )}
+                                />
+                                <PrivateRoute path='/' component={HomePage} />
+                            </Switch>
+                        </Router>
+                    </AuthContext.Provider>
+
+                </ThemeWrapper>
+
             );
         }
     }

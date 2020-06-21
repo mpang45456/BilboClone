@@ -51,6 +51,7 @@
     "@babel/preset-react": "^7.10.1",
     "babel-loader": "^8.1.0",
     "babel-plugin-import": "^1.13.0",
+    "babel-plugin-styled-components": "^1.10.7",
     "chai": "^4.2.0",
     "cookie": "^0.4.1",
     "cookiejar": "^2.1.2",
