@@ -1,7 +1,10 @@
-import { Button } from 'antd';
 import styled from 'styled-components';
 
-export const DarkInvertedStyledButton = styled(Button)`
+/**
+ * Customises the regular <button> HTML element, 
+ * not the antd Button.
+ */
+export const DarkInvertedStyledButton = styled.button`
     color: ${props => props.theme.colors.deepRed };
     font-size: 1em;
     padding: 0.25em 1em;

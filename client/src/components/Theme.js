@@ -23,7 +23,8 @@ const theme = {
         salmon: "#DD8779",
         marble: "#F3F2F0",
         black: "#0E0E0E",
-        white: "FFFFFF"
+        white: "FFFFFF",
+        redGraphite: "#8B7E7E",
     }
 }
 
