@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Modal, Layout, Row, Tooltip } from 'antd';
+import { Drawer, Modal, Layout, Row, Tooltip } from 'antd';
 import {
     SettingOutlined,
     LogoutOutlined,
@@ -52,7 +52,7 @@ function SettingsButton(props) {
     let history = useHistory();
     const clickedSettings = () => {
         history.push('/settings');
-    }
+    };
 
     return(
         <HeaderIconButton 
@@ -65,14 +65,32 @@ function SettingsButton(props) {
 }
 
 function NotificationsButton(props) {
-    return (
-        <HeaderIconButton
-            tooltipPlacement='bottomRight'
-            tooltipTitle='Notifications' 
-            iconComponent={<BellOutlined/>}
-            onClick={() => alert('Clicked on notifications')}>
-        </HeaderIconButton>
-    );
+  const [drawerIsVisible, setDrawerIsVisible] = useState(false);
+  const onClick = () => {
+    setDrawerIsVisible(true);
+  };
+
+  const onClose = () => {
+    setDrawerIsVisible(false);
+  }
+
+  return (
+    <div>
+      <HeaderIconButton
+          tooltipPlacement='bottomRight'
+          tooltipTitle='Notifications' 
+          iconComponent={<BellOutlined/>}
+          onClick={onClick}>
+      </HeaderIconButton>
+
+      <Drawer title='Notifications Panel'
+              placement='right'
+              closable={false}
+              onClose={onClose}
+              visible={drawerIsVisible}>
+      </Drawer>
+    </div>
+  );
 }
 
 function showLogoutConfirmationModal() {
