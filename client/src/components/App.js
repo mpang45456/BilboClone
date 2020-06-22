@@ -74,7 +74,7 @@ export default class App extends React.Component {
                                 <Route
                                     exact path='/login'
                                     render={(props) => (
-                                        <LoginPage {...props} setIsAuthenticated={this.setIsAuthenticated} />
+                                        <LoginPage {...props} />
                                     )}
                                 />
                                 <PrivateRoute path='/' component={AppScaffold} />

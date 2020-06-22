@@ -54,13 +54,13 @@ const Footer = styled.div`
  *                            which determines where the user has
  *                            logged in and has access to Bilbo
  */
-export function LoginPage({location, setIsAuthenticated}) {
+export function LoginPage({ location }) {
     const [isLoading, setIsLoading] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [validateStatus, setValidateStatus] = useState(undefined);
     const [helpMessage, setHelpMessage] = useState(undefined);
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, setIsAuthenticated } = useAuth();
 
     // Send User-entered Credentials to /auth/login API
     let tryLogin = () => {
