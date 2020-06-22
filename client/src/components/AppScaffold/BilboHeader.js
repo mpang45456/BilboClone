@@ -9,6 +9,8 @@ import {
   } from '@ant-design/icons';
 const { Header } = Layout;
 const { confirm } = Modal;
+
+import { bax, useAuth } from '../../context/AuthContext';
 import styled from 'styled-components';
 
 // Utility (Styling) Component: Customised div to contain icons
@@ -38,15 +40,57 @@ function HeaderIconButton(props) {
 }
 
 function LogOutButton(props) {
-    return (
-        <HeaderIconButton 
-            tooltipPlacement='bottom'
-            tooltipTitle='Logout' 
-            iconComponent={<LogoutOutlined/>}
-            onClick={() => showLogoutConfirmationModal()}>
-        </HeaderIconButton>
-    );
+  let history = useHistory();
+  let { setIsAuthenticated } = useAuth();
+
+  // function showLogoutConfirmationModal() {
+  //   const tryLogout = async () => {
+  //     await 
+  //     bax.post('/auth/logout', { withCredentials: true})
+  //         .then(res => {
+  //             if (res.status === 200) {
+  //                 this.setIsAuthenticated(true);
+  //             }
+  //         }).catch(err => {
+  //             this.setIsAuthenticated(false);
+  //         }).then(() => {
+  //             this.setIsFetching(false);
+  //         })
+  //   }
+  
+  function showLogoutConfirmationModal() {
+    confirm({
+      icon: <ExclamationCircleOutlined />,
+      content: 'Are you sure you wish to log out?',
+      onOk: () => {
+        return bax.post('/auth/logout', { withCredentials : true })
+                  .then(res => {
+                    if (res.status === 200) {
+                      setIsAuthenticated(true);
+                      history.push('/login');
+                      console.log('okay');
+                    }
+                  }).catch(err => {
+                    alert('something went wrong')
+                    console.log('something went wrong...')
+                  })
+      }, 
+      onCancel: () => {
+        alert('clicked cancel');
+      }
+    })
+  }
+
+  return (
+      <HeaderIconButton 
+          tooltipPlacement='bottom'
+          tooltipTitle='Logout' 
+          iconComponent={<LogoutOutlined/>}
+          onClick={() => showLogoutConfirmationModal()}>
+      </HeaderIconButton>
+  );
 }
+
 
 function SettingsButton(props) {
     let history = useHistory();
@@ -91,19 +135,6 @@ function NotificationsButton(props) {
       </Drawer>
     </div>
   );
-}
-
-function showLogoutConfirmationModal() {
-  confirm({
-    icon: <ExclamationCircleOutlined />,
-    content: 'Are you sure you wish to log out?',
-    onOk: () => {
-      alert('clicked ok');
-    }, 
-    onCancel: () => {
-      alert('clicked cancel');
-    }
-  })
 }
 
 export default function BilboHeader(props) {

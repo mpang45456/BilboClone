@@ -89,8 +89,8 @@ router.post('/logout', function(req, res) {
     tm.invalidateRefreshToken(refreshToken);
 
     // Generate a new (but invalid) Access Token
-    let invalidatAccessToken = tm.getInvalidAccessToken();
-    res.cookie('accessToken', invalidatAccessToken);
+    let invalidAccessToken = tm.getInvalidAccessToken();
+    res.cookie('accessToken', invalidAccessToken);
     res.status(200).send("Logout Successful");
 })
 
