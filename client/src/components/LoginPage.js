@@ -104,6 +104,7 @@ export function LoginPage({ location }) {
                             rules={[{ required: true, message: 'Please input your Username!' }]}>
                         <Input prefix={<UserOutlined className="site-form-item-icon" />} 
                             placeholder="Username"
+                            autoFocus
                             onChange={e => {
                                 setUsername(e.target.value);
                             }}

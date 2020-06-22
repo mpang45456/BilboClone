@@ -1,6 +1,10 @@
 const { default: Item } = require("antd/lib/list/Item")
 
-describe('The Home Page', () => {
+describe('Login Flow', () => {
+    beforeEach(() => {
+        
+    })
+
     it('successfully loads', () => {
         cy.visit('/settings')
     })
