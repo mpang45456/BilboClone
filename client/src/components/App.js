@@ -1,6 +1,6 @@
 import React from 'react';
 import { LoginPage } from './LoginPage';
-import AppScaffold from './AppScaffold';
+import AppScaffold from './AppScaffold/AppScaffold';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute';
 import { bax, AuthContext } from '../context/AuthContext';
