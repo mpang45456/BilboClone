@@ -7,6 +7,7 @@ import CONFIG from '../config';
 export const AuthContext = createContext();
 
 // Hook to use the Context and gain access to variables set by Provider
+// See `App.js` for values set in Provider.
 export function useAuth() {
     return useContext(AuthContext);
 }

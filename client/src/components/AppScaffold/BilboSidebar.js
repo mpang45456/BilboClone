@@ -15,7 +15,8 @@ import CONFIG from '../../config';
 
 /**
  * Styled <div> element to occupy some space above
- * the sidebar (to match the layout header height)
+ * the sidebar (to match the layout header height
+ * and colour)
  */
 const SidebarTopSpace = styled.div`
   background: ${props => props.theme.colors.darkerRed};

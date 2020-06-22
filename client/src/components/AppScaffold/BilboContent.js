@@ -1,8 +1,8 @@
 import { Layout } from 'antd';
 const { Content } = Layout;
-
 import styled from 'styled-components';
 
+// Styling for Content Component in AppScaffolding
 const BilboContent = styled(Content)`
     margin: 10px 10px; 
     padding: 10px 10px;

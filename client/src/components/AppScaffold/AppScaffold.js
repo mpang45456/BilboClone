@@ -9,12 +9,13 @@ import BilboContent from './BilboContent';
 import HomePage from '../HomePage';
 import SalesPage from '../SalesPage';
 import PurchasePage from '../PurchasePage';
+import InventoryPage from '../InventoryPage';
+import SupplierPage from '../SupplierPage';
 import SettingsPage from '../SettingsPage';
 import ErrorPage from '../ErrorPage';
 
 import CONFIG from '../../config';
 
-// TODO: Refactor into BilboSider, BilboHeader, BilboContent?
 /**
  * Scaffold Component that serves as the point of
  * entry for any authenticated user. The routes 
@@ -40,6 +41,8 @@ export default class AppScaffold extends React.Component {
               <Route exact path={CONFIG.HOME_URL} component={HomePage} />
               <Route path={CONFIG.SALES_ORDERS_URL} component={SalesPage} />
               <Route path={CONFIG.PURCHASE_ORDERS_URL} component={PurchasePage} />
+              <Route path={CONFIG.INVENTORY_URL} component={InventoryPage} />
+              <Route path={CONFIG.SUPPLIER_URL} component={SupplierPage} />
               <Route path={CONFIG.SETTINGS_URL} component={SettingsPage} />
               <Route path='*' component={ErrorPage} />
             </Switch>
