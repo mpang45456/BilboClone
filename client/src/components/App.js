@@ -57,7 +57,6 @@ export default class App extends React.Component {
         this.setState({ isFetching });
     }
 
-    // TODO: LoginPage should use setIsAuthenticated from AuthContext
     render() {
         if (this.state.isFetching) {
             // Async call made at `componentDidMount` to check

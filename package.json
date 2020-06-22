@@ -6,10 +6,11 @@
   "scripts": {
     "start": "NODE_ENV=prod echo \"Meant for prod\"",
     "start-dev": "NODE_ENV=dev LOG_LEVEL=debug node server/server.js | ./node_modules/.bin/pino-pretty",
-    "test": "NODE_ENV=test jest --detectOpenHandles --testTimeout=10000 --forceExit",
+    "test": "NODE_ENV=test LOG_LEVEL=silent jest --detectOpenHandles --testTimeout=10000 --forceExit",
     "react-start": "webpack-dev-server --mode development --open --hot",
     "react-build": "webpack --mode production",
-    "mongod": "mongod --dbpath ./server/data/db"
+    "mongod": "mongod --dbpath ./server/data/db",
+    "cypress:open": "cypress open"
   },
   "repository": {
     "type": "git",
@@ -56,6 +57,7 @@
     "cookie": "^0.4.1",
     "cookiejar": "^2.1.2",
     "css-loader": "^3.6.0",
+    "cypress": "^4.8.0",
     "html-webpack-plugin": "^4.3.0",
     "jest": "^26.0.1",
     "less-loader": "^6.1.1",
