@@ -1,16 +1,6 @@
-import React, { useState } from 'react';
-import { Link, Route, Switch } from 'react-router-dom';
-import {
-  HomeOutlined,
-  DollarOutlined,
-  BarChartOutlined,
-  ShoppingCartOutlined,
-  SettingOutlined,
-  LogoutOutlined,
-  BellOutlined,
-  ExclamationCircleOutlined
-} from '@ant-design/icons';
-import { Layout, Menu, Row, Col, Tooltip, Modal } from 'antd';
+import React from 'react';
+import { Route, Switch } from 'react-router-dom';
+import { Layout } from 'antd';
 
 import BilboSidebar from './BilboSidebar';
 import BilboHeader from './BilboHeader';
@@ -23,10 +13,6 @@ import SettingsPage from '../SettingsPage';
 import ErrorPage from '../ErrorPage';
 
 import CONFIG from '../../config';
-import { NavigationContext } from '../../context/NavigationContext';
-
-const { Header, Content, Sider } = Layout;
-const { SubMenu } = Menu;
 
 // TODO: Refactor into BilboSider, BilboHeader, BilboContent?
 /**
