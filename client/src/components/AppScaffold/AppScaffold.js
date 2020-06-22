@@ -21,6 +21,8 @@ import PurchasePage from '../PurchasePage';
 import SettingsPage from '../SettingsPage';
 import ErrorPage from '../ErrorPage';
 
+import { NavigationContext } from '../../context/NavigationContext';
+
 const { Header, Content, Sider } = Layout;
 const { SubMenu } = Menu;
 
