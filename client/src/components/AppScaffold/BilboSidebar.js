@@ -76,34 +76,34 @@ class Sidebar extends React.Component {
               <Menu theme='dark' 
                     selectedKeys={[this.__getMenuKeyFromURL(location.pathname)]} 
                     mode="inline">
-                <Menu.Item key={CONFIG.HOME_MENU_ITEM_URL} 
+                <Menu.Item key={CONFIG.HOME_URL} 
                            icon={<HomeOutlined />}>
-                  <NavLink to={CONFIG.HOME_MENU_ITEM_URL}>
+                  <NavLink to={CONFIG.HOME_URL}>
                     Home
                   </NavLink>
                 </Menu.Item>
-                <Menu.Item key={this.__getMenuKeyFromURL(CONFIG.SALES_ORDERS_MENU_ITEM_URL)} 
+                <Menu.Item key={this.__getMenuKeyFromURL(CONFIG.SALES_ORDERS_URL)} 
                            icon={<DollarOutlined />} >
-                  <NavLink to={CONFIG.SALES_ORDERS_MENU_ITEM_URL}>
+                  <NavLink to={CONFIG.SALES_ORDERS_URL}>
                     Sales Orders
                   </NavLink>
                 </Menu.Item>
-                <Menu.Item key={this.__getMenuKeyFromURL(CONFIG.PURCHASE_ORDERS_MENU_ITEM_URL)} 
+                <Menu.Item key={this.__getMenuKeyFromURL(CONFIG.PURCHASE_ORDERS_URL)} 
                            icon={<ShoppingCartOutlined />} >
-                  <NavLink to={CONFIG.PURCHASE_ORDERS_MENU_ITEM_URL}>
+                  <NavLink to={CONFIG.PURCHASE_ORDERS_URL}>
                     Purchase Orders
                   </NavLink>
                 </Menu.Item>
                 <SubMenu key={CONFIG.DATA_SUB_MENU_KEY} 
                          icon={<BarChartOutlined />} 
                          title="Data">
-                  <Menu.Item key={this.__getMenuKeyFromURL(CONFIG.INVENTORY_MENU_ITEM_URL)} >
-                    <NavLink to={CONFIG.INVENTORY_MENU_ITEM_URL}>
+                  <Menu.Item key={this.__getMenuKeyFromURL(CONFIG.INVENTORY_URL)} >
+                    <NavLink to={CONFIG.INVENTORY_URL}>
                         Inventory
                     </NavLink>
                   </Menu.Item>
-                  <Menu.Item key={this.__getMenuKeyFromURL(CONFIG.SUPPLIER_MENU_ITEM_URL)} >
-                    <NavLink to={CONFIG.SUPPLIER_MENU_ITEM_URL}>
+                  <Menu.Item key={this.__getMenuKeyFromURL(CONFIG.SUPPLIER_URL)} >
+                    <NavLink to={CONFIG.SUPPLIER_URL}>
                         Suppliers
                     </NavLink>
                   </Menu.Item>

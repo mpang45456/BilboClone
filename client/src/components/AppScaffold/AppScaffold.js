@@ -21,6 +21,7 @@ import PurchasePage from '../PurchasePage';
 import SettingsPage from '../SettingsPage';
 import ErrorPage from '../ErrorPage';
 
+import CONFIG from '../../config';
 import { NavigationContext } from '../../context/NavigationContext';
 
 const { Header, Content, Sider } = Layout;
@@ -83,16 +84,7 @@ import styled from 'styled-components';
 export default class AppScaffold extends React.Component {
   constructor(props) {
     super(props);
-    // this.state = {
-    //   collapsed: false,
-    // };
-
-    // this.onCollapse = this.onCollapse.bind(this);
   }
-
-  // onCollapse(collapsed) {
-  //   this.setState({ collapsed });
-  // }
 
   render() {
     return (
@@ -103,11 +95,11 @@ export default class AppScaffold extends React.Component {
           <BilboHeader />
           <Content style={{ margin: '10px 10px', background: 'green', height:'100px', overflowY:'scroll' }}>
             <Switch>
-              <Route exact path='/' component={HomePage} />
-              <Route path='/sales' component={SalesPage} />
-              <Route path='/purchases' component={PurchasePage} />
-              <Route path='/settings' component={SettingsPage} />
-              <Route path='/' component={ErrorPage} />
+              <Route exact path={CONFIG.HOME_URL} component={HomePage} />
+              <Route path={CONFIG.SALES_ORDERS_URL} component={SalesPage} />
+              <Route path={CONFIG.PURCHASE_ORDERS_URL} component={PurchasePage} />
+              <Route path={CONFIG.SETTINGS_URL} component={SettingsPage} />
+              <Route path='*' component={ErrorPage} />
             </Switch>
 
                 ...
