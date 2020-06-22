@@ -57,6 +57,7 @@ export default class App extends React.Component {
         this.setState({ isFetching });
     }
 
+    // TODO: LoginPage should use setIsAuthenticated from AuthContext
     render() {
         if (this.state.isFetching) {
             // Async call made at `componentDidMount` to check
@@ -67,7 +68,7 @@ export default class App extends React.Component {
         } else {
             return (
                 <ThemeWrapper>
-                    <AuthContext.Provider value={{ isAuthenticated: this.state.isAuthenticated }}>
+                    <AuthContext.Provider value={{ isAuthenticated: this.state.isAuthenticated, setIsAuthenticated: this.setIsAuthenticated }}>
                         <Router>
                             <Switch>
                                 <Route

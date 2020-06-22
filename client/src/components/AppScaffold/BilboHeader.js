@@ -43,22 +43,10 @@ function LogOutButton(props) {
   let history = useHistory();
   let { setIsAuthenticated } = useAuth();
 
-  // function showLogoutConfirmationModal() {
-  //   const tryLogout = async () => {
-  //     await 
-  //     bax.post('/auth/logout', { withCredentials: true})
-  //         .then(res => {
-  //             if (res.status === 200) {
-  //                 this.setIsAuthenticated(true);
-  //             }
-  //         }).catch(err => {
-  //             this.setIsAuthenticated(false);
-  //         }).then(() => {
-  //             this.setIsFetching(false);
-  //         })
-  //   }
-  
-  function showLogoutConfirmationModal() {
+  // Renders Confirmation Modal while making
+  // async call to /auth/logout to invalidate
+  // access and refresh JWTs
+  const showLogoutConfirmationModal = () => {
     confirm({
       icon: <ExclamationCircleOutlined />,
       content: 'Are you sure you wish to log out?',
@@ -66,18 +54,14 @@ function LogOutButton(props) {
         return bax.post('/auth/logout', { withCredentials : true })
                   .then(res => {
                     if (res.status === 200) {
-                      setIsAuthenticated(true);
+                      setIsAuthenticated(false);
                       history.push('/login');
-                      console.log('okay');
                     }
                   }).catch(err => {
-                    alert('something went wrong')
-                    console.log('something went wrong...')
+                    console.log(err);
                   })
-      }, 
-      onCancel: () => {
-        alert('clicked cancel');
-      }
+      },
+      okText: 'Confirm'
     })
   }
 
