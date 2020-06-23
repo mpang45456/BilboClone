@@ -118,7 +118,7 @@ router.post('/user',
 
     newUser.save(function(error, newUser) {
         if (error) {
-            logger.error("/auth/user: Could not save newUser");
+            logger.error(`/auth/user: Could not save newUser: ${error}`);
             return res.status(400).send("Unable to create new user");
         }
         return res.status(200).send("Successfully created new user: " + username);
@@ -301,7 +301,7 @@ function isAuthorized(...requiredPerms) {
     return function(req, res, next) {
         let userPerms = pm.decode(req.user.permissions);
         if (!requiredPerms.every((requiredPerm) => userPerms.includes(requiredPerm))) {
-            return res.sendStatus(401);
+            return res.sendStatus(403);
         } else {
             next();
         }

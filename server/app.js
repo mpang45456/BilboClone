@@ -35,6 +35,7 @@ app.get('/test', isAuthenticated, function(req, res) {
     res.send("Accessing a protected resource!");
 })
 
+// FIXME: Temporary Protected Endpoint (to test authorization middleware)
 const { PERMS } = require('./auth/permissions');
 app.get('/test2', isAuthenticated, isAuthorized(PERMS.PURCHASES_READ, PERMS.PURCHASES_WRITE), function(req, res) {
     res.send("Accessing Purchases-Only protected resource!");

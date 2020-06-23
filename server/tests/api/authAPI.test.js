@@ -3,10 +3,11 @@ const app = require('../../app');
 const { UserModel } = require('../../data/database');
 const { expect } = require('chai');
 const cookie = require('cookie');
-const { CookieAccessInfo, Cookie } = require('cookiejar');
+const { CookieAccessInfo } = require('cookiejar');
 
 // Configure Test
 let testUsers = require('../../data/databaseBootstrap').users;
+const { PERMS } = require('../../auth/permissions');
 
 let protectedEndpoint = '/test';
 let loginEndpoint = '/api/v1/auth/login';
@@ -23,7 +24,11 @@ let server = null;
 
 // Helper Functions
 function addUserToDatabase(user) {
-    const userObj = new UserModel({ username: user.username, role: user.role});
+    const userObj = new UserModel({ username: user.username, 
+                                    permissions: user.permissions, 
+                                    name: user.name, 
+                                    position: user.position 
+    });
     userObj.setPassword(user.password);
     return userObj.save();
 }
@@ -241,7 +246,9 @@ describe('Testing /api/v1/auth/user endpoint', () => {
     let newAdmin = {
         "username": "newAdmin",
         "password": "newAdminPassword",
-        "role": "admin"
+        "permissions": Object.keys(PERMS),
+        "name": "Gandalf",
+        "position": "Resident Wizard"
     }
 
     let authenticatedNonAdminAgent = null;
@@ -346,7 +353,9 @@ describe('Testing /api/v1/auth/user endpoint', () => {
                 .expect((res) => {
                     expect(res.body.length).to.be.equal(2);
                     expect(res.body[0].username).to.exist;
-                    expect(res.body[0].role).to.exist;
+                    expect(res.body[0].permissions).to.exist;
+                    expect(res.body[0].name).to.exist;
+                    expect(res.body[0].position).to.exist;
                 })
         
         return done();
