@@ -4,9 +4,11 @@ const router = express.Router();
 const logger = require('../utils');
 const { UserModel } = require('../data/database');
 const { TokenManager } = require('./authUtils');
+const { PermissionsManager } = require('./permissions');
 
 // Configure Router
 const tm = new TokenManager();
+const pm = new PermissionsManager();
 
 // Router Endpoints
 /**
@@ -34,9 +36,12 @@ router.post('/login', function(req, res) {
             return res.status(401).send("Invalid credentials");
         }
 
+        // Generate Permission String
+        let perms = pm.encode(user.permissions);
+
         // Generate Tokens
-        const accessToken = tm.getNewAccessToken(user.username, user.role);
-        const refreshToken = tm.getNewRefreshToken(user.username, user.role);
+        const accessToken = tm.getNewAccessToken(user.username, user.role, perms);
+        const refreshToken = tm.getNewRefreshToken(user.username, user.role, perms);
 
         // Prepare Response
         res.cookie('accessToken', accessToken);
