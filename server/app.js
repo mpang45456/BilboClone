@@ -27,13 +27,18 @@ if (process.env.RESET_DB === 'true') {
 }
 
 // Authentication Endpoint
-const { authRouter, isAuthenticated } = require('./auth/auth');
+const { authRouter, isAuthenticated, isAuthorized } = require('./auth/auth');
 app.use('/api/v1/auth', authRouter);
 
 // FIXME: Temporary Protected Endpoint
 app.get('/test', isAuthenticated, function(req, res) {
     res.send("Accessing a protected resource!");
 })
+
+const { PERMS } = require('./auth/permissions');
+app.get('/test2', isAuthenticated, isAuthorized(PERMS.PURCHASES_READ, PERMS.PURCHASES_WRITE), function(req, res) {
+    res.send("Accessing Purchases-Only protected resource!");
+});
 
 // Set Up Static File Server
 const path = require('path');

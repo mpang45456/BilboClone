@@ -40,8 +40,8 @@ router.post('/login', function(req, res) {
         let perms = pm.encode(user.permissions);
 
         // Generate Tokens
-        const accessToken = tm.getNewAccessToken(user.username, user.role, perms);
-        const refreshToken = tm.getNewRefreshToken(user.username, user.role, perms);
+        const accessToken = tm.getNewAccessToken(user.username, perms);
+        const refreshToken = tm.getNewRefreshToken(user.username, perms);
 
         // Prepare Response
         res.cookie('accessToken', accessToken);
@@ -68,7 +68,7 @@ router.post('/token', function(req, res) {
         return res.sendStatus(403); //Forbidden
     }
 
-    const newAccessToken = tm.getNewAccessToken(user.username, user.role);
+    const newAccessToken = tm.getNewAccessToken(user.username, user.permissions);
     res.cookie('accessToken', newAccessToken);
     res.sendStatus(200);
 })
@@ -108,6 +108,7 @@ router.post('/logout', function(req, res) {
  * Note: Only an admin user can access this endpoint
  */
 router.post('/user', isAuthenticated, isAdmin, function(req, res) {
+    // TODO: Update
     const { username, password, role } = req.body;
     const newUser = new UserModel({ username: username , role: role });
     newUser.setPassword(password);
@@ -236,6 +237,7 @@ function isAuthenticated(req, res, next) {
         return res.sendStatus(403); //Forbidden
     }
 
+    logger.debug(user);
     req.user = user;
     next();
 }
@@ -252,8 +254,21 @@ function isAdmin(req, res, next) {
     next();
 }
 
+// Must be used AFTER 'isAuthenticated' because
+// it makes use of `req.user`, which is set by `isAuthenticated`
+function isAuthorized(...requiredPerms) {
+    return function(req, res, next) {
+        let userPerms = pm.decode(req.user.permissions);
+        if (!requiredPerms.every((requiredPerm) => userPerms.includes(requiredPerm))) {
+            return res.sendStatus(401);
+        } else {
+            next();
+        }
+    }
+}
+
 module.exports = {
     authRouter: router,
     isAuthenticated,
-    isAdmin
+    isAuthorized
 };

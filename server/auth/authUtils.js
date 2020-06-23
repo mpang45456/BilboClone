@@ -22,8 +22,8 @@ class TokenManager {
      * @param {String} username 
      * @param {String} role 
      */
-    getNewAccessToken(username, role, permissions) {
-        return jwt.sign({ username, role, permissions }, 
+    getNewAccessToken(username, permissions) {
+        return jwt.sign({ username, permissions }, 
                         CONFIG.ACCESS_TOKEN_SECRET,
                         { expiresIn: CONFIG.ACCESS_TOKEN_EXPIRY });
     }
@@ -46,7 +46,7 @@ class TokenManager {
      * expiration)
      */
     getInvalidAccessToken() {
-        return jwt.sign({ username: "invalid", role: "invalid", permissions: "invalid" }, 
+        return jwt.sign({ username: "invalid", permissions: "invalid" }, 
                         CONFIG.ACCESS_TOKEN_SECRET,
                         { expiresIn: -CONFIG.ACCESS_TOKEN_EXPIRY });
     }
@@ -62,8 +62,8 @@ class TokenManager {
      * @param {String} username
      * @param {String} role
      */
-    getNewRefreshToken(username, role, permissions) {
-        const refreshToken = jwt.sign({ username, role, permissions }, 
+    getNewRefreshToken(username, permissions) {
+        const refreshToken = jwt.sign({ username, permissions }, 
                                       CONFIG.REFRESH_TOKEN_SECRET);
         this.validRefreshTokens.push(refreshToken); // TODO: Document this
         return refreshToken;
