@@ -9,10 +9,10 @@ const { CookieAccessInfo, Cookie } = require('cookiejar');
 let testUsers = require('../data/databaseBootstrap').users;
 
 let protectedEndpoint = '/test';
-let loginEndpoint = '/auth/login';
-let logoutEndpoint = '/auth/logout';
-let tokenEndpoint = '/auth/token';
-let userEndpoint = '/auth/user';
+let loginEndpoint = '/api/v1/auth/login';
+let logoutEndpoint = '/api/v1/auth/logout';
+let tokenEndpoint = '/api/v1/auth/token';
+let userEndpoint = '/api/v1/auth/user';
 let serverPortNumber = process.env.PORT;
 
 let authenticatedAdminAgent = null;
@@ -63,7 +63,7 @@ beforeEach(async (done) => {
     const admin = testUsers[0];
     authenticatedAdminAgent = request.agent(server);
     await authenticatedAdminAgent
-            .post('/auth/login')    
+            .post(loginEndpoint)    
             .send({ username: admin.username, password: admin.password });
     accessToken = authenticatedAdminAgent.jar.getCookie('accessToken', accessInfo).value;
     refreshToken = authenticatedAdminAgent.jar.getCookie('refreshToken', accessInfo).value; 
@@ -76,7 +76,7 @@ afterAll((done) => {
 })
 
 // Tests
-describe('Testing /auth/login', () => {
+describe('Testing /api/v1/auth/login', () => {
     it("Incorrect username", (done) => {
         request(server)
                .post(loginEndpoint)
@@ -151,7 +151,7 @@ describe('Testing /auth/login', () => {
     })
 })
 
-describe("Testing /auth/token", () => {
+describe("Testing /api/v1/auth/token", () => {
     it("No tokens provided", async (done) => {
         await request(server)
                 .post(tokenEndpoint)
@@ -188,7 +188,7 @@ describe("Testing /auth/token", () => {
     })
 })
 
-describe('Testing /auth/logout', () => {
+describe('Testing /api/v1/auth/logout', () => {
     it("Logout after authentication", async (done) => {
         await authenticatedAdminAgent
                 .post(logoutEndpoint)
@@ -237,7 +237,7 @@ describe('Testing /auth/logout', () => {
     })
 })
 
-describe('Testing /auth/user endpoint', () => {
+describe('Testing /api/v1/auth/user endpoint', () => {
     let newAdmin = {
         "username": "newAdmin",
         "password": "newAdminPassword",
@@ -251,7 +251,7 @@ describe('Testing /auth/user endpoint', () => {
         const nonAdmin = testUsers[1];
         authenticatedNonAdminAgent = request.agent(server);
         await authenticatedNonAdminAgent
-                .post('/auth/login')    
+                .post(loginEndpoint)    
                 .send({ username: nonAdmin.username, password: nonAdmin.password });
         done();
     })
@@ -364,7 +364,7 @@ describe('Testing /auth/user endpoint', () => {
         return done();
     })
 
-    it("Non-Admin should not be able access /auth/user endpoints", async (done) => {
+    it("Non-Admin should not be able access /api/v1/auth/user endpoints", async (done) => {
         await authenticatedNonAdminAgent
                 .post(userEndpoint)
                 .send(newAdmin)

@@ -37,7 +37,7 @@ export default class App extends React.Component {
      * depending on the value of `isAuthenticated`.
      */
     componentDidMount() {
-        bax.post('/auth/token', { withCredentials: true})
+        bax.post('/api/v1/auth/token', { withCredentials: true})
         .then(res => {
             if (res.status === 200) {
                 this.setIsAuthenticated(true);

@@ -28,7 +28,7 @@ if (process.env.RESET_DB === 'true') {
 
 // Authentication Endpoint
 const { authRouter, isAuthenticated } = require('./auth/auth');
-app.use('/auth', authRouter);
+app.use('/api/v1/auth', authRouter);
 
 // FIXME: Temporary Protected Endpoint
 app.get('/test', isAuthenticated, function(req, res) {
@@ -38,5 +38,9 @@ app.get('/test', isAuthenticated, function(req, res) {
 // Set Up Static File Server
 const path = require('path');
 app.use(express.static(path.join(__dirname, '../client/dist')));
+app.get('*', function(req, res) {
+    // Enables HTML5 pushstate
+    res.sendFile(path.join(__dirname, '..', '/client/dist/index.html'));
+})
 
 module.exports = app;

@@ -30,7 +30,6 @@ export function useAuth() {
  */
 export const bax = axios.create();
 bax.defaults.withCredentials = true; // FIXME: Required for react webpack-dev-server
-bax.defaults.baseURL = CONFIG.SERVER_URL;
 bax.interceptors.response.use(
     function(res) {
         // Status Code: 2xx

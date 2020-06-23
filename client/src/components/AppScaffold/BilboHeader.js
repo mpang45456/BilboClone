@@ -51,7 +51,7 @@ function LogOutButton(props) {
       icon: <ExclamationCircleOutlined />,
       content: 'Are you sure you wish to log out?',
       onOk: () => {
-        return bax.post('/auth/logout', { withCredentials : true })
+        return bax.post('/api/v1/auth/logout', { withCredentials : true })
                   .then(res => {
                     if (res.status === 200) {
                       setIsAuthenticated(false);

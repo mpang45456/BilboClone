@@ -65,7 +65,7 @@ export function LoginPage({ location }) {
     // Send User-entered Credentials to /auth/login API
     let tryLogin = () => {
         setIsLoading(true);
-        bax.post('/auth/login',
+        bax.post('/api/v1/auth/login',
                    { username: username, 
                      password: password})
             .then((res) => {
