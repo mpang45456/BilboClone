@@ -20,7 +20,7 @@ class TokenManager {
      * and permissions in the `User` schema are embedded
      * inside the JWT. Note that the permissions are
      * first converted to a permissions bit string via the
-     * `PermissionsManager`
+     * `PermissionsTransformer`
      * @param {String} username 
      * @param {String} permissions : e.g. '111001'
      */
@@ -57,7 +57,7 @@ class TokenManager {
      * Get a new refresh token. Only the username 
      * and permission in the `User` schema is embedded
      * inside the JWT. Permissions are first converted
-     * to a permissions bit string via `PermissionsManager`.
+     * to a permissions bit string via `PermissionsTransformer`.
      * 
      * Also stores the new refresh token in 
      * `this.validRefreshTokens` for possible

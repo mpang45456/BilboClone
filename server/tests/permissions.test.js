@@ -1,17 +1,17 @@
-const { PERMS, PermissionsManager } = require('../auth/permissions');
+const { PERMS, PermissionsTransformer } = require('../auth/permissions');
 const { expect } = require('chai');
 
 describe('Testing Permissions Management', () => {
-    const pm = new PermissionsManager();
+    const pt = new PermissionsTransformer();
     
     it('Encoded permission string should have correct order', (done) => {
-        let permString = pm.encode([PERMS.SALES_READ, PERMS.SALES_WRITE]);
+        let permString = pt.encode([PERMS.SALES_READ, PERMS.SALES_WRITE]);
         expect(permString[0]).to.equal('1');
         expect(permString[1]).to.equal('1');
         expect(permString[2]).to.equal('0');
         expect(permString[3]).to.equal('0');
 
-        permString = pm.encode([PERMS.SALES_READ, PERMS.PURCHASES_WRITE]);
+        permString = pt.encode([PERMS.SALES_READ, PERMS.PURCHASES_WRITE]);
         expect(permString[0]).to.equal('1');
         expect(permString[1]).to.equal('0');
         expect(permString[2]).to.equal('0');
@@ -21,15 +21,15 @@ describe('Testing Permissions Management', () => {
     })
 
     it('Encoding of permissions string should throw error for invalid permission', (done) => {
-        expect(() => pm.encode('SALES_RAED')).to.throw(Error);
-        expect(() => pm.encode(['SALES_RAED', PERMS.SALES_WRITE])).to.throw(Error);
+        expect(() => pt.encode('SALES_RAED')).to.throw(Error);
+        expect(() => pt.encode(['SALES_RAED', PERMS.SALES_WRITE])).to.throw(Error);
 
         done();
     })
 
     it('Decoding of permission string should yield correct permissions', (done) => {
         let permString = '1100';
-        let permList = pm.decode(permString);
+        let permList = pt.decode(permString);
         expect(permList).to.be.an('array');
         expect(permList).to.include(PERMS.SALES_READ);
         expect(permList).to.include(PERMS.SALES_WRITE);
@@ -37,7 +37,7 @@ describe('Testing Permissions Management', () => {
         expect(permList).to.not.include(PERMS.PURCHASES_WRITE);
 
         permString = '1001';
-        permList = pm.decode(permString);
+        permList = pt.decode(permString);
         expect(permList).to.be.an('array');
         expect(permList).to.include(PERMS.SALES_READ);
         expect(permList).to.not.include(PERMS.SALES_WRITE);
@@ -49,14 +49,14 @@ describe('Testing Permissions Management', () => {
 
     it('Check for valid permissions', (done) => {
         let perms = [PERMS.SALES_WRITE, PERMS.PURCHASES_WRITE];
-        expect(pm.isValidPermissions(perms)).to.be.true;
+        expect(pt.isValidPermissions(perms)).to.be.true;
 
         done();
     })
 
     it('Check for invalid permissions', (done) => {
         let perms = ['SALES_RAED', PERMS.PURCHASES_WRITE];
-        expect(pm.isValidPermissions(perms)).to.be.false;
+        expect(pt.isValidPermissions(perms)).to.be.false;
 
         done();
     })

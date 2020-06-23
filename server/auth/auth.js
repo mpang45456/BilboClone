@@ -4,11 +4,11 @@ const router = express.Router();
 const logger = require('../utils');
 const { UserModel } = require('../data/database');
 const { TokenManager } = require('./authUtils');
-const { PermissionsManager, PERMS } = require('./permissions');
+const { PermissionsTransformer, PERMS } = require('./permissions');
 
 // Configure Router
 const tm = new TokenManager();
-const pm = new PermissionsManager();
+const pt = new PermissionsTransformer();
 
 // Router Endpoints
 /**
@@ -37,7 +37,7 @@ router.post('/login', function(req, res) {
         }
 
         // Generate Permission String
-        let perms = pm.encode(user.permissions);
+        let perms = pt.encode(user.permissions);
 
         // Generate Tokens
         const accessToken = tm.getNewAccessToken(user.username, perms);
@@ -299,7 +299,7 @@ function isAuthenticated(req, res, next) {
  */
 function isAuthorized(...requiredPerms) {
     return function(req, res, next) {
-        let userPerms = pm.decode(req.user.permissions);
+        let userPerms = pt.decode(req.user.permissions);
         if (!requiredPerms.every((requiredPerm) => userPerms.includes(requiredPerm))) {
             return res.sendStatus(403);
         } else {

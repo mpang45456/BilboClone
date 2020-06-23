@@ -36,7 +36,7 @@ const PERMS = Object.freeze({
  * - In JWT: permissions ==> '110001;
  * - Elsewhere: permissions ==> ['SALES_READ', 'USER_READ' ...]
  */
-class PermissionsManager {
+class PermissionsTransformer {
     constructor() {
         this.totalNumPerms = Object.keys(PERMS).length;
     }
@@ -110,5 +110,5 @@ class PermissionsManager {
 
 module.exports = {
     PERMS,
-    PermissionsManager
+    PermissionsTransformer
 }
