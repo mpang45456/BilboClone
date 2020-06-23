@@ -5,12 +5,17 @@
   "main": "server/server.js",
   "scripts": {
     "start": "NODE_ENV=prod echo \"Meant for prod\"",
+    
     "start-dev": "NODE_ENV=dev LOG_LEVEL=debug node server/server.js | ./node_modules/.bin/pino-pretty",
-    "test": "NODE_ENV=test LOG_LEVEL=silent jest --detectOpenHandles --testTimeout=10000 --forceExit",
-    "react-start": "webpack-dev-server --mode development --open --hot",
-    "react-build": "webpack --mode production",
     "mongod": "mongod --dbpath ./server/data/db",
-    "cypress:open": "cypress open"
+    
+    "test-server": "PORT=8002 RESET_DB=true NODE_ENV=test LOG_LEVEL=fatal jest --detectOpenHandles --testTimeout=10000 --forceExit",
+    
+    "cypress:open": "cypress open",
+    "cypress:start-test-server": "RESET_DB=true NODE_ENV=test node server/server.js | ./node_modules/.bin/pino-pretty",
+
+    "react-start": "webpack-dev-server --mode development --open --hot",
+    "react-build": "webpack --mode production"
   },
   "repository": {
     "type": "git",

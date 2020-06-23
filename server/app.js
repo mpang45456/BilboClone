@@ -20,15 +20,11 @@ let corsOptions = {
 }
 app.use(cors(corsOptions));
 
-// FIXME: Temporary Database (User) Bootstrap
-const { UserModel } = require('./database');
-const admin = new UserModel({ username: "admin", role: "admin" });
-admin.setPassword("123");
-admin.save(function(err, admin) {
-    if (err) {
-        logger.warn("Could not save admin");
-    }
-})
+// Database Bootstrap
+const { resetAndSeedDatabase } = require('./database');
+if (process.env.RESET_DB === 'true') {
+    resetAndSeedDatabase();
+}
 
 // Authentication Endpoint
 const { authRouter, isAuthenticated } = require('./auth/auth');

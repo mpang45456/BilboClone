@@ -6,25 +6,14 @@ const cookie = require('cookie');
 const { CookieAccessInfo, Cookie } = require('cookiejar');
 
 // Configure Test
-const testUsers = [
-    {
-        "username": "testAdmin",
-        "password": "testAdminPassword",
-        "role": "admin"
-    },
-    {
-        "username": "testUser",
-        "password": "testUserPassword",
-        "role": "user"
-    }
-]
+let testUsers = require('../databaseBootstrap').users;
 
 let protectedEndpoint = '/test';
 let loginEndpoint = '/auth/login';
 let logoutEndpoint = '/auth/logout';
 let tokenEndpoint = '/auth/token';
 let userEndpoint = '/auth/user';
-let serverPortNumber = 3000;
+let serverPortNumber = process.env.PORT;
 
 let authenticatedAdminAgent = null;
 const accessInfo = CookieAccessInfo();

@@ -42,6 +42,22 @@ const UserModel = mongoose.model('User', UserSchema);
 
 
 
+const { users } = require('./databaseBootstrap');
+function resetAndSeedDatabase() {
+    db.on('open', async () => {
+        await UserModel.deleteMany({});
+        users.forEach(user => {
+            let userObj = new UserModel({ username: user.username, role: user.role });
+            userObj.setPassword(user.password);
+            userObj.save(function(err, userObj) {
+                if (err) { logger.error(`Could not save user: ${user}`)};
+            })
+        })
+        logger.warn('Reset and Seeded Database');
+    })
+}
+
 module.exports = {
+    resetAndSeedDatabase,
     UserModel
 }
