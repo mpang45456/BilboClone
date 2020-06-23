@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const logger = require('../utils');
-const { UserModel } = require('../database');
+const { UserModel } = require('../data/database');
 const { TokenManager } = require('./authUtils');
 
 // Configure Router

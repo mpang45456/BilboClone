@@ -22,7 +22,7 @@ app.use(cors(corsOptions));
 
 // Database Bootstrap
 if (process.env.RESET_DB === 'true') {
-    const { resetAndSeedDatabase } = require('./database');
+    const { resetAndSeedDatabase } = require('./data/database');
     resetAndSeedDatabase();
 }
 

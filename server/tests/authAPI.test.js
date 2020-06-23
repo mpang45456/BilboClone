@@ -1,12 +1,12 @@
 const request = require('supertest');
 const app = require('../app');
-const { UserModel } = require('../database');
+const { UserModel } = require('../data/database');
 const { expect } = require('chai');
 const cookie = require('cookie');
 const { CookieAccessInfo, Cookie } = require('cookiejar');
 
 // Configure Test
-let testUsers = require('../databaseBootstrap').users;
+let testUsers = require('../data/databaseBootstrap').users;
 
 let protectedEndpoint = '/test';
 let loginEndpoint = '/auth/login';
