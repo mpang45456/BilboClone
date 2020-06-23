@@ -41,3 +41,39 @@ const Wrapper = styled.div`
 - Style an ant-design component directly using `style` from
 `style-components` module. (See `DarkInvertedStyledButton` in
 `UtilComponents.js`)
+
+
+# Testing Strategies
+There are 3 main testing strategies used in Bilbo: 
+1. Client-Side Testing (Unit + Integration Tests)
+- These test the React Components and how they interface/work together
+- //FIXME: Not Yet Implemented
+2. Server-Side Testing
+    - This tests the backend APIs
+    - Found in `server/tests`
+    - Run using `npm run test-server`
+    - `PORT=8002 NODE_ENV=test LOG_LEVEL=silent`
+    - When writing server-side API tests, it is best to avoid assumptions
+    of the existing database (there can be side-effects from previous tests)
+    and to use the before/after hooks to perform setup/teardown instead. Always
+    clear the database's collections before/after each test.
+3. End-To-End Testing
+    - This uses Cypress and is meant to test application flows
+    - 2 commands must be run to get this started:
+        - (1) `npm run cypress:start-test-server`
+            - This will reset the database (but only once at the start, 
+            so care must still be taken to prevent side-effects)
+            - This is an end-to-end test, so an actual database that persists
+            changes based on interactions in the user interface is necessary.
+            The reset at the start is just to ensure that each separate
+            run of the tests starts from the same state, making behaviour
+            more predictable.
+        - (2) `npm run cypress:open`
+
+Note:
+For both Server-Side Testing and End-To-End Testing, the PORT number and
+NODE_ENV and explicitly set in the npm script. 
+
+The PORT number is unique (different from the dev server's PORT number), 
+so tests and the dev server can run concurrently. The NODE_ENV is set to
+`test` to ensure that any database changes will not affect data for `dev`.

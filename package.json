@@ -1,5 +1,5 @@
 {
-  "name": "xyrix",
+  "name": "Bilbo",
   "version": "1.0.0",
   "description": "Business Management Platform for Industrial SMEs",
   "main": "server/server.js",
@@ -9,10 +9,10 @@
     "start-dev": "NODE_ENV=dev LOG_LEVEL=debug node server/server.js | ./node_modules/.bin/pino-pretty",
     "mongod": "mongod --dbpath ./server/data/db",
     
-    "test-server": "PORT=8002 RESET_DB=true NODE_ENV=test LOG_LEVEL=fatal jest --detectOpenHandles --testTimeout=10000 --forceExit",
+    "test-server": "PORT=8002 NODE_ENV=test LOG_LEVEL=silent jest --detectOpenHandles --testTimeout=10000 --forceExit",
     
     "cypress:open": "cypress open",
-    "cypress:start-test-server": "RESET_DB=true NODE_ENV=test node server/server.js | ./node_modules/.bin/pino-pretty",
+    "cypress:start-test-server": "PORT=8001 RESET_DB=true NODE_ENV=test node server/server.js | ./node_modules/.bin/pino-pretty",
 
     "react-start": "webpack-dev-server --mode development --open --hot",
     "react-build": "webpack --mode production"
