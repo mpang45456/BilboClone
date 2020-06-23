@@ -4,7 +4,7 @@ const router = express.Router();
 const logger = require('../utils');
 const { UserModel } = require('../data/database');
 const { TokenManager } = require('./authUtils');
-const { PermissionsManager } = require('./permissions');
+const { PermissionsManager, PERMS } = require('./permissions');
 
 // Configure Router
 const tm = new TokenManager();
@@ -102,15 +102,18 @@ router.post('/logout', function(req, res) {
 /**
  * Mounted: /auth/user
  * 
- * Creates a new user. Request body must contain
- * username, password and role (JSON). 
- * 
- * Note: Only an admin user can access this endpoint
+ * Creates a NEW user. Request body must contain
+ * username, password, permissions, name and position (JSON). 
  */
-router.post('/user', isAuthenticated, isAdmin, function(req, res) {
-    // TODO: Update
-    const { username, password, role } = req.body;
-    const newUser = new UserModel({ username: username , role: role });
+router.post('/user', 
+            isAuthenticated, 
+            isAuthorized(PERMS.USER_WRITE), 
+            function(req, res) {
+    const { username, password, permissions, name, position } = req.body;
+    const newUser = new UserModel({ username, 
+                                    permissions, 
+                                    name, 
+                                    position });
     newUser.setPassword(password);
 
     newUser.save(function(error, newUser) {
@@ -125,21 +128,29 @@ router.post('/user', isAuthenticated, isAdmin, function(req, res) {
 /**
  * Mounted: /auth/user/:username
  * 
- * Patches the fields (password and role) of a user.
- * 
- * Note: The current implementation only allows 
- * the admin to update a user's credentials and role
+ * Patches the fields (password, permissions, name
+ * position) of a user. The username cannot be changed.
  */
-router.patch('/user/:username', isAuthenticated, isAdmin, function(req, res) {
+router.patch('/user/:username', 
+             isAuthenticated, 
+             isAuthorized(PERMS.USER_WRITE), 
+             function(req, res) {
     const username = req.params.username;
-    const { password, role } = req.body;
+    const { oldPassword, newPassword, permissions, name , position } = req.body;
 
     UserModel.findOne({ username: username }, function(err, user) {
         if (err) { return res.status(500).send("Oops, something went wrong"); }
         if (!user) { return res.status(400).send("User does not exist"); }
 
-        if (password) { user.setPassword(password); }
-        if (role) { user.role = role; }
+        if (newPassword) { 
+            if (!user.isValidPassword(oldPassword)) {
+                return res.status(400).send("Incorrect credentials");
+            }
+            user.setPassword(newPassword); 
+        }
+        if (permissions) { user.permissions = permissions; }
+        if (name) { user.name = name; }
+        if (position) { user.position = position; }
 
         user.save()
             .then(() => res.status(200).send("Updated User Details"))
@@ -156,10 +167,13 @@ router.patch('/user/:username', isAuthenticated, isAdmin, function(req, res) {
  * request is to make sure the resource does not exist
  * at the end of a request)
  */
-router.delete('/user/:username', isAuthenticated, isAdmin, function(req, res) {
+router.delete('/user/:username', 
+              isAuthenticated, 
+              isAuthorized(PERMS.USER_WRITE), 
+              function(req, res) {
     const username = req.params.username;
 
-    UserModel.deleteOne({ username: username}, function(err) {
+    UserModel.deleteOne({ username: username }, function(err) {
         if (err) {
             return res.status(500).send("Oops, something went wrong");
         }
@@ -181,13 +195,27 @@ router.delete('/user/:username', isAuthenticated, isAdmin, function(req, res) {
  *      }
  *      ...
  * ]
+ * 
+ * // TODO: Can add query parameters to filter
+ * the fields that are returned
  */
-router.get('/user', isAuthenticated, isAdmin, function(req, res) {
+router.get('/user', 
+           isAuthenticated, 
+           isAuthorized(PERMS.USER_READ), 
+           function(req, res) {
     let ret = [];
 
     UserModel.find({}, function(err, users) {
+        if (err) {
+            return res.status(500).send("Oops, something went wrong");
+        }
+
         users.forEach(user => {
-            ret.push({ username: user.username, role: user.role });
+            ret.push({ username: user.username, 
+                       permissions: user.permissions,
+                       name: user.name,
+                       position: user.position
+            });
         })
         res.status(200).json(ret);
     })
@@ -204,7 +232,10 @@ router.get('/user', isAuthenticated, isAdmin, function(req, res) {
  *      "role": role
  * }
  */
-router.get('/user/:username', isAuthenticated, isAdmin, function(req, res) {
+router.get('/user/:username', 
+           isAuthenticated, 
+           isAuthorized(PERMS.USER_READ), 
+           function(req, res) {
     const username = req.params.username;
 
     UserModel.findOne({ username: username }, function(err, user) {
@@ -216,14 +247,23 @@ router.get('/user/:username', isAuthenticated, isAdmin, function(req, res) {
             return res.status(400).send("User does not exist");
         }
 
-        res.status(200).json({ username: username, role: user.role });
+        res.status(200).json({ username: username, 
+                               permissions: user.permissions,
+                               name: user.name, 
+                               position: user.position 
+        });
     })
 })
 
-// Authentication Middleware
+// Middleware
 /**
  * Ensures that user is logged in (valid
  * access token is used)
+ * 
+ * Note: This middleware also sets the user
+ * object in `req.user`. The user object
+ * contains the information encoded within
+ * the access JWT (not the refresh JWT).
  */
 function isAuthenticated(req, res, next) {
     const accessToken = req.cookies.accessToken;
@@ -243,19 +283,20 @@ function isAuthenticated(req, res, next) {
 }
 
 /**
- * Ensures that user has "admin" role.
- * Must be used AFTER the `isAuthenticated` middleware.
+ * Ensures that the user is authorized to
+ * access a certain endpoint. Any number
+ * of permissions can be entered, but take note
+ * that typing the actual string representing
+ * the permission should be avoided (to avoid
+ * typos). Instead use the `PERMS` object's 
+ * fields instead. 
+ * 
+ * 
+ * Note: This middleware must only be used
+ * AFTER `isAuthenticated` because it makes use
+ * of `req.user`, which is set by `isAuthenticated`
+ * @param  {...String} requiredPerms
  */
-function isAdmin(req, res, next) {
-    if (req.user.role !== "admin") {
-        return res.sendStatus(403);
-    }
-
-    next();
-}
-
-// Must be used AFTER 'isAuthenticated' because
-// it makes use of `req.user`, which is set by `isAuthenticated`
 function isAuthorized(...requiredPerms) {
     return function(req, res, next) {
         let userPerms = pm.decode(req.user.permissions);
