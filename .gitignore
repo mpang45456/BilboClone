@@ -107,3 +107,6 @@ dist
 ##### Added by Self #####
 # MongoDB
 /server/data
+
+# Cypress
+/cypress/videos
