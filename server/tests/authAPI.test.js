@@ -345,7 +345,6 @@ describe('Testing /auth/user endpoint', () => {
                 .expect(200)
                 .expect((res) => {
                     expect(res.body.length).to.be.equal(2);
-                    console.log(res.body)
                     expect(res.body[0].username).to.exist;
                     expect(res.body[0].role).to.exist;
                 })
