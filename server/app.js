@@ -21,8 +21,8 @@ let corsOptions = {
 app.use(cors(corsOptions));
 
 // Database Bootstrap
-const { resetAndSeedDatabase } = require('./database');
 if (process.env.RESET_DB === 'true') {
+    const { resetAndSeedDatabase } = require('./database');
     resetAndSeedDatabase();
 }
 

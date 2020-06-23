@@ -46,8 +46,8 @@ const Wrapper = styled.div`
 # Testing Strategies
 There are 3 main testing strategies used in Bilbo: 
 1. Client-Side Testing (Unit + Integration Tests)
-- These test the React Components and how they interface/work together
-- //FIXME: Not Yet Implemented
+    - These test the React Components and how they interface/work together
+    - //FIXME: Not Yet Implemented
 2. Server-Side Testing
     - This tests the backend APIs
     - Found in `server/tests`
@@ -77,3 +77,10 @@ NODE_ENV and explicitly set in the npm script.
 The PORT number is unique (different from the dev server's PORT number), 
 so tests and the dev server can run concurrently. The NODE_ENV is set to
 `test` to ensure that any database changes will not affect data for `dev`.
+
+# Running the Dev Server
+While developing, there may be an occasion where a reset of the database
+to a pre-defined state is necessary.
+
+If so, set the `RESET_DB=true` environment variable, like so:
+`RESET_DB=true npm run start-dev`
