@@ -1,4 +1,4 @@
-const { PERMS, PermissionsTransformer } = require('../auth/permissions');
+const { PERMS, PermissionsTransformer } = require('../routes/api/v1/auth/permissions');
 const { expect } = require('chai');
 
 describe('Testing Permissions Management', () => {

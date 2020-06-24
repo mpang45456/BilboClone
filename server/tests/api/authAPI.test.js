@@ -7,13 +7,13 @@ const { CookieAccessInfo } = require('cookiejar');
 
 // Configure Test
 let testUsers = require('../../data/databaseBootstrap').users;
-const { PERMS } = require('../../auth/permissions');
+const { PERMS } = require('../../routes/api/v1/auth/permissions');
 
 let protectedEndpoint = '/test';
 let loginEndpoint = '/api/v1/auth/login';
 let logoutEndpoint = '/api/v1/auth/logout';
 let tokenEndpoint = '/api/v1/auth/token';
-let userEndpoint = '/api/v1/auth/user';
+let userEndpoint = '/api/v1/user';
 let serverPortNumber = process.env.PORT;
 
 let authenticatedAdminAgent = null;

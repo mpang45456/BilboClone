@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const CONFIG = require('../config');
+const CONFIG = require('../../../../config');
 
 /**
  * Class to manage the generation and checking

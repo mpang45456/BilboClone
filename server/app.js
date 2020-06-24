@@ -27,16 +27,17 @@ if (process.env.RESET_DB === 'true') {
 }
 
 // Authentication Endpoint
-const { authRouter, isAuthenticated, isAuthorized } = require('./auth/auth');
-app.use('/api/v1/auth', authRouter);
+const { apiV1Router } = require('./routes/api/v1/router');
+app.use('/api/v1', apiV1Router);
 
 // FIXME: Temporary Protected Endpoint
+const { isAuthenticated, isAuthorized } = require('./routes/api/v1/auth/auth');
 app.get('/test', isAuthenticated, function(req, res) {
     res.send("Accessing a protected resource!");
 })
 
 // FIXME: Temporary Protected Endpoint (to test authorization middleware)
-const { PERMS } = require('./auth/permissions');
+const { PERMS } = require('./routes/api/v1/auth/permissions');
 app.get('/test2', isAuthenticated, isAuthorized(PERMS.PURCHASES_READ, PERMS.PURCHASES_WRITE), function(req, res) {
     res.send("Accessing Purchases-Only protected resource!");
 });
@@ -44,8 +45,9 @@ app.get('/test2', isAuthenticated, isAuthorized(PERMS.PURCHASES_READ, PERMS.PURC
 // Set Up Static File Server
 const path = require('path');
 app.use(express.static(path.join(__dirname, '../client/dist')));
+
+// Enable HTML5 pushstate
 app.get('*', function(req, res) {
-    // Enables HTML5 pushstate
     res.sendFile(path.join(__dirname, '..', '/client/dist/index.html'));
 })
 
