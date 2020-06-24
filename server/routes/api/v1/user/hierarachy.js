@@ -8,7 +8,6 @@ class UserHierarchy {
     static async getAllDirectDescendents(username) {
         // Check if user `username` exists
         let user = await UserModel.findOne({ username });
-        console.error(user);
         if (!user) {
             throw new Error(`Cannot find direct descendents. No such user: ${username}`);
         }
