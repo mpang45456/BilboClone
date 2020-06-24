@@ -251,19 +251,27 @@ describe('Testing /api/v1/auth/user endpoint', () => {
         "position": "Resident Wizard"
     }
 
-    let authenticatedNonAdminAgent = null;
+    let newNonAdmin = {
+        "username": "newUser",
+        "password": "newUserPassword",
+        "permissions": [PERMS.SALES_READ, PERMS.PURCHASES_READ],
+        "name": "Thorin",
+        "position": "Resident Dwarf"
+    }
+
+    let authenticatedUnauthorizedAgent = null;
 
     beforeEach(async (done) => {
         // Create non-admin agent
         const nonAdmin = testUsers[1];
-        authenticatedNonAdminAgent = request.agent(server);
-        await authenticatedNonAdminAgent
+        authenticatedUnauthorizedAgent = request.agent(server);
+        await authenticatedUnauthorizedAgent
                 .post(loginEndpoint)    
                 .send({ username: nonAdmin.username, password: nonAdmin.password });
         done();
     })
 
-    it("Admin should be able to create new user", async (done) => {
+    it("User with USER_WRITE perm should be able to create new user", async (done) => {
         // Create new user
         await authenticatedAdminAgent
                 .post(userEndpoint)
@@ -284,7 +292,71 @@ describe('Testing /api/v1/auth/user endpoint', () => {
         return done();
     })
 
-    it("Admin should not be able to re-create existing user", async (done) => {
+
+    it("User with USER_WRITE perm should not be able to create new user without required fields", async(done) => {
+        // Missing username field
+        await authenticatedAdminAgent
+                .post(userEndpoint)
+                .send({
+                    password: newAdmin.password,
+                    permissions: newAdmin.permissions,
+                    name: newAdmin.name,
+                    position: newAdmin.position
+                })
+                .expect(400)
+        
+                // Missing password field
+        await authenticatedAdminAgent
+                .post(userEndpoint)
+                .send({
+                    username: newAdmin.username,
+                    permissions: newAdmin.permissions,
+                    name: newAdmin.name,
+                    position: newAdmin.position
+                })
+                .expect(400)
+        
+        // Missing name field
+        await authenticatedAdminAgent
+                .post(userEndpoint)
+                .send({
+                    username: newAdmin.username,
+                    password: newAdmin.password,
+                    permissions: newAdmin.permissions,
+                    position: newAdmin.position
+                })
+                .expect(400)
+        
+        // Missing username field
+        await authenticatedAdminAgent
+                .post(userEndpoint)
+                .send({
+                    password: newAdmin.password,
+                    name: newAdmin.name,
+                    position: newAdmin.position
+                })
+                .expect(400)
+
+        done();
+    })
+
+    it("User with USER_WRITE perm should be able to create new user with no permissions", async (done) => {
+        // Although the permissions field is required, it
+        // defaults to [], which is considered valid
+        await authenticatedAdminAgent
+                .post(userEndpoint)
+                .send({
+                    username: newAdmin.username,
+                    password: newAdmin.password,
+                    name: newAdmin.name,
+                    position: newAdmin.position
+                })
+                .expect(200);
+
+        done();
+    })
+
+    it("User with USER_WRITE perm should not be able to re-create existing user", async (done) => {
         // Re-create existing user
         await authenticatedAdminAgent
                 .post(userEndpoint)
@@ -297,7 +369,7 @@ describe('Testing /api/v1/auth/user endpoint', () => {
         return done();
     })
 
-    it("Admin should be able to update password of existing user", async (done) => {
+    it("User with USER_WRITE perm should be able to update password of existing user", async (done) => {
         let newPassword = "newPassword123";
         await authenticatedAdminAgent
                 .patch(userEndpoint + `/${testUsers[1].username}`)
@@ -316,7 +388,7 @@ describe('Testing /api/v1/auth/user endpoint', () => {
         return done();
     })
 
-    it("Admin should be able to update role of existing user", async (done) => {
+    it("User with USER_WRITE perm should be able to update role of existing user", async (done) => {
         let newRole = "admin";
         await authenticatedAdminAgent
                 .patch(userEndpoint + `/${testUsers[1].username}`)
@@ -329,7 +401,7 @@ describe('Testing /api/v1/auth/user endpoint', () => {
         return done();
     })
 
-    it("Admin should be able to delete existing user", async (done) => {
+    it("User with USER_WRITE perm should be able to delete existing user", async (done) => {
         await authenticatedAdminAgent
                 .delete(userEndpoint + `/${testUsers[1].username}`)
                 .expect(200)
@@ -346,7 +418,7 @@ describe('Testing /api/v1/auth/user endpoint', () => {
         return done();
     })
 
-    it("Admin should be able to get list of all users", async (done) => {
+    it("User with USER_WRITE perm should be able to get list of all users", async (done) => {
         await authenticatedAdminAgent
                 .get(userEndpoint)
                 .expect(200)
@@ -361,7 +433,7 @@ describe('Testing /api/v1/auth/user endpoint', () => {
         return done();
     })
 
-    it("Admin should be able to get single user's detail", async (done) => {
+    it("User with USER_WRITE perm should be able to get single user's detail", async (done) => {
         await authenticatedAdminAgent
                 .get(userEndpoint + `/${testUsers[1].username}`)
                 .expect(200)
@@ -374,25 +446,25 @@ describe('Testing /api/v1/auth/user endpoint', () => {
     })
 
     it("Non-Admin should not be able access /api/v1/auth/user endpoints", async (done) => {
-        await authenticatedNonAdminAgent
+        await authenticatedUnauthorizedAgent
                 .post(userEndpoint)
                 .send(newAdmin)
                 .expect(403);
         
-        await authenticatedNonAdminAgent
+        await authenticatedUnauthorizedAgent
                 .patch(userEndpoint + `/${testUsers[0].username}`)
                 .send(newAdmin)
                 .expect(403);
         
-        await authenticatedNonAdminAgent
+        await authenticatedUnauthorizedAgent
                 .delete(userEndpoint + `/${testUsers[0].username}`)
                 .expect(403);
         
-        await authenticatedNonAdminAgent
+        await authenticatedUnauthorizedAgent
                 .get(userEndpoint)
                 .expect(403);
 
-        await authenticatedNonAdminAgent
+        await authenticatedUnauthorizedAgent
                 .get(userEndpoint + `/${testUsers[0].username}`)
                 .expect(403);
 

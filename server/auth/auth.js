@@ -110,15 +110,22 @@ router.post('/user',
             isAuthorized(PERMS.USER_WRITE), 
             function(req, res) {
     const { username, password, permissions, name, position } = req.body;
-    const newUser = new UserModel({ username, 
+    let newUser = null;
+    try {
+        newUser = new UserModel({ username,
                                     permissions, 
                                     name, 
                                     position });
-    newUser.setPassword(password);
+        newUser.setPassword(password);
+    } catch(error) {
+        logger.error(`/auth/user: Could not save newUser: ${error}`);
+        return res.status(400).send("Unable to create new user");
+    }
 
     newUser.save(function(error, newUser) {
         if (error) {
             logger.error(`/auth/user: Could not save newUser: ${error}`);
+            // console.error(error);
             return res.status(400).send("Unable to create new user");
         }
         return res.status(200).send("Successfully created new user: " + username);
