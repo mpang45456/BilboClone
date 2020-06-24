@@ -1,43 +1,46 @@
 const { UserModel } = require('../../../../data/database');
 
-class UserHierarchyManager {
+class UserHierarchy {
     constructor() {
         // FIXME: Necessary?
     }
 
-    getAllDirectDescendents(username) {
-        UserModel.find({ reportsTo: username }, function(err, users) {
-            if (err) { throw new Error(err); }
-            return users.map(user => user.username);
-        })
+    static async getAllDirectDescendents(username) {
+        // Check if user `username` exists
+        let user = await UserModel.findOne({ username });
+        console.error(user);
+        if (!user) {
+            throw new Error(`Cannot find direct descendents. No such user: ${username}`);
+        }
+
+        // Find direct descendents
+        let users = await UserModel.find({ reportsTo: username })
+        return users.map(user => user.username);
     }
 
-    async getAllDescendents(username) {
+    static async getAllDescendents(username) {
         let descendents = []; // Stores usernames only
         let stack = [];
-        try {
-            const rootUser = await UserModel.findOne({ username });
-            stack.push(rootUser);
+        const rootUser = await UserModel.findOne({ username });
 
-            while (stack.length > 0) {
-                let currUser = stack.pop();
-                let children = await UserModel.find({ reportsTo: currUser.username });
-                for (let child of children) {
-                    descendents.push(child.username);
-                    stack.push(child);
-                }
-            }
-
-            return descendents;
-        } catch(error) {
-            // The try-catch clause is not absolutely necessary, 
-            // but makes explicit that any problems with the db
-            // access code may possibly throw an error
-            throw new Error(err);
+        if (!rootUser) {
+            throw new Error(`Cannot find all descendents. No such user: ${username}`);
         }
+
+        stack.push(rootUser);
+        while (stack.length > 0) {
+            let currUser = stack.pop();
+            let children = await UserModel.find({ reportsTo: currUser.username });
+            for (let child of children) {
+                descendents.push(child.username);
+                stack.push(child);
+            }
+        }
+
+        return descendents;
     }
 }
 
 module.exports = {
-    UserHierarchyManager
+    UserHierarchy
 }

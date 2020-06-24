@@ -20,11 +20,25 @@ let corsOptions = {
 }
 app.use(cors(corsOptions));
 
+// Set Up Database
+const mongoose = require('mongoose');
+const CONFIG = require('./config');
+mongoose.set('useCreateIndex', true);
+mongoose
+    .connect(CONFIG.DATABASE_URL, 
+             {useNewUrlParser: true, useUnifiedTopology: true})
+    .then(() => {
+        logger.info("Connection to MongoDB is open");
+        if (process.env.RESET_DB === 'true') {
+            const { resetAndSeedDatabase } = require('./data/database');
+            resetAndSeedDatabase();
+        }
+    }).catch((err) => {
+        logger.error(`Unable to Connect to MongoDB: ${err}`);
+    });
+
+// FIXME: DEBUG
 // Database Bootstrap
-if (process.env.RESET_DB === 'true') {
-    const { resetAndSeedDatabase } = require('./data/database');
-    resetAndSeedDatabase();
-}
 
 // API Endpoint
 const { apiV1Router } = require('./routes/api/v1/router');

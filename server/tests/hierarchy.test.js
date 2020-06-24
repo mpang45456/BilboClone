@@ -1,19 +1,29 @@
-const { expect } = require('chai');
+// const { expect } = require('chai');
 
-const { UserHierarchyManager } = require('../routes/api/v1/user/hierarachy');
+const { UserHierarchy } = require('../routes/api/v1/user/hierarachy');
 const { UserModel } = require('../data/database');
 const testUsers = require('../data/databaseBootstrap').users;
 
+const mongoose = require('mongoose');
+const CONFIG = require('../config');
+
 describe('Testing UserHierarchyManager', () => {
-    const uhm = new UserHierarchyManager();
+    beforeAll(async (done) => {
+        // TODO: Refactor this code into a utils file
+        await mongoose.connect(CONFIG.DATABASE_URL, {useNewUrlParser: true, useUnifiedTopology: true})
+        done();
+    })
+
+    afterAll(async (done) => {
+        await mongoose.connection.close();
+        done();
+    })
 
     // TODO: Refactor
     beforeEach(async (done) => {
-        console.error("here");
         await UserModel.deleteMany({});
 
         function addUserToDatabase(user) {
-            console.error(`user.reportsTo: ${user.reportsTo}`)
             const userObj = new UserModel({ username: user.username, 
                                             permissions: user.permissions, 
                                             name: user.name, 
@@ -24,17 +34,79 @@ describe('Testing UserHierarchyManager', () => {
             return userObj.save();
         }
         
-        testUsers.forEach(async (user) => {
-            try {
-                await addUserToDatabase(user);
-            } catch(error) {
-                console.error("Error occured: " + error);
-            }
-        })
+        for (let user of testUsers) {
+            await addUserToDatabase(user);
+        }
+
+        done();
     })
 
-    it('Testing getAllDirectDescendents: success', async (done) => {
-        let directDescendents = await uhm.getAllDirectDescendents(testUsers[0].reportsTo);
+    it.only('Should not be able to getAllDirectDescendents starting from root "none"', async (done) => {
+        expect.assertions(1);
+        try {
+            await UserHierarchy.getAllDirectDescendents(testUsers[0].reportsTo)
+        } catch(e) {
+            expect(e.message).toMatch(/.*No such user/);
+            done();
+        }
+    })
+
+    it('Testing getAllDirectDescendents: Existing user with descendents', async (done) => {
+        let directDescendents = await UserHierarchy.getAllDirectDescendents(testUsers[0].username);
         expect(directDescendents).to.be.an('array');
+        expect(directDescendents.length).to.be.equal(2);
+        expect(directDescendents).to.include(testUsers[1].username);
+        expect(directDescendents).to.include(testUsers[2].username);
+        expect(directDescendents).to.not.include(testUsers[3].username);
+        done();
+    })
+
+    it('Testing getAllDirectDescendents: Existing user with no descendents', async (done) => {
+        let directDescendents = await UserHierarchy.getAllDirectDescendents(testUsers[2].username);
+        expect(directDescendents).to.be.an('array');
+        expect(directDescendents.length).to.be.equal(0);
+        done();
+    })
+
+    it('Testing getAllDirectDescendents: Non-existent user', async (done) => {
+        let directDescendents = await UserHierarchy.getAllDirectDescendents("nonExistentUser");
+        expect(directDescendents).to.be.an('array');
+        expect(directDescendents.length).to.be.equal(0);
+        done();
+    })
+
+    it('Testing getAllDescendents: Starting from root "none"', async (done) => {
+        let allDescendents = await UserHierarchy.getAllDescendents(testUsers[0].reportsTo);
+        expect(allDescendents).to.be.an('array');
+        expect(allDescendents.length).to.be.equal(4);
+        expect(allDescendents).to.include(testUsers[0].username);
+        expect(allDescendents).to.include(testUsers[1].username);
+        expect(allDescendents).to.include(testUsers[2].username);
+        expect(allDescendents).to.include(testUsers[3].username);
+        done();
+    })
+
+    it('Testing getAllDescendents: Existing user with descendents', async (done) => {
+        let allDescendents = await UserHierarchy.getAllDescendents(testUsers[0].username);
+        expect(allDescendents).to.be.an('array');
+        expect(allDescendents.length).to.be.equal(3);
+        expect(allDescendents).to.include(testUsers[1].username);
+        expect(allDescendents).to.include(testUsers[2].username);
+        expect(allDescendents).to.include(testUsers[3].username);
+        done();
+    })
+
+    it('Testing getAllDescendents: Existing user with no descendents', async (done) => {
+        let allDescendents = await UserHierarchy.getAllDescendents(testUsers[2].username);
+        expect(allDescendents).to.be.an('array');
+        expect(allDescendents.length).to.be.equal(0);
+        done();
+    })
+
+    it('Testing getAllDescendents: Non-existent user', async (done) => {
+        let allDescendents = await UserHierarchy.getAllDescendents("nonExistentUser");
+        expect(allDescendents).to.be.an('array');
+        expect(allDescendents.length).to.be.equal(0);
+        done();
     })
 })
