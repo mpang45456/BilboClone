@@ -96,10 +96,38 @@ describe('Testing /api/v1/auth/login', () => {
                })
     })
 
+    it("No username", (done) => {
+        request(server)
+               .post(loginEndpoint)
+               .send({ password: "testAdminPassword"})
+               .expect(401)
+               .end((err, res) => {
+                   if (err) {
+                       return done(err);
+                   }
+                   expect(res.text).to.be.equal('Invalid credentials');
+                   return done();
+               })
+    })
+
     it("Incorrect password", (done) => {
         request(server)
                .post(loginEndpoint)
                .send({ username: "testAdmin", password: "wrongPassword"})
+               .expect(401)
+               .end((err, res) => {
+                   if (err) {
+                       return done(err);
+                   }
+                   expect(res.text).to.be.equal('Invalid credentials');
+                   return done();
+               })
+    })
+
+    it("No password", (done) => {
+        request(server)
+               .post(loginEndpoint)
+               .send({ username: "testAdmin" })
                .expect(401)
                .end((err, res) => {
                    if (err) {
@@ -191,6 +219,20 @@ describe("Testing /api/v1/auth/token", () => {
             .expect(200);
         return done();
     })
+
+    it("Old (invalidated) refresh token provided", async (done) => {
+        // Logout to invalidate refresh token
+        await authenticatedAdminAgent
+                .post(logoutEndpoint)
+                .expect(200);
+        
+        await request(server)
+                .post(tokenEndpoint)
+                .set('Cookie', [`accessToken=${accessToken};refreshToken=${refreshToken}`])
+                .expect(403);
+        
+        return done();
+    })
 })
 
 describe('Testing /api/v1/auth/logout', () => {
@@ -242,7 +284,7 @@ describe('Testing /api/v1/auth/logout', () => {
     })
 })
 
-describe('Testing /api/v1/auth/user endpoint', () => {
+describe('Testing /api/v1/auth/user endpoint (UNIT)', () => {
     let newAdmin = {
         "username": "newAdmin",
         "password": "newAdminPassword",
@@ -292,8 +334,27 @@ describe('Testing /api/v1/auth/user endpoint', () => {
         return done();
     })
 
+    it(`Newly created user should be in resource collection`, async (done) => {
+        let origLength = testUsers.length;
 
-    it("User with USER_WRITE perm should not be able to create new user without required fields", async(done) => {
+        await authenticatedAdminAgent
+                .post(userEndpoint)
+                .send(newAdmin)
+                .expect(200);
+        
+        await authenticatedAdminAgent
+                .get(userEndpoint)
+                .expect((res) => {
+                    expect(res.body.length).to.equal(origLength + 1);
+                })
+
+        return done();
+    })
+
+
+    it(`User with USER_WRITE perm should not be able to 
+        create new user without required fields (excluding
+        permissions)`, async(done) => {
         // Missing username field
         await authenticatedAdminAgent
                 .post(userEndpoint)
@@ -340,7 +401,8 @@ describe('Testing /api/v1/auth/user endpoint', () => {
         done();
     })
 
-    it("User with USER_WRITE perm should be able to create new user with no permissions", async (done) => {
+    it(`User with USER_WRITE perm should be able 
+        to create new user with no permissions`, async (done) => {
         // Although the permissions field is required, it
         // defaults to [], which is considered valid
         await authenticatedAdminAgent
@@ -356,7 +418,8 @@ describe('Testing /api/v1/auth/user endpoint', () => {
         done();
     })
 
-    it("User with USER_WRITE perm should not be able to re-create existing user", async (done) => {
+    it(`User with USER_WRITE perm should not be 
+        able to re-create existing user`, async (done) => {
         // Re-create existing user
         await authenticatedAdminAgent
                 .post(userEndpoint)
@@ -369,7 +432,8 @@ describe('Testing /api/v1/auth/user endpoint', () => {
         return done();
     })
 
-    it("User with USER_WRITE perm should be able to update password of existing user", async (done) => {
+    it(`User with USER_WRITE perm should be able 
+        to update password of existing user`, async (done) => {
         let newPassword = "newPassword123";
         await authenticatedAdminAgent
                 .patch(userEndpoint + `/${testUsers[1].username}`)
@@ -388,19 +452,6 @@ describe('Testing /api/v1/auth/user endpoint', () => {
         return done();
     })
 
-    it("User with USER_WRITE perm should be able to update role of existing user", async (done) => {
-        let newRole = "admin";
-        await authenticatedAdminAgent
-                .patch(userEndpoint + `/${testUsers[1].username}`)
-                .send({ role: newRole })
-                .expect(200)
-                .expect((res) => {
-                    expect(res.text).to.be.equal('Updated User Details');
-                })
-        
-        return done();
-    })
-
     it("User with USER_WRITE perm should be able to delete existing user", async (done) => {
         await authenticatedAdminAgent
                 .delete(userEndpoint + `/${testUsers[1].username}`)
@@ -415,6 +466,22 @@ describe('Testing /api/v1/auth/user endpoint', () => {
             .send({ username: testUsers[1].user, password: testUsers[1].password })
             .expect(200)
         
+        return done();
+    })
+
+    it(`Deleted user should not be in resource collection`, async (done) => {
+        let origLength = testUsers.length;
+
+        await authenticatedAdminAgent
+                .delete(userEndpoint + `/${testUsers[1].username}`)
+                .expect(200);
+        
+        await authenticatedAdminAgent
+                .get(userEndpoint)
+                .expect((res) => {
+                    expect(res.body.length).to.equal(origLength - 1);
+                })
+
         return done();
     })
 
@@ -445,7 +512,8 @@ describe('Testing /api/v1/auth/user endpoint', () => {
         return done();
     })
 
-    it("Non-Admin should not be able access /api/v1/auth/user endpoints", async (done) => {
+    it(`User without USER_WRITE perm should not 
+        be able access /api/v1/auth/user endpoints`, async (done) => {
         await authenticatedUnauthorizedAgent
                 .post(userEndpoint)
                 .send(newAdmin)
@@ -470,4 +538,8 @@ describe('Testing /api/v1/auth/user endpoint', () => {
 
         return done();
     })
+})
+
+describe('Testing /api/v1/auth/user endpoint (UNIT)', () => {
+    
 })

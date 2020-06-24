@@ -105,7 +105,7 @@ router.post('/logout', function(req, res) {
  * Creates a NEW user. Request body must contain
  * username, password, permissions, name and position (JSON). 
  */
-router.post('/user', 
+router.post('/user',
             isAuthenticated, 
             isAuthorized(PERMS.USER_WRITE), 
             function(req, res) {
