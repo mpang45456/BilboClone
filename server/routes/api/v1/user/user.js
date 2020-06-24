@@ -18,16 +18,17 @@ router.use(isAuthenticated);
 router.post('/',
             isAuthorized(PERMS.USER_WRITE), 
             function(req, res) {
-    const { username, password, permissions, name, position } = req.body;
+    const { username, password, permissions, name, position, reportsTo } = req.body;
     let newUser = null;
     try {
         newUser = new UserModel({ username,
-                                    permissions, 
-                                    name, 
-                                    position });
+                                  permissions, 
+                                  name, 
+                                  position,
+                                  reportsTo });
         newUser.setPassword(password);
     } catch(error) {
-        logger.error(`/user: Could not save newUser: ${error}`);
+        logger.error(`/user: Could not create newUser: ${error}`);
         return res.status(400).send("Unable to create new user");
     }
 
@@ -51,7 +52,7 @@ router.patch('/:username',
              isAuthorized(PERMS.USER_WRITE), 
              function(req, res) {
     const username = req.params.username;
-    const { oldPassword, newPassword, permissions, name , position } = req.body;
+    const { oldPassword, newPassword, permissions, name , position, reportsTo } = req.body;
 
     UserModel.findOne({ username: username }, function(err, user) {
         if (err) { return res.status(500).send("Oops, something went wrong"); }
@@ -66,6 +67,7 @@ router.patch('/:username',
         if (permissions) { user.permissions = permissions; }
         if (name) { user.name = name; }
         if (position) { user.position = position; }
+        if (reportsTo) { user.reportsTo = reportsTo; }
 
         user.save()
             .then(() => res.status(200).send("Updated User Details"))
