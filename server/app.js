@@ -26,7 +26,7 @@ if (process.env.RESET_DB === 'true') {
     resetAndSeedDatabase();
 }
 
-// Authentication Endpoint
+// API Endpoint
 const { apiV1Router } = require('./routes/api/v1/router');
 app.use('/api/v1', apiV1Router);
 

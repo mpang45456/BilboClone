@@ -284,7 +284,7 @@ describe('Testing /api/v1/auth/logout', () => {
     })
 })
 
-describe('Testing /api/v1/auth/user endpoint (UNIT)', () => {
+describe('Testing /api/v1/auth/user endpoint', () => {
     let newAdmin = {
         "username": "newAdmin",
         "password": "newAdminPassword",
@@ -312,6 +312,8 @@ describe('Testing /api/v1/auth/user endpoint (UNIT)', () => {
                 .send({ username: nonAdmin.username, password: nonAdmin.password });
         done();
     })
+
+    // TODO: Add tests for authentication
 
     it("User with USER_WRITE perm should be able to create new user", async (done) => {
         // Create new user
@@ -366,7 +368,7 @@ describe('Testing /api/v1/auth/user endpoint (UNIT)', () => {
                 })
                 .expect(400)
         
-                // Missing password field
+        // Missing password field
         await authenticatedAdminAgent
                 .post(userEndpoint)
                 .send({
@@ -538,8 +540,4 @@ describe('Testing /api/v1/auth/user endpoint (UNIT)', () => {
 
         return done();
     })
-})
-
-describe('Testing /api/v1/auth/user endpoint (UNIT)', () => {
-    
 })
