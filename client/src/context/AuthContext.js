@@ -41,7 +41,7 @@ bax.interceptors.response.use(
         // Only if 401(Unauthorized) or 403(Forbidden) will 
         // an attempt be made to refresh the access token
         if ((err.response.status === 401 || err.response.status === 403)) {
-            if (originalReq.url === '/auth/token') {
+            if (originalReq.url === '/api/v1/auth/token') {
                 // Prevent loops (i.e. /auth/token is the one that returns 401/403)
                 // Happens when refresh token is invalid (e.g. due to logout)
                 // Use Router to redirect to /login page
@@ -49,7 +49,7 @@ bax.interceptors.response.use(
                     history.push('/login');
                 })
             } else {
-                return bax.post('/auth/token', { withCredentials: true})
+                return bax.post('/api/v1/auth/token', { withCredentials: true})
                             .then(res => {
                                 if (res.status === 200) {
                                     return bax(originalReq);
