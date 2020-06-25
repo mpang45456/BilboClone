@@ -1,43 +1,25 @@
-// const { expect } = require('chai');
-
 const { UserHierarchy } = require('../routes/api/v1/user/hierarachy');
 const { UserModel } = require('../data/database');
+const { DatabaseInteractor } = require('../data/DatabaseInteractor');
 const testUsers = require('../data/databaseBootstrap').users;
 
-const mongoose = require('mongoose');
-const CONFIG = require('../config');
-
 describe('Testing UserHierarchy', () => {
+    let dbi = null; //DatabaseInteractor
+    
     beforeAll(async (done) => {
-        // TODO: Refactor this code into a utils file
-        await mongoose.connect(CONFIG.DATABASE_URL, {useNewUrlParser: true, useUnifiedTopology: true})
+        dbi = new DatabaseInteractor();
+        await dbi.initConnection();
         done();
     })
 
     afterAll(async (done) => {
-        await mongoose.connection.close();
+        await dbi.closeConnection();
         done();
     })
 
-    // TODO: Refactor
     beforeEach(async (done) => {
-        await UserModel.deleteMany({});
-
-        function addUserToDatabase(user) {
-            const userObj = new UserModel({ username: user.username, 
-                                            permissions: user.permissions, 
-                                            name: user.name, 
-                                            position: user.position,
-                                            reportsTo: user.reportsTo
-            });
-            userObj.setPassword(user.password);
-            return userObj.save();
-        }
-        
-        for (let user of testUsers) {
-            await addUserToDatabase(user);
-        }
-
+        await dbi.clearModelData(UserModel);
+        await dbi.addUsers(...testUsers);
         done();
     })
 
