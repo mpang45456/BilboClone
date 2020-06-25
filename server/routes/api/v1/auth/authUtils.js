@@ -68,7 +68,7 @@ class TokenManager {
     getNewRefreshToken(username, permissions) {
         const refreshToken = jwt.sign({ username, permissions }, 
                                       CONFIG.REFRESH_TOKEN_SECRET);
-        this.validRefreshTokens.push(refreshToken); // TODO: Document this
+        this.validRefreshTokens.push(refreshToken);
         return refreshToken;
     }
 

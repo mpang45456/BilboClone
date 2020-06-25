@@ -5,15 +5,19 @@ const { expect } = require('chai');
 const cookie = require('cookie');
 const { CookieAccessInfo } = require('cookiejar');
 
+const protectedEndpoint = '/test';
+const loginEndpoint = '/api/v1/auth/login';
+const logoutEndpoint = '/api/v1/auth/logout';
+const tokenEndpoint = '/api/v1/auth/token';
+const userEndpoint = '/api/v1/user';
+
 // Configure Test
 let testUsers = require('../../data/databaseBootstrap').users;
 const { PERMS } = require('../../routes/api/v1/auth/permissions');
 
-let protectedEndpoint = '/test';
-let loginEndpoint = '/api/v1/auth/login';
-let logoutEndpoint = '/api/v1/auth/logout';
-let tokenEndpoint = '/api/v1/auth/token';
-let userEndpoint = '/api/v1/user';
+// const {
+
+// } = require('./testUtils');
 let serverPortNumber = process.env.PORT;
 
 let authenticatedAdminAgent = null;
@@ -46,23 +50,28 @@ function parseCookiesFromResponse(res) {
     return cookie.parse(res.header['set-cookie'].join('; '));
 }
 
+const { DatabaseInteractor } = require('../../data/DatabaseInteractor');
+let dbi = null;
 beforeAll(async (done) => {
     // Set up server before all tests
     server = app.listen(serverPortNumber, function() {
+        dbi = new DatabaseInteractor();
         done();
     })
 })
 
 beforeEach(async (done) => {
     // Reset Database
-    await UserModel.deleteMany({});
-    testUsers.forEach(async (user) => {
-        try {
-            await addUserToDatabase(user);
-        } catch(error) {
-            console.error("Error occured: " + error);
-        }
-    })
+    await dbi.clearModelData(UserModel);
+    await dbi.addUsers(...testUsers);
+    // await UserModel.deleteMany({});
+    // testUsers.forEach(async (user) => {
+    //     try {
+    //         await addUserToDatabase(user);
+    //     } catch(error) {
+    //         console.error("Error occured: " + error);
+    //     }
+    // })
     
     // Login and Authenticate
     const admin = testUsers[0];
@@ -290,7 +299,8 @@ describe('Testing /api/v1/auth/user endpoint', () => {
         "password": "newAdminPassword",
         "permissions": Object.keys(PERMS),
         "name": "Gandalf",
-        "position": "Resident Wizard"
+        "position": "Resident Wizard",
+        "reportsTo": "admin"
     }
 
     let newNonAdmin = {
@@ -298,7 +308,8 @@ describe('Testing /api/v1/auth/user endpoint', () => {
         "password": "newUserPassword",
         "permissions": [PERMS.SALES_READ, PERMS.PURCHASES_READ],
         "name": "Thorin",
-        "position": "Resident Dwarf"
+        "position": "Resident Dwarf",
+        "reportsTo": "admin"
     }
 
     let authenticatedUnauthorizedAgent = null;
@@ -353,7 +364,6 @@ describe('Testing /api/v1/auth/user endpoint', () => {
         return done();
     })
 
-
     it(`User with USER_WRITE perm should not be able to 
         create new user without required fields (excluding
         permissions)`, async(done) => {
@@ -364,7 +374,8 @@ describe('Testing /api/v1/auth/user endpoint', () => {
                     password: newAdmin.password,
                     permissions: newAdmin.permissions,
                     name: newAdmin.name,
-                    position: newAdmin.position
+                    position: newAdmin.position,
+                    reportsTo: newAdmin.reportsTo
                 })
                 .expect(400)
         
@@ -375,7 +386,8 @@ describe('Testing /api/v1/auth/user endpoint', () => {
                     username: newAdmin.username,
                     permissions: newAdmin.permissions,
                     name: newAdmin.name,
-                    position: newAdmin.position
+                    position: newAdmin.position,
+                    reportsTo: newAdmin.reportsTo
                 })
                 .expect(400)
         
@@ -386,7 +398,8 @@ describe('Testing /api/v1/auth/user endpoint', () => {
                     username: newAdmin.username,
                     password: newAdmin.password,
                     permissions: newAdmin.permissions,
-                    position: newAdmin.position
+                    position: newAdmin.position,
+                    reportsTo: newAdmin.reportsTo
                 })
                 .expect(400)
         
@@ -395,6 +408,20 @@ describe('Testing /api/v1/auth/user endpoint', () => {
                 .post(userEndpoint)
                 .send({
                     password: newAdmin.password,
+                    permissions: newAdmin.permissions,
+                    name: newAdmin.name,
+                    position: newAdmin.position,
+                    reportsTo: newAdmin.reportsTo
+                })
+                .expect(400)
+
+        // Missing reportsTo field
+        await authenticatedAdminAgent
+                .post(userEndpoint)
+                .send({
+                    username: newAdmin.username,
+                    password: newAdmin.password,
+                    permissions: newAdmin.permissions,
                     name: newAdmin.name,
                     position: newAdmin.position
                 })
@@ -413,7 +440,8 @@ describe('Testing /api/v1/auth/user endpoint', () => {
                     username: newAdmin.username,
                     password: newAdmin.password,
                     name: newAdmin.name,
-                    position: newAdmin.position
+                    position: newAdmin.position,
+                    reportsTo: newAdmin.reportsTo
                 })
                 .expect(200);
 
@@ -492,7 +520,7 @@ describe('Testing /api/v1/auth/user endpoint', () => {
                 .get(userEndpoint)
                 .expect(200)
                 .expect((res) => {
-                    expect(res.body.length).to.be.equal(2);
+                    expect(res.body.length).to.be.equal(testUsers.length);
                     expect(res.body[0].username).to.exist;
                     expect(res.body[0].permissions).to.exist;
                     expect(res.body[0].name).to.exist;

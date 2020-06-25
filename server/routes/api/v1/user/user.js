@@ -129,7 +129,8 @@ router.get('/',
             ret.push({ username: user.username, 
                        permissions: user.permissions,
                        name: user.name,
-                       position: user.position
+                       position: user.position,
+                       reportsTo: user.reportsTo
             });
         })
         res.status(200).json(ret);
@@ -164,7 +165,8 @@ router.get('/:username',
         res.status(200).json({ username: username, 
                                permissions: user.permissions,
                                name: user.name, 
-                               position: user.position 
+                               position: user.position,
+                               reportsTo: user.reportsTo
         });
     })
 })
