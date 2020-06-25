@@ -108,6 +108,11 @@ class Sidebar extends React.Component {
                         Suppliers
                     </NavLink>
                   </Menu.Item>
+                  <Menu.Item key={this.__getMenuKeyFromURL(CONFIG.CUSTOMER_URL)} >
+                    <NavLink to={CONFIG.CUSTOMER_URL}>
+                        Customers
+                    </NavLink>
+                  </Menu.Item>
                 </SubMenu>
               </Menu>
             </Sider>

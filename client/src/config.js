@@ -8,6 +8,7 @@ CONFIG.SALES_ORDERS_URL = '/sales';
 CONFIG.PURCHASE_ORDERS_URL = '/purchases';
 CONFIG.INVENTORY_URL = '/inventory';
 CONFIG.SUPPLIER_URL = '/suppliers';
+CONFIG.CUSTOMER_URL = '/customers';
 
 // Non-Menu URLS
 CONFIG.SETTINGS_URL = '/settings';

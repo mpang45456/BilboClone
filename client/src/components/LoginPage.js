@@ -5,7 +5,7 @@ import styled from 'styled-components';
 
 import { Redirect } from 'react-router-dom';
 import { useAuth, bax } from '../context/AuthContext';
-import { getPermissionsList } from '../utils/utils';
+import { getPermissionsList } from '../context/AuthContext';
 
 
 // Horizontally centers a title h1 element on the screen

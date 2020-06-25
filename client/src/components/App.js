@@ -8,7 +8,7 @@ import { bax, AuthContext } from '../context/AuthContext';
 import ThemeWrapper from './Theme';
 import "../styles/styles.less";
 
-import { getPermissionsList } from '../utils/utils';
+import { getPermissionsList } from '../context/AuthContext';
 /**
  * Root React Component Class for Bilbo App
  */
