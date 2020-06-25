@@ -5,6 +5,7 @@ import styled from 'styled-components';
 
 import { Redirect } from 'react-router-dom';
 import { useAuth, bax } from '../context/AuthContext';
+import { getPermissionsList } from '../utils/utils';
 
 
 // Horizontally centers a title h1 element on the screen
@@ -60,7 +61,7 @@ export function LoginPage({ location }) {
     const [password, setPassword] = useState('');
     const [validateStatus, setValidateStatus] = useState(undefined);
     const [helpMessage, setHelpMessage] = useState(undefined);
-    const { isAuthenticated, setIsAuthenticated } = useAuth();
+    const { isAuthenticated, setIsAuthenticated, setPermissionsList } = useAuth();
 
     // Send User-entered Credentials to /auth/login API
     let tryLogin = () => {
@@ -69,6 +70,7 @@ export function LoginPage({ location }) {
                    { username: username, 
                      password: password})
             .then((res) => {
+                setPermissionsList(getPermissionsList());
                 setIsAuthenticated(true);
                 setValidateStatus('success');
             }).catch((err => {
@@ -78,7 +80,7 @@ export function LoginPage({ location }) {
             }))
     }
 
-    // Redirect back to original location after authentication
+    // Redirect back to original location after authentication.
     // `props.location.state.referer` is set in `PrivateRoute`
     let referer = null;
     try {
