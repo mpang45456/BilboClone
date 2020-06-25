@@ -37,9 +37,6 @@ mongoose
         logger.error(`Unable to Connect to MongoDB: ${err}`);
     });
 
-// FIXME: DEBUG
-// Database Bootstrap
-
 // API Endpoint
 const { apiV1Router } = require('./routes/api/v1/router');
 app.use('/api/v1', apiV1Router);

@@ -1,7 +1,7 @@
 const { PERMS, PermissionsTransformer } = require('../routes/api/v1/auth/permissions');
 const { expect } = require('chai');
 
-describe('Testing Permissions Management', () => {
+describe('Testing PermissionsTransformer', () => {
     const pt = new PermissionsTransformer();
     
     it('Encoded permission string should have correct order', (done) => {
