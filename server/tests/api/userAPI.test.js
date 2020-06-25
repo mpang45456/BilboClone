@@ -26,15 +26,6 @@ describe('Testing /api/v1/auth/user endpoint', () => {
         "reportsTo": "admin"
     }
 
-    let newNonAdmin = {
-        "username": "newUser",
-        "password": "newUserPassword",
-        "permissions": [PERMS.SALES_READ, PERMS.PURCHASES_READ],
-        "name": "Thorin",
-        "position": "Resident Dwarf",
-        "reportsTo": "admin"
-    }
-
     beforeAll(async (done) => {
         // Set up Database Connection before all tests
         dbi = new DatabaseInteractor();
