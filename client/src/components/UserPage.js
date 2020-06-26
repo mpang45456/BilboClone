@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { List, Menu, Skeleton } from 'antd';
+import { List, Menu, Skeleton, Divider } from 'antd';
 import { PlusOutlined } from "@ant-design/icons";
 import { bax, useAuth, PERMS } from '../context/AuthContext';
-import { BilboPageHeader, BilboNavLink, ShowMoreButton } from './UtilComponents';
+import { BilboPageHeader, BilboNavLink, ShowMoreButton, BilboDivider } from './UtilComponents';
 import CONFIG from '../config';
 
 /**
@@ -21,6 +21,7 @@ export default function UserPage(props) {
         <div>
             <BilboPageHeader 
                 title='All Users'
+                subTitle='View All Users'
                 extra={[
                     <AllUsersShowMoreButton 
                         key='allUsersShowMoreButton'
@@ -28,7 +29,7 @@ export default function UserPage(props) {
                     />
                 ]}
             />
-
+            <BilboDivider />
             <UserList />
         </div>
     );
@@ -123,6 +124,4 @@ function UserList(props) {
             }}>
         </List>
     )
-
-
 }

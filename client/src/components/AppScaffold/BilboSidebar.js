@@ -115,7 +115,7 @@ class Sidebar extends React.Component {
                     </NavLink>
                   </Menu.Item>
                 </SubMenu>
-                <Menu.Item key={CONFIG.USER_URL} 
+                <Menu.Item key={this.__getMenuKeyFromURL(CONFIG.USER_URL)} 
                            icon={<UserOutlined />}>
                   <NavLink to={CONFIG.USER_URL}>
                     Users

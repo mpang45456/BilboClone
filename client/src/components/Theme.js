@@ -30,6 +30,7 @@ const theme = {
         darkerRed: '#570501',
         darkestRed: '#450401',
         brightRed: '#C93835',
+        lightGrey: '#dbd2d0',
     },
     settings: {
         layoutHeaderHeight: '45px',

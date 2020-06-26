@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useHistory, Link } from 'react-router-dom';
 import { Descriptions, Spin } from 'antd';
 import { bax } from '../context/AuthContext';
-import { BilboDescriptions, BilboNavLink } from './UtilComponents';
+import { BilboDescriptions, BilboNavLink, BilboPageHeader } from './UtilComponents';
 import CONFIG from '../config';
 
 
@@ -39,7 +39,10 @@ export default function UserDetailPage(props) {
     return (
         <div>
             <Spin spinning={isLoading}>
-                <BilboDescriptions title='Change this later' bordered column={1}>
+                <BilboDescriptions title={ <BilboPageHeader 
+                                            title='User Account Details' /> }
+                                   bordered 
+                                   column={1} >
                     <Descriptions.Item label="Username">{user.username}</Descriptions.Item>
                     <Descriptions.Item label="Name">{user.name}</Descriptions.Item>
                     <Descriptions.Item label="Position">{user.position}</Descriptions.Item>
