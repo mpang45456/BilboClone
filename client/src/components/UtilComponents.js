@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { PageHeader, Dropdown, Button, Spin, Descriptions, Divider } from 'antd';
 import { EllipsisOutlined } from "@ant-design/icons";
 import PropTypes from 'prop-types';
@@ -60,7 +60,7 @@ export const BilboPageHeader = styled(PageHeader)`
 `;
 
 // Styled Link
-export const BilboNavLink = styled(Link)`
+export const BilboNavLink = styled(NavLink)`
     &:hover {
         text-decoration: underline;
     }
@@ -90,6 +90,6 @@ export const BilboDescriptions = styled(Descriptions)`
 // Styled Divider
 export const BilboDivider = styled(Divider)`
     &.ant-divider {
-        border-top: 1px solid ${props => props.theme.colors.deepRed };
+        border-top: 1px solid ${props => props.theme.colors.lightGrey };
     }
 `;

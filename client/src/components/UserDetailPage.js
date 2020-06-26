@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useHistory, Link } from 'react-router-dom';
 import { Descriptions, Spin } from 'antd';
 import { bax } from '../context/AuthContext';
-import { BilboDescriptions, BilboNavLink, BilboPageHeader } from './UtilComponents';
+import { BilboDescriptions, BilboNavLink, BilboPageHeader, BilboDivider } from './UtilComponents';
 import CONFIG from '../config';
 
 
+// TODO: Add documentation
+// TODO: Add edit button at the top right hand corner (ShowMoreButton)?
 export default function UserDetailPage(props) {
     const [isLoading, setIsLoading] = useState(true);
     const [user, setUser] = useState({});
@@ -36,14 +38,20 @@ export default function UserDetailPage(props) {
                 }
             }
         })();
-    }, [props.match.params.username])
+    }, [props.match.params.username]) // TODO: Change this to props.location?
 
+    const title = (
+        <div>
+            <BilboPageHeader 
+                title='User Account Details'
+                onBack={() => history.push('/users')}/>
+            <BilboDivider />
+        </div>
+    )
     return (
         <div>
             <Spin spinning={isLoading}>
-                <BilboDescriptions title={ <BilboPageHeader 
-                                            title='User Account Details'
-                                            onBack={() => history.push('/users')}/> }
+                <BilboDescriptions title={title}
                                    bordered 
                                    column={1} >
                     <Descriptions.Item label="Username">{user.username}</Descriptions.Item>

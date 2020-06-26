@@ -93,6 +93,7 @@ function UserList(props) {
             }
         })
     }, []) // Will only run when component first mounts
+    // FIXME: Likely won't show updated user list when you make a change via the UI
 
     return (
         <List
@@ -105,7 +106,7 @@ function UserList(props) {
 
                 // With PERMS.USER_WRITE, can 'edit'
                 if (permissionsList.includes(PERMS.USER_WRITE)) {
-                    actions.push(<BilboNavLink to={CONFIG.EDIT_USER_URL}>edit</BilboNavLink>)
+                    actions.push(<BilboNavLink to={`${CONFIG.USER_URL}/${user.username}/edit`}>edit</BilboNavLink>)
                 }
 
                 return (

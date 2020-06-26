@@ -15,9 +15,17 @@ CONFIG.USER_URL = '/users';
 
 // Non-Menu URLS
 CONFIG.SETTINGS_URL = '/settings';
-CONFIG.EDIT_USER_URL = CONFIG.USER_URL + '/editUser';
 CONFIG.ERROR_403_URL = '/error403';
 CONFIG.ERROR_500_URL = '/error500';
+
+// For Documentation Purposes
+/*
+-- Users
+--- Specific User: CONFIG.USER_URL + '/:username'
+--- Edit Users: CONFIG.USER_URL + '/:username/edit'
+
+
+*/
 
 // Sub-Menu Keys
 CONFIG.DATA_SUB_MENU_KEY = 'dataSM';
