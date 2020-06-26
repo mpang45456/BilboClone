@@ -222,6 +222,7 @@ describe('Testing /api/v1/auth/user endpoint', () => {
 
     it(`User with USER_WRITE perm should be able 
         to update password of existing user`, async (done) => {
+        // FIXME: Why is this passing? Field should be newPassword, not password
         let newPassword = "newPassword123";
         await authenticatedAdminAgent
                 .patch(userEndpoint + `/${testUsers[1].username}`)

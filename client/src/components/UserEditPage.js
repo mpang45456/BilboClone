@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Spin, Descriptions, Input, Select } from 'antd';
+import { Spin, Descriptions, Input, Select, Button, Row } from 'antd';
 const { Option } = Select;
 import { Redirect, useHistory } from 'react-router-dom';
 import { bax, useAuth, PERMS } from '../context/AuthContext';
 import { BilboPageHeader, BilboDivider, BilboDescriptions } from './UtilComponents';
 
+// TODO: Update documentation
 export default function UserEditPage(props) {
     const { permissionsList } = useAuth();
     
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true); // For initial API call (to retrieve user details)
+    const [isUpdating, setIsUpdating] = useState(false); // For update API call (when clicking on update button)
     const [user, setUser] = useState({});
     const [allUsers, setAllUsers] = useState([]);
     const history = useHistory();
@@ -75,6 +77,19 @@ export default function UserEditPage(props) {
         newUser.password = val;
         setUser(newUser);
     }
+
+    const postAndUpdateUserDetails = (e) => {
+        setIsUpdating(true);
+        // FIXME: What about old password?
+        bax.patch(`api/v1/user/${user.username}`, user)
+            .then(res => {
+                console.log('success!');
+                console.log(res);
+            }).catch(err => {
+                console.log('error');
+                console.log(err)
+            })
+    }
     
     const title = (
         <div>
@@ -94,24 +109,28 @@ export default function UserEditPage(props) {
                                    column={1} >
                     <Descriptions.Item label="Username">
                         <Input value={user.username} 
-                               onChange={(e) => updateUsername(e.target.value)}/>
+                               onChange={(e) => updateUsername(e.target.value)}
+                                disabled={true} />
                     </Descriptions.Item>
 
                     <Descriptions.Item label="Name">
                         <Input value={user.name} 
-                               onChange={(e) => updateName(e.target.value)}/>
+                               onChange={(e) => updateName(e.target.value)}
+                               disabled={isUpdating} />
                     </Descriptions.Item>
 
                     <Descriptions.Item label="Position">
                         <Input value={user.position} 
-                               onChange={(e) => updatePosition(e.target.value)}/>
+                               onChange={(e) => updatePosition(e.target.value)}
+                               disabled={isUpdating} />
                     </Descriptions.Item>
 
                     <Descriptions.Item label="Reports To">
                         <Select showSearch 
                                 style={{width:'100%'}} 
                                 value={user.reportsTo} 
-                                onChange={updateReportsTo}>
+                                onChange={updateReportsTo}
+                                disabled={isUpdating} >
                             {allUsers.map(user => <Option value={user.username} key={user.username}>{user.username}</Option>)}
                         </Select>
                     </Descriptions.Item>
@@ -124,13 +143,24 @@ export default function UserEditPage(props) {
                                    column={1}>
                     <Descriptions.Item label="Reset Password">
                         <Input.Password placeholder='Reset Password Here'
-                                        onChange={(e) => updatePassword(e.target.value)}/>
+                                        onChange={(e) => updatePassword(e.target.value)}
+                                        disabled={isUpdating} />
                     </Descriptions.Item>
                 </BilboDescriptions>
                 <BilboDivider />
-
-                
             </Spin>
+
+            <Row justify='end'>
+                <Button>
+                    Cancel
+                </Button>
+
+                <Button type='primary'
+                        loading={isUpdating}
+                        onClick={postAndUpdateUserDetails}>
+                    Update
+                </Button>
+            </Row>
         </div>
     )
 }
