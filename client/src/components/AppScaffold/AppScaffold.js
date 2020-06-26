@@ -43,26 +43,11 @@ export default class AppScaffold extends React.Component {
           <BilboContent>
             <Switch>
               <Route exact path={CONFIG.HOME_URL} component={HomePage} />
-              {
-                permissionsList.includes(PERMS.SALES_READ) &&
-                <Route path={CONFIG.SALES_ORDERS_URL} component={SalesPage} />
-              }
-              {
-                permissionsList.includes(PERMS.PURCHASES_READ) &&
-                <Route path={CONFIG.PURCHASE_ORDERS_URL} component={PurchasePage} />
-              }
-              {
-                permissionsList.includes(PERMS.INVENTORY_READ) &&
-                <Route path={CONFIG.INVENTORY_URL} component={InventoryPage} />
-              }
-              {
-                permissionsList.includes(PERMS.SUPPLIER_READ) &&
-                <Route path={CONFIG.SUPPLIER_URL} component={SupplierPage} />
-              }
-              {
-                permissionsList.includes(PERMS.CUSTOMER_READ) &&
-                <Route path={CONFIG.CUSTOMER_URL} component={CustomerPage} />
-              }
+              <Route path={CONFIG.SALES_ORDERS_URL} component={SalesPage} />
+              <Route path={CONFIG.PURCHASE_ORDERS_URL} component={PurchasePage} />
+              <Route path={CONFIG.INVENTORY_URL} component={InventoryPage} />
+              <Route path={CONFIG.SUPPLIER_URL} component={SupplierPage} />
+              <Route path={CONFIG.CUSTOMER_URL} component={CustomerPage} />
               <Route path={CONFIG.USER_URL} component={UserPage} />
               <Route path={CONFIG.SETTINGS_URL} component={SettingsPage} />
               <Route path='*' component={ErrorPage} />
