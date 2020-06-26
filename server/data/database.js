@@ -12,7 +12,6 @@ const logger = require('../utils');
 const crypto = require('crypto');
 const { PermissionsTransformer } = require('../routes/api/v1/auth/permissions');
 const pt = new PermissionsTransformer();
-// TODO: Deal with reporting hierarchy
 const UserSchema = new Schema({
     username: { type: String, unique: true, index: true, required: true }, 
     hash: { type: String },

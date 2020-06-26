@@ -12,10 +12,10 @@ Instructions for adding permissions:
 // Object Property Order is preserved for non-integer keys
 // Care must be taken to ensure that the key corresponds to the value
 const PERMS = Object.freeze({
-    SALES_READ: 'SALES_READ', // TODO: Add descriptions
+    SALES_READ: 'SALES_READ',
     SALES_WRITE: 'SALES_WRITE',
     PURCHASES_READ: 'PURCHASES_READ',
-    PURCHASES_WRITE: 'PURCHASES_WRITE', // TODO: Add more perms
+    PURCHASES_WRITE: 'PURCHASES_WRITE',
     USER_READ: 'USER_READ',
     USER_WRITE: 'USER_WRITE',
     SUPPLIER_READ: 'SUPPLIER_READ',
