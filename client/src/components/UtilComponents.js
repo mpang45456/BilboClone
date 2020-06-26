@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { PageHeader, Dropdown, Button } from 'antd';
+import { PageHeader, Dropdown, Button, Spin } from 'antd';
 import { EllipsisOutlined } from "@ant-design/icons";
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
@@ -65,3 +65,15 @@ export const BilboNavLink = styled(Link)`
         text-decoration: underline;
     }
 `;
+
+export const StyledSpin = styled(Spin)`
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+`;
+
+export function BilboLoadingSpinner(props) {
+    return <StyledSpin size='large' {...props}/>
+}

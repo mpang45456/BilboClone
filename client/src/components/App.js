@@ -4,6 +4,7 @@ import AppScaffold from './AppScaffold/AppScaffold';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute';
 import { bax, AuthContext } from '../context/AuthContext';
+import { BilboLoadingSpinner } from './UtilComponents';
 
 import ThemeWrapper from './Theme';
 import "../styles/styles.less";
@@ -73,8 +74,7 @@ export default class App extends React.Component {
             // Async call made at `componentDidMount` to check
             // if user is already authenticated. Loading animation
             // is displayed before async call returns.
-            // TODO: Update this
-            return <h1>THIS IS THE FETCHING ANIMATION</h1>
+            return <BilboLoadingSpinner />
         } else {
             return (
                 <ThemeWrapper>
@@ -95,7 +95,6 @@ export default class App extends React.Component {
                         </Router>
                     </AuthContext.Provider>
                 </ThemeWrapper>
-
             );
         }
     }
