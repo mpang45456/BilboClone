@@ -13,7 +13,6 @@ export default function UserPage(props) {
     // TODO: Add user authorization (USER_READ)
     // TODO: Add user authorization (USER_WRITE for add user button)
     useEffect(() => {
-        console.log('useeffect'); // FIXME: DEBUG
         bax.get('/api/v1/user', { withCredentials: true})
         .then(res => {
             if (res.status === 200) {

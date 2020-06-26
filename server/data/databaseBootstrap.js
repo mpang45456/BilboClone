@@ -12,7 +12,7 @@ const users = [
     {
         "username": "user1",
         "password": "asd",
-        "permissions": [PERMS.SALES_READ, PERMS.SALES_WRITE],
+        "permissions": [PERMS.USER_READ, PERMS.SALES_READ, PERMS.SALES_WRITE],
         "name": "Balin",
         "position": "Sales Representative",
         "reportsTo": "admin"

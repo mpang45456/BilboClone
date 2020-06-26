@@ -68,7 +68,7 @@ export function LoginPage({ location }) {
         setIsLoading(true);
         bax.post('/api/v1/auth/login',
                    { username: username, 
-                     password: password})
+                     password: password })
             .then((res) => {
                 setPermissionsList(getPermissionsList());
                 setIsAuthenticated(true);
