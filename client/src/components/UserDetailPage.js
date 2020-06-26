@@ -13,6 +13,8 @@ export default function UserDetailPage(props) {
     //Effect is applied whenever the route changes
     //i.e. the `username` in /user/:username
     useEffect(() => {
+        // IIFE to obtain `user`'s details and details of 
+        // the user `user` reports to
         (async function getUserDetails() {
             try {
                 let res = await bax.get(`/api/v1/user/${props.match.params.username}`);
@@ -40,7 +42,8 @@ export default function UserDetailPage(props) {
         <div>
             <Spin spinning={isLoading}>
                 <BilboDescriptions title={ <BilboPageHeader 
-                                            title='User Account Details' /> }
+                                            title='User Account Details'
+                                            onBack={() => history.push('/users')}/> }
                                    bordered 
                                    column={1} >
                     <Descriptions.Item label="Username">{user.username}</Descriptions.Item>
