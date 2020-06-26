@@ -11,6 +11,7 @@ export function useAuth() {
     return useContext(AuthContext);
 }
 
+// Helper function to get cookie by name (from `document.cookie`)
 function getCookie(cookieName) {
     let name = cookieName + "=";
     let ca = document.cookie.split(';');
@@ -26,6 +27,7 @@ function getCookie(cookieName) {
     return "";
 }
 
+// Helper function to decode the JWT
 function parseJWT(token) {
     let base64Url = token.split('.')[1];
     let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -46,6 +48,7 @@ export function getPermissionsList() {
     let decodedAccessToken = parseJWT(getCookie('accessToken'));
     return pm.decode(decodedAccessToken.permissions);
 }
+
 /**
  * Helper object to make authenticated API calls.
  * 
