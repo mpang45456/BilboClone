@@ -66,7 +66,7 @@ export const BilboNavLink = styled(Link)`
     }
 `;
 
-export const StyledSpin = styled(Spin)`
+const StyledSpin = styled(Spin)`
     position: absolute;
     left: 50%;
     top: 50%;
@@ -74,6 +74,7 @@ export const StyledSpin = styled(Spin)`
     transform: translate(-50%, -50%);
 `;
 
+// Whole-Page Loading Spinner (for when app first starts)
 export function BilboLoadingSpinner(props) {
     return <StyledSpin size='large' {...props}/>
 }
@@ -89,6 +90,6 @@ export const BilboDescriptions = styled(Descriptions)`
 // Styled Divider
 export const BilboDivider = styled(Divider)`
     &.ant-divider {
-        border-top: 1px solid ${props => props.theme.colors.lightGrey };
+        border-top: 1px solid ${props => props.theme.colors.deepRed };
     }
 `;
