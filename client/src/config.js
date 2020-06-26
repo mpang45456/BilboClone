@@ -14,6 +14,8 @@ CONFIG.USER_URL = '/users';
 // Non-Menu URLS
 CONFIG.SETTINGS_URL = '/settings';
 CONFIG.EDIT_USER_URL = CONFIG.USER_URL + '/addUser';
+CONFIG.ERROR_403_URL = '/error403';
+CONFIG.ERROR_500_URL = '/error500';
 
 // Sub-Menu Keys
 CONFIG.DATA_SUB_MENU_KEY = 'dataSM';

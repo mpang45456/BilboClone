@@ -14,10 +14,10 @@ import SupplierPage from '../SupplierPage';
 import SettingsPage from '../SettingsPage';
 import CustomerPage from '../CustomerPage';
 import UserPage from '../UserPage';
-import ErrorPage from '../ErrorPage';
+import { Error403, Error404, Error500 } from '../Errors/ErrorPages';
 
 import CONFIG from '../../config';
-import { AuthContext, PERMS } from '../../context/AuthContext';
+import { AuthContext } from '../../context/AuthContext';
 
 /**
  * Scaffold Component that serves as the point of
@@ -50,7 +50,9 @@ export default class AppScaffold extends React.Component {
               <Route path={CONFIG.CUSTOMER_URL} component={CustomerPage} />
               <Route path={CONFIG.USER_URL} component={UserPage} />
               <Route path={CONFIG.SETTINGS_URL} component={SettingsPage} />
-              <Route path='*' component={ErrorPage} />
+              <Route path={CONFIG.ERROR_403_URL} component={Error403} />
+              <Route path={CONFIG.ERROR_500_URL} component={Error500} />
+              <Route path='*' component={Error404} />
             </Switch>
           </BilboContent>
         </Layout>
