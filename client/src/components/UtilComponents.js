@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { PageHeader, Dropdown, Button, Spin } from 'antd';
+import { PageHeader, Dropdown, Button, Spin, Descriptions } from 'antd';
 import { EllipsisOutlined } from "@ant-design/icons";
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
@@ -77,3 +77,11 @@ export const StyledSpin = styled(Spin)`
 export function BilboLoadingSpinner(props) {
     return <StyledSpin size='large' {...props}/>
 }
+
+// Styled Descriptions
+export const BilboDescriptions = styled(Descriptions)`
+    & .ant-descriptions-item-label{
+        width: 150px;
+        border-right: 2px solid ${props => props.theme.colors.deepRed };
+    }
+`;

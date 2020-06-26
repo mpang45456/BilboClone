@@ -2,6 +2,8 @@ const CONFIG = {};
 
 CONFIG.SERVER_URL = 'http://localhost:3000';
 
+// Note that the following URLS are client-side URLS
+// and are not the backend API URLs
 // Menu URLs (used as keys)
 CONFIG.HOME_URL = '/';
 CONFIG.SALES_ORDERS_URL = '/sales';
