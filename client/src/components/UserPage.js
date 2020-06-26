@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { List, PageHeader, Dropdown, Button, Menu, Skeleton } from 'antd';
 import { EllipsisOutlined, PlusOutlined } from "@ant-design/icons";
 import { bax, useAuth, PERMS } from '../context/AuthContext';
+import { BilboPageHeader, BilboNavLink, ShowMoreButton } from './UtilComponents';
+import CONFIG from '../config';
 
 export default function UserPage(props) {
     const [isLoading, setIsLoading] = useState(true);
@@ -20,6 +23,7 @@ export default function UserPage(props) {
                 setIsLoading(false);
             }
         }).catch(err => {
+            // TODO: Add Error Component
             console.log('error');
         })
     }, []) // Will only run when component first mounts
@@ -28,14 +32,14 @@ export default function UserPage(props) {
     // TODO: Abstract out separate components
     return (
         <div>
-            <PageHeader 
+            <BilboPageHeader 
                 title='All Users'
                 extra={[
-                    <AllUsersShowMoreButton key='allUsersShowMoreButton'/>
+                    <AllUsersShowMoreButton 
+                        key='allUsersShowMoreButton'
+                        disabled={!permissionsList.includes(PERMS.USER_WRITE)}
+                    />
                 ]}
-                style={{
-                    padding: 0
-                }}
             />
 
             <List
@@ -43,12 +47,14 @@ export default function UserPage(props) {
                 itemLayout='horizontal'
                 dataSource={userData}
                 renderItem={ user => {
+                    let actions = [<BilboNavLink to={`${CONFIG.USER_URL}/${user.username}`}>view</BilboNavLink>];
+                    if (permissionsList.includes(PERMS.USER_WRITE)) {
+                        actions.push(<BilboNavLink to={CONFIG.EDIT_USER_URL}>edit</BilboNavLink>)
+                    }
+
                     return (
                         <List.Item
-                            actions={
-                                permissionsList.includes(PERMS.USER_WRITE) &&
-                                [<a>edit</a>]
-                            }
+                            actions={actions}
                             >
                             <Skeleton
                                 title={false}
@@ -58,7 +64,6 @@ export default function UserPage(props) {
                                     title={user.name}
                                     description={user.position}>
                                 </List.Item.Meta>
-                                <div>Insert Content Here</div>
                             </Skeleton>
                         </List.Item>
                     )
@@ -69,6 +74,7 @@ export default function UserPage(props) {
     );
 }
 
+// Customise ShowMoreButton for UsersPage
 function AllUsersShowMoreButton(props) {
     const menu = (
         <Menu>
@@ -82,31 +88,14 @@ function AllUsersShowMoreButton(props) {
     return (
         <ShowMoreButton 
             dropdownKey='allUsersShowMoreDropdown'
-            menu = {menu}
+            menu={menu}
+            disabled={props.disabled}
         />
     )
 }
-
-
-
-// TODO: Abstract this into UtilComponents later
-function ShowMoreButton(props) {
-    return (
-        <Dropdown key={props.dropdownKey} 
-                  overlay={props.menu}
-                  trigger='click' >
-            <Button style={{ border: 'none', 
-                             backgroundColor: 'transparent',
-                             boxShadow: 'none' }}>
-                <EllipsisOutlined style={{
-                    fontSize: 20
-                }} />
-            </Button>
-        </Dropdown>
-    );
+AllUsersShowMoreButton.propTypes = {
+    disabled: PropTypes.bool.isRequired
 }
-
-ShowMoreButton.propTypes = {
-    dropdownKey: PropTypes.string.isRequired,
-    menu: PropTypes.element.isRequired
+AllUsersShowMoreButton.defaultProps = {
+    disabled: false
 }
