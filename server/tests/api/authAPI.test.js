@@ -188,7 +188,7 @@ describe("Testing /api/v1/auth/token", () => {
         await request(server)
             .post(tokenEndpoint)
             .set('Cookie', [`accessToken=${accessToken};refreshToken=INVALIDVALUE`])
-            .expect(403);
+            .expect(401);
         return done();
     })
 
@@ -209,7 +209,7 @@ describe("Testing /api/v1/auth/token", () => {
         await request(server)
                 .post(tokenEndpoint)
                 .set('Cookie', [`accessToken=${accessToken};refreshToken=${refreshToken}`])
-                .expect(403);
+                .expect(401);
         
         return done();
     })
@@ -244,7 +244,7 @@ describe('Testing /api/v1/auth/logout', () => {
         // Not able to access after logout
         await authenticatedAdminAgent
                 .get(protectedEndpoint)
-                .expect(403)
+                .expect(401)
         
         return done();
     })
@@ -260,11 +260,11 @@ describe('Testing /api/v1/auth/logout', () => {
 
         await authenticatedAdminAgent
                 .post(tokenEndpoint)
-                .expect(403)
+                .expect(401)
 
         await authenticatedAdminAgent
                 .get(protectedEndpoint)
-                .expect(403)
+                .expect(401)
         
         return done();
     })

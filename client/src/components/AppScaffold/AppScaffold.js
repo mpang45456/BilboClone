@@ -63,10 +63,7 @@ export default class AppScaffold extends React.Component {
                 permissionsList.includes(PERMS.CUSTOMER_READ) &&
                 <Route path={CONFIG.CUSTOMER_URL} component={CustomerPage} />
               }
-              {
-                permissionsList.includes(PERMS.USER_READ) &&
-                <Route path={CONFIG.USER_URL} component={UserPage} />
-              }
+              <Route path={CONFIG.USER_URL} component={UserPage} />
               <Route path={CONFIG.SETTINGS_URL} component={SettingsPage} />
               <Route path='*' component={ErrorPage} />
             </Switch>

@@ -75,11 +75,12 @@ bax.interceptors.response.use(
         // Status Code: NOT 2xx
         const originalReq = err.config;
 
-        // Only if 401(Unauthorized) or 403(Forbidden) will 
-        // an attempt be made to refresh the access token
-        if ((err.response.status === 401 || err.response.status === 403)) {
+        // For refreshing the access token
+        // Only if 401(Unauthorized) will an attempt
+        // be made to refresh the access token
+        if (err.response.status === 401) {
             if (originalReq.url === '/api/v1/auth/token') {
-                // Prevent loops (i.e. /auth/token is the one that returns 401/403)
+                // Prevent loops (i.e. /auth/token is the one that returns 401)
                 // Happens when refresh token is invalid (e.g. due to logout)
                 // Use Router to redirect to /login page
                 withRouter(({history}) => {
@@ -95,6 +96,9 @@ bax.interceptors.response.use(
             }
         }
         
+        // For 2 cases:
+        // 1. All other error codes (e.g. status code 500)
+        // 2. If /auth/token returns 401 (i.e. refresh rejected)
         return Promise.reject(err);
     }
 )

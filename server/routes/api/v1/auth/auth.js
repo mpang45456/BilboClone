@@ -60,12 +60,12 @@ router.post('/token', function(req, res) {
     const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken) {
-        return res.sendStatus(401); //Unauthorized
+        return res.sendStatus(401);
     }
     
     let { error, user } = tm.isValidRefreshToken(refreshToken);
     if (error) {
-        return res.sendStatus(403); //Forbidden
+        return res.sendStatus(401);
     }
 
     const newAccessToken = tm.getNewAccessToken(user.username, user.permissions);
@@ -113,13 +113,13 @@ router.post('/logout', function(req, res) {
 function isAuthenticated(req, res, next) {
     const accessToken = req.cookies.accessToken;
     if (!accessToken) {
-        return res.sendStatus(401); //Unauthorized
+        return res.sendStatus(401);
     }
 
     let { error, user } = tm.isValidAccessToken(accessToken);
     
     if (error) {
-        return res.sendStatus(403); //Forbidden
+        return res.sendStatus(401); // FIXME: Initially 403
     }
 
     logger.debug(user);
