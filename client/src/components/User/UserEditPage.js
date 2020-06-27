@@ -6,9 +6,9 @@ import { Redirect, useHistory } from 'react-router-dom';
 import { DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import PropTypes from 'prop-types';
 
-import { bax, useAuth, PERMS } from '../context/AuthContext';
-import { BilboPageHeader, BilboDivider, BilboDescriptions, ShowMoreButton } from './UtilComponents';
-import CONFIG from '../config';
+import { bax, useAuth, PERMS } from '../../context/AuthContext';
+import { BilboPageHeader, BilboDivider, BilboDescriptions, ShowMoreButton } from '../UtilComponents';
+import CONFIG from '../../config';
 
 /**
  * Component for editing user details.

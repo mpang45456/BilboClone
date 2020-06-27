@@ -3,9 +3,9 @@ import { useHistory, withRouter, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { List, Menu, Skeleton } from 'antd';
 import { PlusOutlined } from "@ant-design/icons";
-import { bax, useAuth, PERMS } from '../context/AuthContext';
-import { BilboPageHeader, BilboNavLink, ShowMoreButton, BilboDivider } from './UtilComponents';
-import CONFIG from '../config';
+import { bax, useAuth, PERMS } from '../../context/AuthContext';
+import { BilboPageHeader, BilboNavLink, ShowMoreButton, BilboDivider } from '../UtilComponents';
+import CONFIG from '../../config';
 
 /**
  * Component rendered at /user.

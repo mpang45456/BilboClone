@@ -13,10 +13,10 @@ import InventoryPage from '../InventoryPage';
 import SupplierPage from '../SupplierPage';
 import SettingsPage from '../SettingsPage';
 import CustomerPage from '../CustomerPage';
-import UserPage from '../UserPage';
-import UserViewPage from '../UserViewPage';
-import UserEditPage from '../UserEditPage';
-import UserAddPage from '../UserAddPage';
+import UserPage from '../User/UserPage';
+import UserViewPage from '../User/UserViewPage';
+import UserEditPage from '../User/UserEditPage';
+import UserAddPage from '../User/UserAddPage';
 import { Error403, Error404, Error500 } from '../Errors/ErrorPages';
 
 import CONFIG from '../../config';

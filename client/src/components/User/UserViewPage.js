@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useHistory, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Descriptions, Spin, Menu } from 'antd';
-import { bax, useAuth, PERMS } from '../context/AuthContext';
 import { EditOutlined } from "@ant-design/icons";
-import { BilboDescriptions, BilboNavLink, BilboPageHeader, BilboDivider, ShowMoreButton } from './UtilComponents';
-import CONFIG from '../config';
 
+import { bax, useAuth, PERMS } from '../../context/AuthContext';
+import { BilboDescriptions, BilboNavLink, BilboPageHeader, BilboDivider, ShowMoreButton } from '../UtilComponents';
+import CONFIG from '../../config';
 
 /**
  * Component for viewing user's details.

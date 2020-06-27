@@ -4,9 +4,9 @@ const { Option } = Select;
 import { Redirect, useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
-import { bax, useAuth, PERMS } from '../context/AuthContext';
-import { BilboPageHeader, BilboDivider } from './UtilComponents';
-import CONFIG from '../config';
+import { bax, useAuth, PERMS } from '../../context/AuthContext';
+import { BilboPageHeader, BilboDivider } from '../UtilComponents';
+import CONFIG from '../../config';
 
 /**
  * Component to add user to Bilbo. 
