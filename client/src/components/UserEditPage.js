@@ -177,7 +177,7 @@ function DeleteUserShowMoreButton(props) {
         if (key === 'deleteUser') {
             confirm({
                 icon: <ExclamationCircleOutlined />,
-                content: 'Are you sure you wish to delete this user',
+                content: 'Are you sure you wish to delete this user?',
                 onOk: () => {
                     bax.delete(`/api/v1/user/${props.username}`)
                         .then(res => {
@@ -207,6 +207,7 @@ function DeleteUserShowMoreButton(props) {
         <ShowMoreButton 
             dropdownKey='deleteUserShowMoreDropdown'
             menu={menu}
+            disabled={false}
         />
     )
 }
