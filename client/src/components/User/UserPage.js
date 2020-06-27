@@ -37,14 +37,20 @@ export default function UserPage(props) {
 
 // Customise ShowMoreButton for UsersPage
 function AllUsersShowMoreButton(props) {
+    const history = useHistory();
+    // Handler when Delete Button is clicked on (will display a modal)
+    const buttonClicked = ({item, key, keyPath, domEvent}) => {
+        if (key === 'addUserItem') {
+            history.push(`${CONFIG.USER_URL}add`);
+        }
+    }
+
     const menu = (
-        <Menu>
+        <Menu onClick={buttonClicked}>
             <Menu.Item 
                 key='addUserItem'
                 icon={<PlusOutlined/>}>
-                <Link to={`${CONFIG.USER_URL}add`}>
-                    Add a User
-                </Link>
+                Add a User
             </Menu.Item>
         </Menu>
     )

@@ -92,14 +92,20 @@ UserViewPage.propTypes = {
 
 // Customise ShowMoreButton for UserViewPage
 function EditUserShowMoreButton(props) {
+    const history = useHistory();
+    // Handler when Delete Button is clicked on (will display a modal)
+    const buttonClicked = ({item, key, keyPath, domEvent}) => {
+        if (key === 'editUserDetails') {
+            history.push(`${CONFIG.USER_URL}/${props.username}/edit`);
+        }
+    }
+
     const menu = (
-        <Menu>
+        <Menu onClick={buttonClicked}>
             <Menu.Item 
                 key='editUserDetails'
                 icon={<EditOutlined/>}>
-                <Link to={`${CONFIG.USER_URL}/${props.username}/edit`}>
-                    Edit User Details
-                </Link>
+                Edit User Details
             </Menu.Item>
         </Menu>
     )
