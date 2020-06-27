@@ -85,14 +85,14 @@ function UserList(props) {
         }).catch((err) => {
             if (err.response.status === 403) {
                 // If unauthorized, redirect to error page
-                history.push('/error403');
+                history.push(CONFIG.ERROR_403_URL);
             } else {
                 // If something goes wrong server-side
                 // redirect to error page
-                history.push('/error500');
+                history.push(CONFIG.ERROR_500_URL);
             }
         })
-    }, []) // Will only run when component first mounts
+    }, [props.location]) // Will only run when component first mounts
     // FIXME: Likely won't show updated user list when you make a change via the UI
 
     return (

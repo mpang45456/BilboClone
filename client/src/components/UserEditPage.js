@@ -4,6 +4,7 @@ const { Option } = Select;
 import { Redirect, useHistory } from 'react-router-dom';
 import { bax, useAuth, PERMS } from '../context/AuthContext';
 import { BilboPageHeader, BilboDivider, BilboDescriptions } from './UtilComponents';
+import CONFIG from '../config';
 
 // TODO: Update documentation
 export default function UserEditPage(props) {
@@ -38,11 +39,11 @@ export default function UserEditPage(props) {
             } catch(err) {
                 if (err.response.status === 403) {
                     // If unauthorized, redirect to error page
-                    history.push('/error403');
+                    history.push(CONFIG.ERROR_403_URL);
                 } else {
                     // If something goes wrong server-side
                     // redirect to error page
-                    history.push('/error500');
+                    history.push(CONFIG.ERROR_500_URL);
                 }
             }
         })();
@@ -80,13 +81,13 @@ export default function UserEditPage(props) {
 
     const postAndUpdateUserDetails = (e) => {
         setIsUpdating(true);
-        bax.patch(`api/v1/user/${user.username}`, user)
+        bax.patch(`/api/v1/user/${user.username}`, user)
             .then(res => {
-                console.log('success!');
-                console.log(res);
+                setIsUpdating(false);
+                history.push(CONFIG.USER_URL);
             }).catch(err => {
-                console.log('error');
-                console.log(err)
+                setIsUpdating(false);
+                history.push(CONFIG.ERROR_500_URL);
             })
     }
     
