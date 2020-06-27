@@ -16,6 +16,7 @@ import CustomerPage from '../CustomerPage';
 import UserPage from '../UserPage';
 import UserViewPage from '../UserViewPage';
 import UserEditPage from '../UserEditPage';
+import UserAddPage from '../UserAddPage';
 import { Error403, Error404, Error500 } from '../Errors/ErrorPages';
 
 import CONFIG from '../../config';
@@ -50,6 +51,7 @@ export default class AppScaffold extends React.Component {
               <Route path={CONFIG.INVENTORY_URL} component={InventoryPage} />
               <Route path={CONFIG.SUPPLIER_URL} component={SupplierPage} />
               <Route path={CONFIG.CUSTOMER_URL} component={CustomerPage} />
+              <Route path={`${CONFIG.USER_URL}add`} component={UserAddPage} />
               <Route path={`${CONFIG.USER_URL}/:username/edit`} component={UserEditPage} />
               <Route path={`${CONFIG.USER_URL}/:username`} component={UserViewPage} />
               <Route path={CONFIG.USER_URL} component={UserPage} />

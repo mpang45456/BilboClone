@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory, withRouter } from 'react-router-dom';
+import { useHistory, withRouter, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { List, Menu, Skeleton, Divider } from 'antd';
+import { List, Menu, Skeleton } from 'antd';
 import { PlusOutlined } from "@ant-design/icons";
 import { bax, useAuth, PERMS } from '../context/AuthContext';
 import { BilboPageHeader, BilboNavLink, ShowMoreButton, BilboDivider } from './UtilComponents';
@@ -42,7 +42,9 @@ function AllUsersShowMoreButton(props) {
             <Menu.Item 
                 key='addUserItem'
                 icon={<PlusOutlined/>}>
-                Add a User
+                <Link to={`${CONFIG.USER_URL}add`}>
+                    Add a User
+                </Link>
             </Menu.Item>
         </Menu>
     )

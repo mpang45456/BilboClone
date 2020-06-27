@@ -8,8 +8,6 @@ import { BilboDescriptions, BilboNavLink, BilboPageHeader, BilboDivider, ShowMor
 import CONFIG from '../config';
 
 
-// TODO: Add documentation
-// TODO: Add edit button at the top right hand corner (ShowMoreButton)?
 /**
  * Component for viewing user's details.
  */

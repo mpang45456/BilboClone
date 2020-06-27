@@ -23,6 +23,7 @@ CONFIG.ERROR_500_URL = '/error500';
 -- Users
 --- Specific User: CONFIG.USER_URL + '/:username'
 --- Edit Users: CONFIG.USER_URL + '/:username/edit'
+--- Add Users: CONFIG.USER_URL + 'add' (Note: the add has no / prefix, so it is concatenated to /users)
 
 
 */
