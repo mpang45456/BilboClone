@@ -26,7 +26,6 @@ const pt = new PermissionsTransformer();
  */
 router.post('/login', function(req, res) {
     const { username, password } = req.body;
-
     UserModel.findOne({ username: username }, function(err, user) {
         if (err) {
             return res.status(500).send("Oops, something went wrong");

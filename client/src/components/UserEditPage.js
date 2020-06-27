@@ -80,7 +80,6 @@ export default function UserEditPage(props) {
 
     const postAndUpdateUserDetails = (e) => {
         setIsUpdating(true);
-        // FIXME: What about old password?
         bax.patch(`api/v1/user/${user.username}`, user)
             .then(res => {
                 console.log('success!');

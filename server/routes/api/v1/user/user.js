@@ -52,18 +52,13 @@ router.patch('/:username',
              isAuthorized(PERMS.USER_WRITE), 
              function(req, res) {
     const username = req.params.username;
-    const { oldPassword, newPassword, permissions, name , position, reportsTo } = req.body;
+    const { password, permissions, name , position, reportsTo } = req.body;
 
     UserModel.findOne({ username: username }, function(err, user) {
         if (err) { return res.status(500).send("Oops, something went wrong"); }
         if (!user) { return res.status(400).send("User does not exist"); }
 
-        if (newPassword) { 
-            if (!user.isValidPassword(oldPassword)) {
-                return res.status(400).send("Incorrect credentials");
-            }
-            user.setPassword(newPassword); 
-        }
+        if (password) { user.setPassword(password); }
         if (permissions) { user.permissions = permissions; }
         if (name) { user.name = name; }
         if (position) { user.position = position; }
