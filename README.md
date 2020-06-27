@@ -112,3 +112,6 @@ using CONFIG.<ERROR_URL>
 methods (if class component) to make API calls if necessary
 3. Plan the use of components. If possible, re-use components
 in `UtilComponents.js`
+4. Add type-checking to all props used. Destructure all props
+to make explicit what props are necessary for the component 
+to work

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Spin, Descriptions, Input, Select, Button, Row } from 'antd';
 const { Option } = Select;
 import { Redirect, useHistory } from 'react-router-dom';
+import PropTypes from 'prop-types';
+
 import { bax, useAuth, PERMS } from '../context/AuthContext';
 import { BilboPageHeader, BilboDivider, BilboDescriptions } from './UtilComponents';
 import CONFIG from '../config';
@@ -146,4 +148,8 @@ export default function UserEditPage(props) {
             </Row>
         </div>
     )
+}
+UserEditPage.propTypes = {
+    match: PropTypes.object.isRequired,
+    location: PropTypes.object.isRequired
 }

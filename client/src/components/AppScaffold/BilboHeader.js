@@ -9,6 +9,7 @@ import {
   } from '@ant-design/icons';
 const { Header } = Layout;
 const { confirm } = Modal;
+import PropTypes from 'prop-types';
 
 import { bax, useAuth } from '../../context/AuthContext';
 import styled from 'styled-components';
@@ -37,6 +38,11 @@ function HeaderIconButton(props) {
       </IconContainer>
     </Tooltip>
   );
+}
+HeaderIconButton.propTypes = {
+  tooltipTitle: PropTypes.string.isRequired,
+  onClick: PropTypes.func.isRequired,
+  iconComponent: PropTypes.element.isRequired
 }
 
 function LogOutButton(props) {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Form, Input, Button } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 import { Redirect } from 'react-router-dom';
@@ -143,4 +144,7 @@ export function LoginPage({ location }) {
             </Footer>
         </div>
     )
+}
+LoginPage.propTypes = {
+    location: PropTypes.object.isRequired
 }

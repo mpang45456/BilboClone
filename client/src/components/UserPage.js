@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { List, Menu, Skeleton, Divider } from 'antd';
 import { PlusOutlined } from "@ant-design/icons";
@@ -68,12 +68,13 @@ AllUsersShowMoreButton.defaultProps = {
  * For more information, will have to click on 'view'
  * link (assuming the user has USER_READ permissions)
  */
-function UserList(props) {
+function UnroutedUserList(props) {
     const [isLoading, setIsLoading] = useState(true);
     const [userData, setUserData] = useState([]);
     const { permissionsList } = useAuth();
     const history = useHistory();
 
+    // Effect is applied whenever the URL changes
     useEffect(() => {
         // Make API call to get list of users
         bax.get('/api/v1/user', { withCredentials: true})
@@ -92,8 +93,7 @@ function UserList(props) {
                 history.push(CONFIG.ERROR_500_URL);
             }
         })
-    }, [props.location]) // Will only run when component first mounts
-    // FIXME: Likely won't show updated user list when you make a change via the UI
+    }, [props.location])
 
     return (
         <List
@@ -125,4 +125,8 @@ function UserList(props) {
             }}>
         </List>
     )
+}
+const UserList = withRouter(UnroutedUserList);
+UnroutedUserList.propTypes = {
+    location: PropTypes.object.isRequired
 }

@@ -10,6 +10,7 @@ import {
 } from '@ant-design/icons';
 const { Sider } = Layout;
 const { SubMenu } = Menu;
+import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 import CONFIG from '../../config';
@@ -125,6 +126,9 @@ class Sidebar extends React.Component {
             </Sider>
         );
     }
+}
+Sidebar.propTypes = {
+  location: PropTypes.object.isRequired
 }
 
 const BilboSidebar = withRouter(Sidebar);
