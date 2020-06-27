@@ -3,14 +3,14 @@ import { useHistory, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Descriptions, Spin, Menu } from 'antd';
 import { bax, useAuth, PERMS } from '../context/AuthContext';
-import { PlusOutlined } from "@ant-design/icons";
+import { EditOutlined } from "@ant-design/icons";
 import { BilboDescriptions, BilboNavLink, BilboPageHeader, BilboDivider, ShowMoreButton } from './UtilComponents';
 import CONFIG from '../config';
 
 
 // TODO: Add documentation
 // TODO: Add edit button at the top right hand corner (ShowMoreButton)?
-export default function UserDetailPage(props) {
+export default function UserViewPage(props) {
     const [isLoading, setIsLoading] = useState(true);
     const [user, setUser] = useState({});
     const history = useHistory();
@@ -83,15 +83,19 @@ export default function UserDetailPage(props) {
         </div>
     )
 }
+UserViewPage.propTypes = {
+    match: PropTypes.object.isRequired,
+    location: PropTypes.object.isRequired,
+}
 
 
-// Customise ShowMoreButton for UserDetailPage
+// Customise ShowMoreButton for UserViewPage
 function EditUserShowMoreButton(props) {
     const menu = (
         <Menu>
             <Menu.Item 
                 key='editUserDetails'
-                icon={<PlusOutlined/>}>
+                icon={<EditOutlined/>}>
                 <Link to={`${CONFIG.USER_URL}/${props.username}/edit`}>
                     Edit User Details
                 </Link>

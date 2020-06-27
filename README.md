@@ -103,3 +103,12 @@ to a pre-defined state is necessary.
 
 If so, set the `RESET_DB=true` environment variable, like so:
 `RESET_DB=true npm run start-dev`
+
+## Development Practices
+Steps for Creating Custom Components
+1. Check for Authorization First. Redirect if unauthorized 
+using CONFIG.<ERROR_URL>
+2. Use useEffect() hook (if function component) or lifecycle 
+methods (if class component) to make API calls if necessary
+3. Plan the use of components. If possible, re-use components
+in `UtilComponents.js`
