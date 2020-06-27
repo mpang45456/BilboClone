@@ -68,7 +68,7 @@ AllUsersShowMoreButton.defaultProps = {
  * For more information, will have to click on 'view'
  * link (assuming the user has USER_READ permissions)
  */
-function UnroutedUserList(props) {
+function UserListWithoutRouter(props) {
     const [isLoading, setIsLoading] = useState(true);
     const [userData, setUserData] = useState([]);
     const { permissionsList } = useAuth();
@@ -126,7 +126,7 @@ function UnroutedUserList(props) {
         </List>
     )
 }
-const UserList = withRouter(UnroutedUserList);
-UnroutedUserList.propTypes = {
+const UserList = withRouter(UserListWithoutRouter);
+UserListWithoutRouter.propTypes = {
     location: PropTypes.object.isRequired
 }

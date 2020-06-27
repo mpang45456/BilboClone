@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Spin, Descriptions, Input, Select, Button, Row } from 'antd';
+import { Spin, Descriptions, Input, Select, Button, Row, Menu, Modal } from 'antd';
+const { confirm } = Modal;
 const { Option } = Select;
 import { Redirect, useHistory } from 'react-router-dom';
+import { DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import PropTypes from 'prop-types';
 
 import { bax, useAuth, PERMS } from '../context/AuthContext';
-import { BilboPageHeader, BilboDivider, BilboDescriptions } from './UtilComponents';
+import { BilboPageHeader, BilboDivider, BilboDescriptions, ShowMoreButton } from './UtilComponents';
 import CONFIG from '../config';
 
-// TODO: Update documentation
-// Users are not allowed to update their username
+/**
+ * Component for editing user details.
+ * 
+ * Note that users are not allowed to update their
+ * username (because the usernames are their ID)
+ */
 export default function UserEditPage(props) {
+    // Check for authorization, otherwise redirect
     const { permissionsList } = useAuth();
     if (!permissionsList.includes(PERMS.USER_WRITE)) {
         return <Redirect to={CONFIG.ERROR_403_URL}/>
@@ -29,6 +36,7 @@ export default function UserEditPage(props) {
                 let res = await bax.get(`/api/v1/user/${props.match.params.username}`);
                 setUser(res.data);
                 
+                // Used to populate the `reportsTo` dropdown
                 let allUsersRes = await bax.get('/api/v1/user');
                 // Only usernames are kept (all other fields are removed)
                 let allUsersData = allUsersRes.data.map(user => {
@@ -63,15 +71,14 @@ export default function UserEditPage(props) {
     const updatePassword = (val) => updateField(val, 'password');
 
     const clickCancelButton = (e) => {
-        history.push(CONFIG.USER_URL);
+        history.push(CONFIG.USER_URL)
     }
-
     const clickUpdateButton = (e) => {
         setIsUpdating(true);
         bax.patch(`/api/v1/user/${user.username}`, user)
             .then(res => {
                 setIsUpdating(false);
-                history.push(CONFIG.USER_URL);
+                history.push(CONFIG.USER_URL)
             }).catch(err => {
                 setIsUpdating(false);
                 history.push(CONFIG.ERROR_500_URL);
@@ -81,12 +88,19 @@ export default function UserEditPage(props) {
     const title = (
         <div>
             <BilboPageHeader 
-                title='User Account Details'
-                onBack={() => history.push('/users')}/>
+                title='Edit User Account Details'
+                onBack={() => history.push(CONFIG.USER_URL)}
+                extra={[
+                    <DeleteUserShowMoreButton 
+                        key='deleteUserShowMoreButton'
+                        username={props.match.params.username}
+                    />
+                ]}
+            />
             <BilboDivider />
         </div>
     )
-    
+
     return (
         <div>
             <Spin spinning={isLoading}>
@@ -152,4 +166,50 @@ export default function UserEditPage(props) {
 UserEditPage.propTypes = {
     match: PropTypes.object.isRequired,
     location: PropTypes.object.isRequired
+}
+
+// Customise ShowMoreButton for UserEditPage
+function DeleteUserShowMoreButton(props) {
+    const history = useHistory();
+
+    // Handler when Delete Button is clicked on (will display a modal)
+    const buttonClicked = ({item, key, keyPath, domEvent}) => {
+        if (key === 'deleteUser') {
+            confirm({
+                icon: <ExclamationCircleOutlined />,
+                content: 'Are you sure you wish to delete this user',
+                onOk: () => {
+                    bax.delete(`/api/v1/user/${props.username}`)
+                        .then(res => {
+                            if (res.status === 200) {
+                                history.push(CONFIG.USER_URL);
+                            }
+                        }).catch(err => {
+                            console.log(err);
+                            history.push(CONFIG.ERROR_500_URL);
+                        })
+                },
+                okText: 'Confirm'
+            })
+        }
+    }
+    
+    const menu = (
+        <Menu onClick={buttonClicked}>
+            <Menu.Item
+                key='deleteUser'
+                icon={<DeleteOutlined/>}>
+                Delete User
+            </Menu.Item>
+        </Menu>
+    )
+    return (
+        <ShowMoreButton 
+            dropdownKey='deleteUserShowMoreDropdown'
+            menu={menu}
+        />
+    )
+}
+DeleteUserShowMoreButton.propTypes = {
+    username: PropTypes.string.isRequired
 }
