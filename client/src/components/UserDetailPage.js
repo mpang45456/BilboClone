@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory, Link } from 'react-router-dom';
-import { Descriptions, Spin } from 'antd';
-import { bax } from '../context/AuthContext';
-import { BilboDescriptions, BilboNavLink, BilboPageHeader, BilboDivider } from './UtilComponents';
+import PropTypes from 'prop-types';
+import { Descriptions, Spin, Menu } from 'antd';
+import { bax, useAuth, PERMS } from '../context/AuthContext';
+import { PlusOutlined } from "@ant-design/icons";
+import { BilboDescriptions, BilboNavLink, BilboPageHeader, BilboDivider, ShowMoreButton } from './UtilComponents';
 import CONFIG from '../config';
 
 
@@ -12,6 +14,8 @@ export default function UserDetailPage(props) {
     const [isLoading, setIsLoading] = useState(true);
     const [user, setUser] = useState({});
     const history = useHistory();
+    const { permissionsList } = useAuth();
+    
     //Effect is applied whenever the route changes
     //i.e. the `username` in /user/:username
     useEffect(() => {
@@ -44,7 +48,15 @@ export default function UserDetailPage(props) {
         <div>
             <BilboPageHeader 
                 title='User Account Details'
-                onBack={() => history.push('/users')}/>
+                onBack={() => history.push('/users')}
+                extra={[
+                    <EditUserShowMoreButton 
+                        key='editUserShowMoreButton'
+                        username={props.match.params.username}
+                        disabled={!permissionsList.includes(PERMS.USER_WRITE)}
+                    />
+                ]}
+            />
             <BilboDivider />
         </div>
     )
@@ -70,4 +82,34 @@ export default function UserDetailPage(props) {
             </Spin>
         </div>
     )
+}
+
+
+// Customise ShowMoreButton for UserDetailPage
+function EditUserShowMoreButton(props) {
+    const menu = (
+        <Menu>
+            <Menu.Item 
+                key='editUserDetails'
+                icon={<PlusOutlined/>}>
+                <Link to={`${CONFIG.USER_URL}/${props.username}/edit`}>
+                    Edit User Details
+                </Link>
+            </Menu.Item>
+        </Menu>
+    )
+    return (
+        <ShowMoreButton 
+            dropdownKey='editUserShowMoreDropdown'
+            menu={menu}
+            disabled={props.disabled}
+        />
+    )
+}
+EditUserShowMoreButton.propTypes = {
+    disabled: PropTypes.bool.isRequired,
+    username: PropTypes.string.isRequired
+}
+EditUserShowMoreButton.defaultProps = {
+    disabled: false
 }

@@ -7,8 +7,12 @@ import { BilboPageHeader, BilboDivider, BilboDescriptions } from './UtilComponen
 import CONFIG from '../config';
 
 // TODO: Update documentation
+// Users are not allowed to update their username
 export default function UserEditPage(props) {
     const { permissionsList } = useAuth();
+    if (!permissionsList.includes(PERMS.USER_WRITE)) {
+        return <Redirect to={CONFIG.ERROR_403_URL}/>
+    }
     
     const [isLoading, setIsLoading] = useState(true); // For initial API call (to retrieve user details)
     const [isUpdating, setIsUpdating] = useState(false); // For update API call (when clicking on update button)
@@ -16,11 +20,7 @@ export default function UserEditPage(props) {
     const [allUsers, setAllUsers] = useState([]);
     const history = useHistory();
 
-    // TODO: Shift this upwards
-    if (!permissionsList.includes(PERMS.USER_WRITE)) {
-        return <Redirect to='/error403'/>
-    }
-
+    // Effect is only applied when URL location changes
     useEffect(() => {
         (async function getUserDetails() {
             try {
@@ -49,37 +49,22 @@ export default function UserEditPage(props) {
         })();
     }, [props.location])
 
-    const updateUsername = (val) => {
+    // Helper function to update a field in the user obj
+    const updateField = (val, fieldName) => {
         let newUser = Object.assign({}, user);
-        newUser.username = val;
+        newUser[fieldName] = val;
         setUser(newUser);
     }
+    const updateName = (val) => updateField(val, 'name');
+    const updatePosition = (val) => updateField(val, 'position');
+    const updateReportsTo = (val) => updateField(val, 'reportsTo');
+    const updatePassword = (val) => updateField(val, 'password');
 
-    const updateName = (val) => {
-        let newUser = Object.assign({}, user);
-        newUser.name = val;
-        setUser(newUser);
+    const clickCancelButton = (e) => {
+        history.push(CONFIG.USER_URL);
     }
 
-    const updatePosition = (val) => {
-        let newUser = Object.assign({}, user);
-        newUser.position = val;
-        setUser(newUser);
-    }
-
-    const updateReportsTo = (val) => {
-        let newUser = Object.assign({}, user);
-        newUser.reportsTo = val;
-        setUser(newUser);
-    }
-
-    const updatePassword = (val) => {
-        let newUser = Object.assign({}, user);
-        newUser.password = val;
-        setUser(newUser);
-    }
-
-    const postAndUpdateUserDetails = (e) => {
+    const clickUpdateButton = (e) => {
         setIsUpdating(true);
         bax.patch(`/api/v1/user/${user.username}`, user)
             .then(res => {
@@ -109,7 +94,6 @@ export default function UserEditPage(props) {
                                    column={1} >
                     <Descriptions.Item label="Username">
                         <Input value={user.username} 
-                               onChange={(e) => updateUsername(e.target.value)}
                                 disabled={true} />
                     </Descriptions.Item>
 
@@ -134,10 +118,10 @@ export default function UserEditPage(props) {
                             {allUsers.map(user => <Option value={user.username} key={user.username}>{user.username}</Option>)}
                         </Select>
                     </Descriptions.Item>
-
                 </BilboDescriptions>
                 
                 <BilboDivider />
+
                 <BilboDescriptions bordered
                                    size='small'
                                    column={1}>
@@ -151,13 +135,12 @@ export default function UserEditPage(props) {
             </Spin>
 
             <Row justify='end'>
-                <Button>
+                <Button onClick={clickCancelButton}>
                     Cancel
                 </Button>
-
                 <Button type='primary'
                         loading={isUpdating}
-                        onClick={postAndUpdateUserDetails}>
+                        onClick={clickUpdateButton}>
                     Update
                 </Button>
             </Row>
