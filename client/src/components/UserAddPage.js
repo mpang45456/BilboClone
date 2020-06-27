@@ -1,21 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { Spin, Descriptions, Input, Button, Row, Menu, Modal, Form, Select } from 'antd';
-const { confirm } = Modal;
+import { Spin, Input, Button, Row, Menu, Modal, Form, Select } from 'antd';
 const { Option } = Select;
 import { Redirect, useHistory } from 'react-router-dom';
-import { DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import PropTypes from 'prop-types';
 
 import { bax, useAuth, PERMS } from '../context/AuthContext';
-import { BilboPageHeader, BilboDivider, BilboDescriptions, ShowMoreButton } from './UtilComponents';
+import { BilboPageHeader, BilboDivider } from './UtilComponents';
 import CONFIG from '../config';
 
-// TODO: Add documentation
-// Note the difference in approach here and in UserEditPage (forms are much
-// easier to handle, since you do not need to explicitly set the state, the `onFinish`
-// handler provides all the values for you. There is the exception of username, 
-// where custom validation is used)
-export default function UserEditPage(props) {
+/**
+ * Component to add user to Bilbo. 
+ * 
+ * Note the difference in approach here and in
+ * UserEditPage (forms are much easier to handle, 
+ * since you do not need to explicitly create and 
+ * set the state. This is because the `onFinish`
+ * handler provides all the values for you. However,
+ * state is still used for `username` because custom
+ * validation is performed on the username field. 
+ * 
+ * Note: only 3 fields are validated in the user add page:
+ * 1. `username`: must be globally unique
+ * 2. `reportsTo`: must be chosen from the set of provided 
+ *                 values in the dropdown list (populated
+ *                 through a call to the /users endpoint)
+ * 3. `permissions`: must be chosen from the set of provided
+ *                   values in the dropdown list (populated
+ *                   through the client-side PERMS variable)
+ */
+export default function UserAddPage(props) {
     // Check for authorization, otherwise redirect
     const { permissionsList } = useAuth();
     if (!permissionsList.includes(PERMS.USER_WRITE)) {
@@ -24,7 +37,8 @@ export default function UserEditPage(props) {
     
     const [isLoading, setIsLoading] = useState(true); // For initial API call (to retrieve all user details (to populate list of usernames))
     const [isSubmitting, setIsSubmitting] = useState(false); // For POST API call (when clicking on submit button)
-    const [allUsers, setAllUsers] = useState([]);
+    const [allUsers, setAllUsers] = useState([]); // arrays of usernames
+    const [username, setUsername] = useState({}); // { value, validateStatus, errorMsg} (the last 2 fields are for validation purposes)
     const history = useHistory();
 
     // Effect is only applied when URL location changes
@@ -55,15 +69,13 @@ export default function UserEditPage(props) {
         })();
     }, [props.location])
 
-    const [username, setUsername] = useState({}); // TODO: Should be able to just initialise as {}
-
+    // Perform validation on username and store username in state
     const onUsernameChange = (e) => {
         setUsername({
             ...validateUsername(e.target.value),
             value: e.target.value
         })
     }
-
     const validateUsername = (u) => {
         if (allUsers.includes(u)) {
             return {
@@ -78,6 +90,7 @@ export default function UserEditPage(props) {
         }
     }
 
+    // Handler when submit button is clicked on
     const tryCreateNewUser = (values) => {
         setIsSubmitting(true);
         bax.post('/api/v1/user', values)
@@ -90,10 +103,12 @@ export default function UserEditPage(props) {
             })
     }
 
+    // Handler when cancel button is clicked
     const clickCancelButton = () => {
         history.push(CONFIG.USER_URL);
     }
     
+    // Layout of <Form> 
     const formItemLayout = {
         labelCol: { span: 3 },
     };
@@ -181,7 +196,7 @@ export default function UserEditPage(props) {
         </div>
     )
 }
-UserEditPage.propTypes = {
+UserAddPage.propTypes = {
     match: PropTypes.object.isRequired,
     location: PropTypes.object.isRequired
 }
