@@ -48,8 +48,8 @@ class DatabaseInteractor {
      * environments
      */
     async __resetAndSeedDatabase() {
-        this.clearModelData(UserModel);
-        this.addUsers(...this.seedUsers);
+        await this.clearModelData(UserModel);
+        await this.addUsers(...this.seedUsers);
     }
 
     /**
