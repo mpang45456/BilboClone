@@ -40,8 +40,8 @@ describe('Login Flow', () => {
     it(`Navigating to /login after login should re-direct 
         to home page`, () => {
         cy.visit('/login');
-        cy.get('input#username').type('admin'); //FIXME: Hardcoded
-        cy.get('input#password').type('123{enter}');
+        cy.get('input#username').type(user.username);
+        cy.get('input#password').type(`${user.password}{enter}`);
         
         cy.visit('/login');
         cy.location('pathname').should('eq', '/');
