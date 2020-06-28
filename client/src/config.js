@@ -15,8 +15,11 @@ CONFIG.USER_URL = '/users';
 
 // Non-Menu URLS
 CONFIG.SETTINGS_URL = '/settings';
-CONFIG.ERROR_403_URL = '/error403';
-CONFIG.ERROR_500_URL = '/error500';
+CONFIG.LOGIN_URL = '/login';
+CONFIG.ERROR_400_URL = '/error400'; // Bad Request
+CONFIG.ERROR_403_URL = '/error403'; // Forbidden
+CONFIG.ERROR_404_URL = '/error404'; // Not Found
+CONFIG.ERROR_500_URL = '/error500'; // Internal Server Error
 
 // For Documentation Purposes
 /*

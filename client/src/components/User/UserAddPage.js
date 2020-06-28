@@ -4,7 +4,7 @@ const { Option } = Select;
 import { Redirect, useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
-import { bax, useAuth, PERMS } from '../../context/AuthContext';
+import { bax, useAuth, PERMS, redirectToErrorPage } from '../../context/AuthContext';
 import { BilboPageHeader, BilboDivider } from '../UtilComponents';
 import CONFIG from '../../config';
 
@@ -57,14 +57,7 @@ export default function UserAddPage(props) {
                 
                 setIsLoading(false);
             } catch(err) {
-                if (err.response.status === 403) {
-                    // If unauthorized, redirect to error page
-                    history.push(CONFIG.ERROR_403_URL);
-                } else {
-                    // If something goes wrong server-side
-                    // redirect to error page
-                    history.push(CONFIG.ERROR_500_URL);
-                }
+                redirectToErrorPage(err, history);
             }
         })();
     }, [props.location])
@@ -95,11 +88,11 @@ export default function UserAddPage(props) {
         setIsSubmitting(true);
         bax.post('/api/v1/user', values)
             .then(res => {
+                setIsSubmitting(false);
                 history.push(CONFIG.USER_URL);
-                setIsSubmitting(false);
             }).catch(err => {
-                history.push(CONFIG.ERROR_500_URL);
                 setIsSubmitting(false);
+                redirectToErrorPage(err, history);
             })
     }
 

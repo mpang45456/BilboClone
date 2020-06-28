@@ -17,7 +17,7 @@ import UserPage from '../User/UserPage';
 import UserViewPage from '../User/UserViewPage';
 import UserEditPage from '../User/UserEditPage';
 import UserAddPage from '../User/UserAddPage';
-import { Error403, Error404, Error500 } from '../Errors/ErrorPages';
+import { Error400, Error403, Error404, Error500 } from '../Errors/ErrorPages';
 
 import CONFIG from '../../config';
 import { AuthContext } from '../../context/AuthContext';
@@ -56,6 +56,7 @@ export default class AppScaffold extends React.Component {
               <Route path={`${CONFIG.USER_URL}/:username`} component={UserViewPage} />
               <Route path={CONFIG.USER_URL} component={UserPage} />
               <Route path={CONFIG.SETTINGS_URL} component={SettingsPage} />
+              <Route path={CONFIG.ERROR_400_URL} component={Error400} />
               <Route path={CONFIG.ERROR_403_URL} component={Error403} />
               <Route path={CONFIG.ERROR_500_URL} component={Error500} />
               <Route path='*' component={Error404} />

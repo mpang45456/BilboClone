@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Input, Button } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import PropTypes from 'prop-types';
@@ -63,6 +63,17 @@ export function LoginPage({ location }) {
     const [validateStatus, setValidateStatus] = useState(undefined);
     const [helpMessage, setHelpMessage] = useState(undefined);
     const { isAuthenticated, setIsAuthenticated, setPermissionsList } = useAuth();
+
+    // TODO: Add documentation
+    useEffect(() => {
+        bax.post('/api/v1/auth/token')
+            .then((res) => {
+                setPermissionsList(getPermissionsList());
+                setIsAuthenticated(true);
+            }).catch(err => {
+                setIsAuthenticated(false);
+            })
+    }, [location])
 
     // Send User-entered Credentials to /auth/login API
     let tryLogin = () => {

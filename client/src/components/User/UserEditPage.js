@@ -6,7 +6,7 @@ import { Redirect, useHistory } from 'react-router-dom';
 import { DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import PropTypes from 'prop-types';
 
-import { bax, useAuth, PERMS } from '../../context/AuthContext';
+import { bax, useAuth, PERMS, redirectToErrorPage } from '../../context/AuthContext';
 import { BilboPageHeader, BilboDivider, BilboDescriptions, ShowMoreButton } from '../UtilComponents';
 import CONFIG from '../../config';
 
@@ -47,14 +47,7 @@ export default function UserEditPage(props) {
                 
                 setIsLoading(false);
             } catch(err) {
-                if (err.response.status === 403) {
-                    // If unauthorized, redirect to error page
-                    history.push(CONFIG.ERROR_403_URL);
-                } else {
-                    // If something goes wrong server-side
-                    // redirect to error page
-                    history.push(CONFIG.ERROR_500_URL);
-                }
+                redirectToErrorPage(err, history);
             }
         })();
     }, [props.location])
@@ -81,7 +74,7 @@ export default function UserEditPage(props) {
                 history.push(CONFIG.USER_URL)
             }).catch(err => {
                 setIsUpdating(false);
-                history.push(CONFIG.ERROR_500_URL);
+                redirectToErrorPage(err, history);
             })
     }
     
@@ -185,8 +178,7 @@ function DeleteUserShowMoreButton(props) {
                                 history.push(CONFIG.USER_URL);
                             }
                         }).catch(err => {
-                            console.log(err);
-                            history.push(CONFIG.ERROR_500_URL);
+                            redirectToErrorPage(err, history);
                         })
                 },
                 okText: 'Confirm'

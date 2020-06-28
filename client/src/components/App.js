@@ -26,6 +26,7 @@ export default class App extends React.Component {
         this.setPermissionsList = this.setPermissionsList.bind(this);
     }
 
+    // TODO: Shift documentation to LoginPage
     /**
      * Makes an async call to check if the user
      * had previously logged in. For example, the user did
@@ -42,25 +43,26 @@ export default class App extends React.Component {
      * or the app's different authenticated views are rendered
      * depending on the value of `isAuthenticated`.
      */
-    componentDidMount() {
-        bax.post('/api/v1/auth/token', { withCredentials: true})
-        .then(res => {
-            if (res.status === 200) {
-                this.setPermissionsList(getPermissionsList());
-                this.setIsAuthenticated(true);
-            }
-        }).catch(err => {
-            this.setPermissionsList([]);
-            this.setIsAuthenticated(false);
-        }).then(() => {
-            this.setIsFetching(false);
-        })
-    }
+    // componentDidMount() {
+    //     bax.post('/api/v1/auth/token', { withCredentials: true})
+    //     .then(res => {
+    //         if (res.status === 200) {
+    //             this.setPermissionsList(getPermissionsList());
+    //             this.setIsAuthenticated(true);
+    //         }
+    //     }).catch(err => {
+    //         this.setPermissionsList([]);
+    //         this.setIsAuthenticated(false);
+    //     }).then(() => {
+    //         this.setIsFetching(false);
+    //     })
+    // }
 
     setIsAuthenticated(isAuthenticated) {
         this.setState({ isAuthenticated });
     }
 
+    // TODO: Marked for removal
     setIsFetching(isFetching) {
         this.setState({ isFetching });
     }
@@ -70,12 +72,12 @@ export default class App extends React.Component {
     }
 
     render() {
-        if (this.state.isFetching) {
-            // Async call made at `componentDidMount` to check
-            // if user is already authenticated. Loading animation
-            // is displayed before async call returns.
-            return <BilboLoadingSpinner />
-        } else {
+        // if (this.state.isFetching) {
+        //     // Async call made at `componentDidMount` to check
+        //     // if user is already authenticated. Loading animation
+        //     // is displayed before async call returns.
+        //     return <BilboLoadingSpinner />
+        // } else {
             return (
                 <ThemeWrapper>
                     <AuthContext.Provider value={{ isAuthenticated: this.state.isAuthenticated, 
@@ -97,5 +99,5 @@ export default class App extends React.Component {
                 </ThemeWrapper>
             );
         }
-    }
+    // }
 }

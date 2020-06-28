@@ -3,7 +3,7 @@ import { useHistory, withRouter, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { List, Menu, Skeleton } from 'antd';
 import { PlusOutlined } from "@ant-design/icons";
-import { bax, useAuth, PERMS } from '../../context/AuthContext';
+import { bax, useAuth, PERMS, redirectToErrorPage, hasPermissionsOrRedirect } from '../../context/AuthContext';
 import { BilboPageHeader, BilboNavLink, ShowMoreButton, BilboDivider } from '../UtilComponents';
 import CONFIG from '../../config';
 
@@ -92,14 +92,7 @@ function UserListWithoutRouter(props) {
                 setIsLoading(false);
             }
         }).catch((err) => {
-            if (err.response.status === 403) {
-                // If unauthorized, redirect to error page
-                history.push(CONFIG.ERROR_403_URL);
-            } else {
-                // If something goes wrong server-side
-                // redirect to error page
-                history.push(CONFIG.ERROR_500_URL);
-            }
+            redirectToErrorPage(err, history);
         })
     }, [props.location])
 

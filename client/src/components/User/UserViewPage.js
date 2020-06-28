@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { Descriptions, Spin, Menu } from 'antd';
 import { EditOutlined } from "@ant-design/icons";
 
-import { bax, useAuth, PERMS } from '../../context/AuthContext';
+import { bax, useAuth, PERMS, redirectToErrorPage } from '../../context/AuthContext';
 import { BilboDescriptions, BilboNavLink, BilboPageHeader, BilboDivider, ShowMoreButton } from '../UtilComponents';
 import CONFIG from '../../config';
 
@@ -33,14 +33,7 @@ export default function UserViewPage(props) {
                 setUser(userDetails);
                 setIsLoading(false);
             } catch(err) {
-                if (err.response.status === 403) {
-                    // If unauthorized, redirect to error page
-                    history.push(CONFIG.ERROR_403_URL);
-                } else {
-                    // If something goes wrong server-side
-                    // redirect to error page
-                    history.push(CONFIG.ERROR_500_URL);
-                }
+                redirectToErrorPage(err, history);
             }
         })();
     }, [props.location])

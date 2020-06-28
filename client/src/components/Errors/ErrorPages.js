@@ -2,6 +2,23 @@ import React from 'react';
 import { Result } from 'antd';
 
 /**
+ * Error Component for Status Code 400
+ * 
+ * * Note: This component is rendered within the
+ * <Content /> element in `AppScaffold`.
+ */
+export function Error400(props) {
+    return (
+        <Result status='warning'
+                title="Sorry... Your rrequest was malformed or disallowed."
+                extra={
+                    <span>Check your request's fields again</span>
+                }>
+        </Result>
+    );
+}
+
+/**
  * Error Component for Status Code 403
  * 
  * * Note: This component is rendered within the

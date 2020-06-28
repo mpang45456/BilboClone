@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react';
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
+import CONFIG from '../config';
 
 // App-wide Authentication Context
 export const AuthContext = createContext();
@@ -58,7 +59,7 @@ export function getPermissionsList() {
  * token when making API calls.
  * 
  * This works through `axios.interceptor`, which
- * examines the response. If the response code is 401/403,
+ * examines the response. If the response code is 401,
  * then `bax` will contact the /auth/token endpoint
  * to refresh the access token before re-attempting
  * to connect to the original API url. 
@@ -102,3 +103,34 @@ bax.interceptors.response.use(
         return Promise.reject(err);
     }
 )
+
+// TODO: Add docs: This is default error handling behaviour, used by `bax`'s catch chained method
+// TODO: Add docs: To customise error handling behaviour, simply deal with the error before calling this function 
+export function redirectToErrorPage(err, history) {
+    try {
+        console.error(err);
+        let statusCode = err.response.status;
+        switch(statusCode) {
+            // Bad Request
+            case 400:
+                history.push(CONFIG.ERROR_400_URL);
+                break;
+            // When unauthenticated
+            case 401:
+                history.push(CONFIG.LOGIN_URL);
+                break;
+            // Forbidden (Unauthorized)
+            case 403:
+                history.push(CONFIG.ERROR_403_URL);
+                break;
+            // Not Found
+            case 404:
+                history.push(CONFIG.ERROR_404_URL);
+                break;
+            default:
+                history.push(CONFIG.ERROR_500_URL);
+        }
+    } catch(tryBlockErr) {
+        console.error(tryBlockErr);
+    }
+}
