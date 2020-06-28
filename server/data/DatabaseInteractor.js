@@ -14,6 +14,14 @@ const { users } = require('./databaseBootstrap');
  * and by `app.js` when the application first
  * starts up (to initialise the connection
  * and possibly reset and seed the database)
+ * 
+ * Note: The `__resetAndSeedDatabase` method
+ * is the nuclear option that resets and seeds
+ * ALL collections. For more fine-grained control
+ * over deletion, use the `clearModelData`
+ * method. For more fine-grained control over
+ * adding data, use the respective `add<ModelName>`
+ * methods.
  */
 class DatabaseInteractor {
     constructor() {
@@ -46,6 +54,8 @@ class DatabaseInteractor {
      * 
      * Note: Seeding is only for dev and test
      * environments
+     * 
+     * // TODO: This method must be updated to reflect new Schemas
      */
     async __resetAndSeedDatabase() {
         await this.clearModelData(UserModel);
@@ -54,6 +64,7 @@ class DatabaseInteractor {
 
     /**
      * Close the database connection
+     * // FIXME: Calling this method in `resetAndSeedDatabase.js` in Cypress causes an error
      */
     async closeConnection() {
         await mongoose.connection.close();

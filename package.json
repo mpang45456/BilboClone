@@ -13,6 +13,7 @@
     
     "cypress:open": "cypress open",
     "cypress:start-test-server": "PORT=8001 RESET_DB=true NODE_ENV=test node server/server.js | ./node_modules/.bin/pino-pretty",
+    "cypress:reset_db": "NODE_ENV=test node cypress/utils/resetAndSeedDatabase.js",
 
     "react-start": "webpack-dev-server --mode development --open --hot",
     "react-build": "webpack --mode production"

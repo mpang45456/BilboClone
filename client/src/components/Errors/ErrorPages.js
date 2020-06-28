@@ -10,7 +10,7 @@ import { Result } from 'antd';
 export function Error400(props) {
     return (
         <Result status='warning'
-                title="Sorry... Your rrequest was malformed or disallowed."
+                title="Sorry... Your request was malformed or disallowed."
                 extra={
                     <span>Check your request's fields again</span>
                 }>

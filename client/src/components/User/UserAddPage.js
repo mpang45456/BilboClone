@@ -143,7 +143,8 @@ export default function UserAddPage(props) {
 
                     <Form.Item name='username' 
                                label='Username' 
-                               rules={[{ required: true, message: 'Please input your username!' }]}
+                               rules={[{ required: true, 
+                                         message: 'Please input your username!' }]}
                                hasFeedback
                                validateStatus={username.validateStatus}
                                help={username.errorMsg}>

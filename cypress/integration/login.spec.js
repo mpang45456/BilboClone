@@ -1,8 +1,9 @@
 const { users } = require('../../server/data/databaseBootstrap');
+import CONFIG from '../../client/src/config';
 
 describe('Login Flow', () => {
-    const loginPage = '/login';
-    const usersPage = '/users';
+    const loginPage = CONFIG.LOGIN_URL;
+    const usersPage = CONFIG.USER_URL;
 
     // Admin user with all authorization rights.
     // This e2e test is to check for login flow, 

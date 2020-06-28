@@ -118,3 +118,14 @@ in `UtilComponents.js`
 4. Add type-checking to all props used. Destructure all props
 to make explicit what props are necessary for the component 
 to work
+
+# Use of Environment Variables
+`PORT`: Specifies the Port Number the server connects to
+`RESET_DB`: Specifies whether or not to reset the database
+`NODE_ENV`: Specifies the node environment, which in turn determines which database to connect to (i.e. the `dev`, `test` and eventually, `prod` databases
+are all siloed)
+
+## Specific to `cypress:reset_db`
+`RESET_DB_ALL`: Resets all collections in the `test` database (because `NODE_ENV` is set to `test` in the npm script, see `package.json`)
+`RESET_DB_USERS`: Resets user collection
+... and so on
