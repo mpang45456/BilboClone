@@ -2,7 +2,6 @@ const { users } = require('../../server/data/databaseBootstrap');
 
 describe('Login Flow', () => {
     const loginPage = '/login';
-    const homePage = '/';
     const usersPage = '/users';
 
     // Admin user with all authorization rights.
@@ -73,24 +72,66 @@ describe('Login Flow', () => {
     })
 
     it(`Clearing cookies after login should redirect
-        user to the login page`, () => {
+        user to the login page after attempted interaction
+        with the app`, () => {
         // Initial login
         cy.visit(loginPage);
         cy.get('input#username').type(user.username);
         cy.get('input#password').type(`${user.password}{enter}`);
 
         cy.clearCookies();
-        // FIXME: This is undone --> requires code changes
-
+        // Click on 'Users' Sidebar Menu Item (simulate app interaction)
+        cy.contains('Users').click();
+        // Should be redirected to login page
+        cy.location('pathname').should('eq', loginPage);
     })
 
-    it(`Things to test`, () => {
-        let stuff=`
-        Things to test:
+    it(`Should be redirected to login after clearing cookies
+        and refreshing the page`, () => {
+        // Initial login
+        cy.visit(loginPage);
+        cy.get('input#username').type(user.username);
+        cy.get('input#password').type(`${user.password}{enter}`);
 
-        Authentication should persist even after refreshing the page
-        Authentication should not persist after clearing cookies and refreshing the page
+        // Navigate to any page
+        cy.visit(usersPage);
 
-        `
+        cy.clearCookies();
+        cy.reload();
+        // Should be redirected to login page after reload
+        cy.location('pathname').should('eq', loginPage);
+    })
+
+    it(`Authentication should persist even after browser
+        refresh and should stay at the same page`, () => {
+        // Initial login
+        cy.visit(loginPage);
+        cy.get('input#username').type(user.username);
+        cy.get('input#password').type(`${user.password}{enter}`);
+
+        // Navigate to any page
+        cy.visit(usersPage)
+          .wait(1000)
+          .reload();
+        
+        cy.location('pathname').should('not.eq', loginPage);
+    })
+
+    it(`Invalidating access JWT cookie should still
+        allow authentication to persist (i.e. no need to
+        re-login)`, () => {
+        // Initial login
+        cy.visit(loginPage);
+        cy.get('input#username').type(user.username);
+        cy.get('input#password').type(`${user.password}{enter}`);
+
+        cy.clearCookie('accessToken');
+        
+        // Click on 'Users' Sidebar Menu Item (simulate app interaction)
+        cy.contains('Users').click();
+        cy.location('pathname').should('eq', usersPage);
+
+        cy.reload();
+        cy.location('pathname').should('eq', usersPage);
     })
 })

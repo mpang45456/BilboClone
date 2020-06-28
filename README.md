@@ -61,7 +61,10 @@ There are 3 main testing strategies used in Bilbo:
     number: 8002)
 3. End-To-End Testing
     - This uses Cypress and is meant to test application flows
-    - 2 commands must be run to get this started:
+    - 3 commands must be run to get this started:
+        - (0) `npm run react-build`
+            - You must first get the most updated version of the React
+            SPA. Otherwise, the e2e tests will run using outdated versions.
         - (1) `npm run cypress:start-test-server`
             - This will reset the database (but only once at the start, 
             so care must still be taken to prevent side-effects)
