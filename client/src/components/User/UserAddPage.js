@@ -85,15 +85,18 @@ export default function UserAddPage(props) {
 
     // Handler when submit button is clicked on
     const tryCreateNewUser = (values) => {
-        setIsSubmitting(true);
-        bax.post('/api/v1/user', values)
-            .then(res => {
-                setIsSubmitting(false);
-                history.push(CONFIG.USER_URL);
-            }).catch(err => {
-                setIsSubmitting(false);
-                redirectToErrorPage(err, history);
-            })
+        // FIXME: Bug: upon submit, form does not check for custom validity. Hence this additional check for `username`'s validity is required. 
+        if (username.validateStatus !== 'error') {
+            setIsSubmitting(true);
+            bax.post('/api/v1/user', values)
+                .then(res => {
+                    setIsSubmitting(false);
+                    history.push(CONFIG.USER_URL);
+                }).catch(err => {
+                    setIsSubmitting(false);
+                    redirectToErrorPage(err, history);
+                })
+        }
     }
 
     // Handler when cancel button is clicked
@@ -113,6 +116,7 @@ export default function UserAddPage(props) {
                 onBack={() => history.push(CONFIG.USER_URL)}
             />
             <BilboDivider />
+
             <Spin spinning={isLoading}>
                 <Form name='createNewUserForm' 
                       labelAlign='left'

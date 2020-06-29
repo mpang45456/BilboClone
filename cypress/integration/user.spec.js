@@ -337,7 +337,7 @@ describe('User Flow', () => {
         cy.location('pathname').should('not.eq', CONFIG.ERROR_403_URL);
     })
 
-    it(`User with USER_WRITE permission should not be able to
+    it.only(`User with USER_WRITE permission should not be able to
         create a new user using an existing username`, () => {
         loginAsUserReadWrite();
         cy.visit(CONFIG.USER_URL);
