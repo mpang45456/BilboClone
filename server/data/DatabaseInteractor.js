@@ -34,13 +34,13 @@ class DatabaseInteractor {
      */
     async initConnection(resetAndSeedDatabase=false) {
         mongoose.set('useCreateIndex', true);
-        return mongoose
+        await mongoose
             .connect(CONFIG.DATABASE_URL, 
                     {useNewUrlParser: true, useUnifiedTopology: true})
-            .then(() => {
+            .then(async () => {
                 logger.info("Connection to MongoDB is open");
                 if (resetAndSeedDatabase) {
-                    this.__resetAndSeedDatabase();
+                    await this.__resetAndSeedDatabase();
                 }
             }).catch((err) => {
                 logger.error(`Unable to Connect to MongoDB: ${err}`);
@@ -67,7 +67,7 @@ class DatabaseInteractor {
      * // FIXME: Calling this method in `resetAndSeedDatabase.js` in Cypress causes an error
      */
     async closeConnection() {
-        await mongoose.connection.close();
+        await mongoose.disconnect();
     }
 
     /**
@@ -75,7 +75,7 @@ class DatabaseInteractor {
      * @param {Object} model : e.g. UserModel
      */
     async clearModelData(model) {
-        return model.deleteMany({});
+        await model.deleteMany({});
     }
 
     /**

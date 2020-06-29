@@ -76,7 +76,7 @@ There are 3 main testing strategies used in Bilbo:
             - Can run concurrently with dev server (because of different
             port number: 8001)
         - (2) `npm run cypress:open`
-            - Alternatively, `npx cypress run` for CLI tests
+            - Alternatively, `npx cypress run --browser chrome` for CLI tests
 
 Note:
 For both Server-Side Testing and End-To-End Testing, the PORT number and

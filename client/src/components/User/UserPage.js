@@ -3,7 +3,7 @@ import { useHistory, withRouter, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { List, Menu, Skeleton } from 'antd';
 import { PlusOutlined } from "@ant-design/icons";
-import { bax, useAuth, PERMS, redirectToErrorPage, hasPermissionsOrRedirect } from '../../context/AuthContext';
+import { bax, useAuth, PERMS, redirectToErrorPage } from '../../context/AuthContext';
 import { BilboPageHeader, BilboNavLink, ShowMoreButton, BilboDivider } from '../UtilComponents';
 import CONFIG from '../../config';
 

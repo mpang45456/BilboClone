@@ -25,7 +25,7 @@ const dbi = new DatabaseInteractor();
     if (process.env.RESET_DB_ALL === 'true') {
         console.warn('Resetting ALL collections')
         await dbi.initConnection(true); //resetAndSeedDatabase boolean set to `true`
-        process.exit(); // FIXME: Should be calling dbi.closeConnection() instead (but this raises an error). Situation is similar for the `process.exit()` calls below
+        await dbi.closeConnection();
     } else {
         await dbi.initConnection();
         if (process.env.RESET_DB_USERS === 'true') {
@@ -34,6 +34,6 @@ const dbi = new DatabaseInteractor();
             await dbi.addUsers(...users);
         }
 
-        process.exit();
+        await dbi.closeConnection();
     }
 })();
