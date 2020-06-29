@@ -25,12 +25,10 @@ export default class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            isFetching: true,       // For async call to check initial authentication
             isAuthenticated: false,  // Boolean to check whether user is authenticated
             permissionsList: []
         }
         this.setIsAuthenticated = this.setIsAuthenticated.bind(this);
-        this.setIsFetching = this.setIsFetching.bind(this);
         this.setPermissionsList = this.setPermissionsList.bind(this);
     }
 
@@ -38,42 +36,30 @@ export default class App extends React.Component {
         this.setState({ isAuthenticated });
     }
 
-    // TODO: Marked for removal
-    setIsFetching(isFetching) {
-        this.setState({ isFetching });
-    }
-
     setPermissionsList(permissionsList) {
         this.setState({ permissionsList});
     }
 
     render() {
-        // if (this.state.isFetching) {
-        //     // Async call made at `componentDidMount` to check
-        //     // if user is already authenticated. Loading animation
-        //     // is displayed before async call returns.
-        //     return <BilboLoadingSpinner />
-        // } else {
-            return (
-                <ThemeWrapper>
-                    <AuthContext.Provider value={{ isAuthenticated: this.state.isAuthenticated, 
-                                                   setIsAuthenticated: this.setIsAuthenticated,
-                                                   permissionsList: this.state.permissionsList,
-                                                   setPermissionsList: this.setPermissionsList }}>
-                        <Router>
-                            <Switch>
-                                <Route
-                                    exact path='/login'
-                                    render={(props) => (
-                                        <LoginPage {...props} />
-                                    )}
-                                />
-                                <PrivateRoute path='/' component={AppScaffold} />
-                            </Switch>
-                        </Router>
-                    </AuthContext.Provider>
-                </ThemeWrapper>
-            );
-        }
-    // }
+        return (
+            <ThemeWrapper>
+                <AuthContext.Provider value={{ isAuthenticated: this.state.isAuthenticated, 
+                                                setIsAuthenticated: this.setIsAuthenticated,
+                                                permissionsList: this.state.permissionsList,
+                                                setPermissionsList: this.setPermissionsList }}>
+                    <Router>
+                        <Switch>
+                            <Route
+                                exact path='/login'
+                                render={(props) => (
+                                    <LoginPage {...props} />
+                                )}
+                            />
+                            <PrivateRoute path='/' component={AppScaffold} />
+                        </Switch>
+                    </Router>
+                </AuthContext.Provider>
+            </ThemeWrapper>
+        );
+    }
 }
