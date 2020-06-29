@@ -34,17 +34,25 @@ class DatabaseInteractor {
      */
     async initConnection(resetAndSeedDatabase=false) {
         mongoose.set('useCreateIndex', true);
-        await mongoose
-            .connect(CONFIG.DATABASE_URL, 
-                    {useNewUrlParser: true, useUnifiedTopology: true})
-            .then(async () => {
-                logger.info("Connection to MongoDB is open");
-                if (resetAndSeedDatabase) {
-                    await this.__resetAndSeedDatabase();
-                }
-            }).catch((err) => {
-                logger.error(`Unable to Connect to MongoDB: ${err}`);
-            });
+        try {
+            await mongoose.connect(CONFIG.DATABASE_URL, 
+                                   {useNewUrlParser: true, useUnifiedTopology: true});
+            logger.info("Connection to MongoDB is open");
+            if (resetAndSeedDatabase) { await this.__resetAndSeedDatabase(); }
+        } catch(err) {
+            logger.error(`Unable to Connect to MongoDB: ${err}`);
+        }
+        // await mongoose
+        //     .connect(CONFIG.DATABASE_URL, 
+        //             {useNewUrlParser: true, useUnifiedTopology: true})
+        //     .then(async () => {
+        //         logger.info("Connection to MongoDB is open");
+        //         if (resetAndSeedDatabase) {
+        //             await this.__resetAndSeedDatabase();
+        //         }
+        //     }).catch((err) => {
+        //         logger.error(`Unable to Connect to MongoDB: ${err}`);
+        //     });
     }
 
     /**
