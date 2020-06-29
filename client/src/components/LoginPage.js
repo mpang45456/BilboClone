@@ -52,9 +52,6 @@ const Footer = styled.div`
  * React Component for the LoginPage
  * 
  * @param location :specifies URL path (relative to baseURL)
- * @param setIsAuthenticated :sets the `isAuthenticated` variable
- *                            which determines where the user has
- *                            logged in and has access to Bilbo
  */
 export function LoginPage({ location }) {
     const [isLoading, setIsLoading] = useState(false);
@@ -64,7 +61,10 @@ export function LoginPage({ location }) {
     const [helpMessage, setHelpMessage] = useState(undefined);
     const { isAuthenticated, setIsAuthenticated, setPermissionsList } = useAuth();
 
-    // TODO: Add documentation
+    // Effect is applied everytime the URL's `location`
+    // changes. This is necessary whenever a redirect to
+    // `/login` is triggered to obtain a fresh value for
+    // `isAuthenticated`
     useEffect(() => {
         bax.post('/api/v1/auth/token')
             .then((res) => {

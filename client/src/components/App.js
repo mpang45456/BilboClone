@@ -12,6 +12,14 @@ import "../styles/styles.less";
 import { getPermissionsList } from '../context/AuthContext';
 /**
  * Root React Component Class for Bilbo App
+ * 
+ * Note: The Router is defined in this class, and 
+ * has 2 types of routes at the top-level: <Route />
+ * to `/login` and <PrivateRoute /> to `AppScaffold`,
+ * which in turns houses all the other routes. Hence,
+ * <PrivateRoute /> serves as a gatekeeper that 
+ * prevents unauthenticated users from accessing 
+ * protected locations. 
  */
 export default class App extends React.Component {
     constructor(props) {
@@ -25,38 +33,6 @@ export default class App extends React.Component {
         this.setIsFetching = this.setIsFetching.bind(this);
         this.setPermissionsList = this.setPermissionsList.bind(this);
     }
-
-    // TODO: Shift documentation to LoginPage
-    /**
-     * Makes an async call to check if the user
-     * had previously logged in. For example, the user did
-     * not log out, and reaccess the page. Or, the user hits 
-     * the refresh button.
-     * 
-     * This is done by making a call to the /auth/token
-     * endpoint. If the refresh token is valid, the response
-     * status code will be 200, and `isAuthenticated` can be
-     * set to `true`. Otherwise, the tokens are no longer
-     * valid and `isAuthenticated` is set to false.
-     * 
-     * The Routes in the Router determine whether LoginPage
-     * or the app's different authenticated views are rendered
-     * depending on the value of `isAuthenticated`.
-     */
-    // componentDidMount() {
-    //     bax.post('/api/v1/auth/token', { withCredentials: true})
-    //     .then(res => {
-    //         if (res.status === 200) {
-    //             this.setPermissionsList(getPermissionsList());
-    //             this.setIsAuthenticated(true);
-    //         }
-    //     }).catch(err => {
-    //         this.setPermissionsList([]);
-    //         this.setIsAuthenticated(false);
-    //     }).then(() => {
-    //         this.setIsFetching(false);
-    //     })
-    // }
 
     setIsAuthenticated(isAuthenticated) {
         this.setState({ isAuthenticated });

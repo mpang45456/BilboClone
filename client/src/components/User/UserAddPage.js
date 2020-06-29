@@ -63,6 +63,7 @@ export default function UserAddPage(props) {
     }, [props.location])
 
     // Perform validation on username and store username in state
+    // Called `onChange` for username <Input />
     const onUsernameChange = (e) => {
         setUsername({
             ...validateUsername(e.target.value),

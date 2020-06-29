@@ -104,8 +104,27 @@ bax.interceptors.response.use(
     }
 )
 
-// TODO: Add docs: This is default error handling behaviour, used by `bax`'s catch chained method
-// TODO: Add docs: To customise error handling behaviour, simply deal with the error before calling this function 
+/**
+ * Default error handler when making bax API calls. 
+ * This is meant to be used in the `catch` chained
+ * method. 
+ * 
+ * To customise error handling behaviour based on the
+ * status code, simply add custom code dealing with 
+ * the particular status code before calling this 
+ * function. 
+ * 
+ * For example:
+ * ```
+ * .catch(err => {
+ *    if (err.response.status === 400) {
+ *        // Custom Behaviour Here
+ *    } else {
+ *        redirectToErrorPage(err, history);
+ *    }
+ * })
+ * ```
+ */
 export function redirectToErrorPage(err, history) {
     try {
         console.error(err);
