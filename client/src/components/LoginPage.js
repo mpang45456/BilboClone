@@ -61,10 +61,19 @@ export function LoginPage({ location }) {
     const [helpMessage, setHelpMessage] = useState(undefined);
     const { isAuthenticated, setIsAuthenticated, setPermissionsList } = useAuth();
 
-    // Effect is applied everytime the URL's `location`
-    // changes. This is necessary whenever a redirect to
-    // `/login` is triggered to obtain a fresh value for
-    // `isAuthenticated`
+    /*
+    Effect is applied everytime the URL's `location`
+    changes. This is necessary whenever a redirect to
+    `/login` is triggered to obtain a fresh value for
+    `isAuthenticated`. A redirect to `/login` can be 
+    triggered for a variety of reasons: 
+    - Browser is refreshed (`isAuthenticated` is always
+      initialised as `false`)
+    - Browser cookies are cleared and an API call returns
+      401 status code (`redirectToErrorPage` function
+      will redirect to `/login`)
+    - User intentionally navigates to `/login`
+    */
     useEffect(() => {
         bax.post('/api/v1/auth/token')
             .then((res) => {
