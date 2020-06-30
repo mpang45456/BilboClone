@@ -41,31 +41,38 @@ UserSchema.methods.isValidPassword = function(password) {
 
 const UserModel = mongoose.model('User', UserSchema);
 
+/**
+ * -----------
+ * PART SCHEMA
+ * -----------
+ */
+const PriceHistorySchema = new Schema({
+    createdBy: { type: String, required: true }, // User.username
+    unitPrice: { type: Number, required: true },
+    additionalInfo: { type: String }
+}, { timestamps: true}) // Has createdAt and updatedAt fields
+
+const PartSchema = new Schema({
+    supplier: { type: String, required: true, index: true},  // Supplier.name
+    partNumber: { type: String, required: true, index: true}, // TODO: Add index for this?
+    priceHistory: [PriceHistorySchema], // TODO: Check if this defaults to an empty array
+    description: { type: String },
+    status: { type: String, 
+              enum: ['ARCHIVED', 'ACTIVE'], 
+              default: 'ACTIVE', 
+              required: true },
+    additionalInfo: { type: String }
+})
+
+const PartModel = mongoose.model('Part', PartSchema);
 
 /**
  * ---------------
  * SUPPLIER SCHEMA
  * ---------------
  */
-const PriceHistorySchema = new Schema({
-    createdBy: { type: String, required: true },             // username
-    unitPrice: { type: Number, required: true },
-    additionalInfo: { type: String }
-}, { timestamps: true})
-
-const PartSchema = new Schema({
-    supplier: { type: String, required: true},
-    partNumber: { type: String, required: true},
-    priceHistory: [PriceHistorySchema], // TODO: Check if this defaults to an empty array
-    description: { type: String },
-    status: { type: String, enum: ['ARCHIVED', 'ACTIVE'], default: 'ACTIVE', required: true},
-    additionalInfo: { type: String }
-})
-
-const PartModel = mongoose.model('Part', PartSchema);
-
 const SupplierSchema = new Schema({
-    name: { type: String, required: true, unique: true },
+    name: { type: String, required: true, unique: true, index: true },
     address: { type: String, required: true},
     telephone: { type: String },
     fax: { type: String },

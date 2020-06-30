@@ -37,9 +37,14 @@ const { DatabaseInteractor } = require('./server/data/DatabaseInteractor');
     await supplierObj.save();
 
     // Update Price of a Particular Part
-    let updatePart = await PartModel.findOne({ supplier: supplier.name, partNumber: part.partNumber});
-    updatePart.priceHistory.push({ createdBy: 'Brian', unitPrice: 0.0002, additionalInfo: 'Expensive Product'});
-    await updatePart.save();
+    let updatePartObj = await PartModel.findOne({ supplier: supplier.name, partNumber: part.partNumber});
+    updatePartObj.priceHistory.push({ createdBy: 'Brian', unitPrice: 0.0002, additionalInfo: 'Expensive Product'});
+    await updatePartObj.save();
+
+    // Delete Part in Supplier
+    partObj = await PartModel.findOne({ supplier: supplier.name, partNumber: part.partNumber});
+    await SupplierModel.findOneAndUpdate({ name: supplier.name }, { $pull: {parts: partObj._id }});
+
 
 
     await dbi.closeConnection();
