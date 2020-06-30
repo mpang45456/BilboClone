@@ -54,6 +54,7 @@ const PriceHistorySchema = new Schema({
 }, { timestamps: true})
 
 const PartSchema = new Schema({
+    supplier: { type: String, required: true},
     partNumber: { type: String, required: true},
     priceHistory: [PriceHistorySchema], // TODO: Check if this defaults to an empty array
     description: { type: String },
@@ -61,12 +62,14 @@ const PartSchema = new Schema({
     additionalInfo: { type: String }
 })
 
+const PartModel = mongoose.model('Part', PartSchema);
+
 const SupplierSchema = new Schema({
-    name: { type: String, required: true, unique: true},
+    name: { type: String, required: true, unique: true },
     address: { type: String, required: true},
     telephone: { type: String },
     fax: { type: String },
-    parts: [PartSchema],
+    parts: [{ type: Schema.Types.ObjectId, ref: 'Part'}],
     additionalInfo: { type: String }
 })
 
@@ -83,5 +86,6 @@ the schemas should be exported, not the models.
 */
 module.exports = {
     UserModel,
-    SupplierModel
+    SupplierModel,
+    PartModel
 }
