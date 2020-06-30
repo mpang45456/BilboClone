@@ -2,8 +2,8 @@ const mongoose = require('mongoose');
 const CONFIG = require('../config');
 const logger = require('../utils');
 
-const { UserModel } = require('./database');
-const { users } = require('./databaseBootstrap');
+const { UserModel, PartModel, SupplierModel } = require('./database');
+const { users, suppliers } = require('./databaseBootstrap');
 
 /**
  * Wrapper class that encapsulates the logic
@@ -26,6 +26,7 @@ const { users } = require('./databaseBootstrap');
 class DatabaseInteractor {
     constructor() {
         this.seedUsers = users;
+        this.seedSuppliersWithParts = suppliers;
     }
 
     /**
@@ -40,7 +41,7 @@ class DatabaseInteractor {
             logger.info("Connection to MongoDB is open");
             if (resetAndSeedDatabase) { await this.__resetAndSeedDatabase(); }
         } catch(err) {
-            logger.error(`Unable to Connect to MongoDB: ${err}`);
+            logger.error(`Something went wrong while setting up the database: ${err}`);
         }
 
         // Set up Mongoose Connection Events Handlers
@@ -63,8 +64,14 @@ class DatabaseInteractor {
      * // TODO: This method must be updated to reflect new Schemas
      */
     async __resetAndSeedDatabase() {
+        // Clear Model Data
         await this.clearModelData(UserModel);
+        await this.clearModelData(SupplierModel);
+        await this.clearModelData(PartModel);
+
+        // Add Model Data
         await this.addUsers(...this.seedUsers);
+        await this.addSuppliersAndParts(...this.seedSuppliersWithParts);
     }
 
     /**
@@ -99,6 +106,44 @@ class DatabaseInteractor {
                                           reportsTo: user.reportsTo });
             userObj.setPassword(user.password);
             await userObj.save();
+        }
+    }
+
+    /**
+     * Add suppliers and their associated parts
+     * to the database. 
+     * 
+     * Note: each `supplierWithParts` must follow
+     * the format detailed in `databaseBootstrap.js`
+     * @param  {...object} suppliersWithParts 
+     */
+    async addSuppliersAndParts(...suppliersWithParts) {
+        for (let supplier of suppliersWithParts) {
+            // Add Suppliers
+            let supplierDoc = new SupplierModel({
+                name: supplier.name, 
+                address: supplier.address,
+                telephone: supplier.telephone, 
+                fax: supplier.fax, 
+                additionalInfo: supplier.additionalInfo
+            })
+            
+            // Add Parts 
+            for (let part of supplier.parts) {
+                let partDoc = PartModel({
+                    supplier: supplier.name, 
+                    partNumber: part.partNumber, 
+                    priceHistory: part.priceHistory, 
+                    description: part.description,
+                    status: part.status,
+                    additionalInfo: part.additionalInfo
+                })
+                await partDoc.save();
+                supplierDoc.parts.push(partDoc);
+            }
+
+            // Save Supplier Document after obtaining Parts reference
+            await supplierDoc.save();
         }
     }
 }

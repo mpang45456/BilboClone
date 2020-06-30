@@ -74,7 +74,7 @@ const suppliers = [
                     unitPrice: 0.0001,
                     additionalInfo: 'Cheap Product'
                 }],
-                description: 'A hammer',
+                description: 'A nail',
                 status: 'ACTIVE',
                 additionalInfo: 'Supplier will stop manufacturing this part on 30/8/2020'
             }
@@ -87,7 +87,8 @@ const suppliers = [
         address: 'Blk 98D Jurong Port Drive',
         telephone: '+65 68093214',
         fax: '+65 62102312',
-        additionalInfo: 'Able to obtain supplies from ASEAN'
+        additionalInfo: 'Able to obtain supplies from ASEAN',
+        parts: []
     },
     {
         // Complete with all fields and multiple parts and price history

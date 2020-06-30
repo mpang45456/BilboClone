@@ -76,7 +76,7 @@ const SupplierSchema = new Schema({
     address: { type: String, required: true},
     telephone: { type: String },
     fax: { type: String },
-    parts: [{ type: Schema.Types.ObjectId, ref: 'Part'}],
+    parts: [{ type: Schema.Types.ObjectId, ref: 'Part'}], // Must be carefully kept in sync with PartModel
     additionalInfo: { type: String }
 })
 
