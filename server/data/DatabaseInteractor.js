@@ -42,17 +42,14 @@ class DatabaseInteractor {
         } catch(err) {
             logger.error(`Unable to Connect to MongoDB: ${err}`);
         }
-        // await mongoose
-        //     .connect(CONFIG.DATABASE_URL, 
-        //             {useNewUrlParser: true, useUnifiedTopology: true})
-        //     .then(async () => {
-        //         logger.info("Connection to MongoDB is open");
-        //         if (resetAndSeedDatabase) {
-        //             await this.__resetAndSeedDatabase();
-        //         }
-        //     }).catch((err) => {
-        //         logger.error(`Unable to Connect to MongoDB: ${err}`);
-        //     });
+
+        // Set up Mongoose Connection Events Handlers
+        mongoose.connection.on('error', err => {
+            logger.error(`Mongoose Connection Error: ${err}`);
+        })
+        mongoose.connection.on('disconnected', () => {
+            logger.warn('Disconnected from MongoDB');
+        })
     }
 
     /**

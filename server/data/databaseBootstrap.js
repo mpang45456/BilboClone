@@ -35,6 +35,30 @@ const users = [
     }
 ]
 
+const suppliers = [
+    {
+        name: 'A Industries',
+        address: 'Blk 604A Tuas Industrial Avenue',
+        telephone: '+65 60829213',
+        fax: '+65 69421245',
+        parts: [
+            {
+                partNumber: 'PN121',
+                priceHistory: [{
+                    createdBy: 'brian',
+                    unitPrice: 0.0001,
+                    additionalInfo: 'Cheap Product'
+                }],
+                description: 'A hammer',
+                status: 'ACTIVE',
+                additionalInfo: 'Supplier will stop manufacturing this part on 30/8/2020'
+            }
+        ],
+        additionalInfo: 'A well-regarded business partner since the 1970s'
+    }
+]
+
 module.exports = {
-    users
+    users,
+    suppliers
 }

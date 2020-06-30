@@ -41,6 +41,47 @@ UserSchema.methods.isValidPassword = function(password) {
 
 const UserModel = mongoose.model('User', UserSchema);
 
+
+/**
+ * ---------------
+ * SUPPLIER SCHEMA
+ * ---------------
+ */
+const PriceHistorySchema = new Schema({
+    createdBy: { type: String, required: true },             // username
+    unitPrice: { type: Number, required: true },
+    additionalInfo: { type: String }
+}, { timestamps: true})
+
+const PartSchema = new Schema({
+    partNumber: { type: String, required: true},
+    priceHistory: [PriceHistorySchema], // TODO: Check if this defaults to an empty array
+    description: { type: String },
+    status: { type: String, enum: ['ARCHIVED', 'ACTIVE'], default: 'ACTIVE', required: true},
+    additionalInfo: { type: String }
+})
+
+const SupplierSchema = new Schema({
+    name: { type: String, required: true, unique: true},
+    address: { type: String, required: true},
+    telephone: { type: String },
+    fax: { type: String },
+    parts: [PartSchema],
+    additionalInfo: { type: String }
+})
+
+const SupplierModel = mongoose.model('Supplier', SupplierSchema);
+// TODO: Update DatabaseInteractor and other db code with SupplierSchema
+// TODO: Trim the strings before saving
+
+/*
+This code uses the `export model pattern`, as per the Mongoose docs. 
+This is acceptable as long as the code uses one connection (in this
+case, the code is using the default mongoose connection). Each model 
+has an associated connection. If multiple connections are used, then
+the schemas should be exported, not the models.
+*/
 module.exports = {
-    UserModel
+    UserModel,
+    SupplierModel
 }
