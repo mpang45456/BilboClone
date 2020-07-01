@@ -73,7 +73,7 @@ const PartModel = mongoose.model('Part', PartSchema);
  */
 const SupplierSchema = new Schema({
     name: { type: String, required: true, unique: true, index: true },
-    address: { type: String, required: true},
+    address: { type: String },
     telephone: { type: String },
     fax: { type: String },
     parts: [{ type: Schema.Types.ObjectId, ref: 'Part'}], // Must be carefully kept in sync with PartModel

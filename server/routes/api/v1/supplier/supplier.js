@@ -92,6 +92,36 @@ router.get('/:supplierObjID',
     }
 })
 
+/**
+ * Mounted on /api/v1/supplier
+ * 
+ * Creates a new supplier, using the fields provided
+ * in the request. 
+ * 
+ * Note: only `username` is a compulsory field that
+ * must be provided in the request.
+ * 
+ * Note: even if `parts` information is provided in the
+ * request, the data will not be persisted. To persist,
+ * parts data, use the PARTS API instead.
+ */
+router.post('/', 
+            isAuthorized(PERMS.SUPPLIER_WRITE),
+            async function(req, res) {
+    const { name, address, telephone, fax, additionalInfo } = req.body;
+    try {
+        const newSupplier = new SupplierModel({ name, 
+                                                address, 
+                                                telephone, 
+                                                fax,
+                                                additionalInfo });
+        await newSupplier.save();
+        return res.status(200).send(`Successfully created new supplier: ${newSupplier}`);
+    } catch(err) {
+        logger.error(`POST /supplier: Could not create new supplier: ${err}`);
+        return res.status(400).send('Unable to create new supplier');
+    }
+})
 
 module.exports = {
     supplierRouter: router,

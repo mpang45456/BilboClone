@@ -21,6 +21,14 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
     let supplierObjID = null;
     let partObjID = null;
 
+    let newSupplier = {
+        name: 'E Industries (New Supplier)',
+        address: 'Blk 642D Jurong Industrial Estate Lorong 5',
+        telephone: '+65 6890 2132',
+        fax: '+65 6092 2312',
+        additionalInfo: 'Supplier of high-precision components'
+    }
+
     beforeAll(async (done) => {
         dbi = new DatabaseInteractor();
         await dbi.initConnection(true);
@@ -210,6 +218,96 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
         await authenticatedUnauthorizedAgent
                 .get(`${supplierEndpoint}/${supplierObjID}`)
                 .expect(403);
+        done();
+    })
+
+    /**
+     * ----------------------------
+     * POST (Create a New Supplier)
+     * ----------------------------
+     */
+    it(`POST /: User with SUPPLIER_WRITE perm should
+        be able to create a new user`, async (done) => {
+        await authenticatedAdminAgent
+                .post(supplierEndpoint)
+                .send(newSupplier)
+                .expect(200)
+
+        await authenticatedAdminAgent
+                .get(supplierEndpoint)
+                .expect(200)
+                .then(res => {
+                    expect(res.body.length).toBe(testSuppliersWithParts.length + 1);
+                })
+        done();
+    })
+
+    it(`POST /: User with SUPPLIER_WRITE perm should
+        not be able to create a new user if the supplier
+        name field is missing`, async (done) => {
+        let newSupplierWithoutName = {
+            address: newSupplier.address,
+            telephone: newSupplier.telephone, 
+            fax: newSupplier.fax,
+            additionalInfo: newSupplier.additionalInfo
+        }
+
+        await authenticatedAdminAgent
+            .post(supplierEndpoint)
+            .send(newSupplierWithoutName)
+            .expect(400)
+        
+        done();
+    })
+
+    it(`POST /: User with SUPPLIER_WRITE perm should
+        not be able to create a new user with parts
+        even if parts are provided in the request`, async (done) => {
+        let newSupplierWithParts = JSON.parse(JSON.stringify(newSupplier));
+        newSupplierWithParts.parts = [{
+            partNumber: 'PN122',
+            priceHistory: [{
+                createdBy: `${testUsers[0].username}`,
+                unitPrice: 0.0001,
+                additionalInfo: 'Cheap Product'
+            }, {
+                createdBy: `${testUsers[0].username}`,
+                unitPrice: 0.0002,
+                additionalInfo: 'Product price double owing to supply constraints'
+            }],
+            description: 'A jackhammer',
+        }]
+
+        await authenticatedAdminAgent
+                .post(supplierEndpoint)
+                .send(newSupplierWithParts)
+                .expect(200)
+
+        await authenticatedAdminAgent
+                .get(supplierEndpoint)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body[res.body.length - 1]).toBeTruthy();
+                    expect(res.body[res.body.length - 1].parts.length).toBe(0);
+                })
+        
+        done();
+    })
+
+    it(`POST /: User without SUPPLIER_WRITE perm should
+        not be able to create a new user`, async (done) => {
+        // Has SUPPLIER_READ perm
+        await authenticatedReadAgent
+                .post(supplierEndpoint)
+                .send(newSupplier)
+                .expect(403)
+        
+        // Has neither SUPPLIER_READ nor SUPPLIER_WRITE perm
+        await authenticatedUnauthorizedAgent
+                .post(supplierEndpoint)
+                .send(newSupplier)
+                .expect(403)
+        
         done();
     })
 
