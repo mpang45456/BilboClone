@@ -1,20 +1,18 @@
 const request = require('supertest');
 const app = require('../../app');
 const { SupplierModel, PartModel } = require('../../data/database');
-// const { expect } = require('chai'); // TODO: Marked for removal
 const queryString = require('query-string');
 
 let testSuppliersWithParts = require('../../data/databaseBootstrap').suppliers;
 let testUsers = require('../../data/databaseBootstrap').users;
-const { PERMS } = require('../../routes/api/v1/auth/permissions');
 const { DatabaseInteractor } = require('../../data/DatabaseInteractor');
-const { loginEndpoint, 
-        supplierEndpoint,
+const { supplierEndpoint,
         getAuthenticatedAgent } = require('./testUtils');
 const CONFIG = require('../../config');
 
 describe.only('Testing /api/v1/supplier endpoint', () => {
     let dbi = null;
+    let server = null;
     let authenticatedAdminAgent = null; // SUPPLIER_READ, SUPPLIER_WRITE
     let authenticatedReadAgent = null; // SUPPLIER_READ
     let authenticatedUnauthorizedAgent = null; // No access to SUPPLIER API
@@ -471,18 +469,35 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
         done();
     })
 
+    /**
+     * -------
+     * General
+     * -------
+     */
+    it(`Unauthenticated users should not be able to access
+        the Supplier API`, async (done) => {
+        await request(server)
+                .get(supplierEndpoint)
+                .expect(401)
 
+        await request(server)
+                .get(`${supplierEndpoint}/${supplierObjID}`)
+                .expect(401)
 
+        await request(server)
+                .post(supplierEndpoint)
+                .send(newSupplier)
+                .expect(401)
 
-
-    it('more tests', (done) => {
-        let tests = `
-        unauthenticated users should not be able to access the API (test all HTTP verbs)
-        unauthorized users should not be able to access the API (different authorization for the specific HTTP verbs)
+        await request(server)
+                .patch(`${supplierEndpoint}/${supplierObjID}`)
+                .send({ name: newSupplier.name, address: newSupplier.address })
+                .expect(401)
+    
+        await request(server)
+                .delete(`${supplierEndpoint}/${supplierObjID}`)
+                .expect(401)
         
-        `
         done();
     })
-
-
 })

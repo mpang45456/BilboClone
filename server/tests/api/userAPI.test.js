@@ -301,7 +301,7 @@ describe('Testing /api/v1/user endpoint', () => {
     })
 
     it(`User without USER_WRITE perm should not 
-        be able access /api/v1/auth/user endpoints`, async (done) => {
+        be able access /api/v1/user endpoints`, async (done) => {
         await authenticatedUnauthorizedAgent
                 .post(userEndpoint)
                 .send(newAdmin)
