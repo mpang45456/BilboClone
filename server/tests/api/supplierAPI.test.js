@@ -346,7 +346,7 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
         done();
     })
 
-    it.only(`PATCH: /:supplierObjID: User with SUPPLIER_WRITE
+    it(`PATCH: /:supplierObjID: User with SUPPLIER_WRITE
         perm should not be able to update any data when 
         an invalid supplierObjID is provided`, async (done) => {
         let fieldsToUpdate = {
@@ -393,6 +393,79 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
         await authenticatedUnauthorizedAgent
                 .patch(`${supplierEndpoint}/${supplierObjID}`)
                 .send(fieldsToUpdate)
+                .expect(403)
+        
+        done();
+    })
+
+    /**
+     * ---------------------------------
+     * DELETE (Delete a single Supplier)
+     * ---------------------------------
+     */
+    it(`DELETE /:supplierObjID: User with SUPPLIER_WRITE
+        perm should be able to delete a supplier. Parts
+        associated with supplier should also be deleted`, async (done) => {
+        await authenticatedAdminAgent
+                .delete(`${supplierEndpoint}/${supplierObjID}`)
+                .expect(200);
+        
+        await authenticatedAdminAgent
+                .get(supplierEndpoint)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.length).toBe(testSuppliersWithParts.length - 1);
+                })
+        
+        await authenticatedAdminAgent
+                .get(`${supplierEndpoint}/${supplierObjID}`)
+                .expect(400)
+        
+        // Use `PartModel` directly to prevent testing dependency
+        // on Parts API (and its correctness)
+        let partsOfDeletedSupplier = await PartModel.find({ supplier: supplierObjID });
+        expect(partsOfDeletedSupplier.length).toBe(0);
+
+        done();
+    })
+
+    it(`DELETE /:supplierObjID: User with SUPPLIER_WRITE
+        perm should not be able to make any data changes
+        when providing an invalid supplierObjID. However, 
+        the DELETE request should still have a status code 200
+        response`, async (done) => {
+        let originalData = null;
+        await authenticatedAdminAgent
+                .get(supplierEndpoint)
+                .expect(200)
+                .then(res => {
+                    originalData = res.body;
+                })
+
+        await authenticatedAdminAgent
+                .delete(`${supplierEndpoint}/${partObjID}`)
+                .expect(200);
+        
+        await authenticatedAdminAgent
+                .get(supplierEndpoint)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body).toEqual(originalData);
+                })
+
+        done();
+    })
+
+    it(`DELETE /:supplierObjID: User without SUPPLIER_WRITE
+        perm should not be able to delete a supplier`, async (done) => {
+        // Has SUPPLIER_READ perm
+        await authenticatedReadAgent
+                .delete(`${supplierEndpoint}/${supplierObjID}`)
+                .expect(403)
+        
+        // Has neither SUPPLIER_READ nor SUPPLIER_WRITE perm
+        await authenticatedUnauthorizedAgent
+                .delete(`${supplierEndpoint}/${supplierObjID}`)
                 .expect(403)
         
         done();

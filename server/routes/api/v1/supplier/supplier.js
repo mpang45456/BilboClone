@@ -156,10 +156,31 @@ router.patch('/:supplierObjID',
     }
 })
 
+/**
+ * Mounted on /api/v1/supplier/:supplierObjID
+ * 
+ * Deletes the supplier document identified by
+ * `:supplierObjID`. 
+ * 
+ * Note: Providing an invalid `:supplierObjID`
+ * will still result in a 200 status code response.
+ * This is because the end result of the request
+ * is still the same (the supplier document with
+ * the `:supplierObjID` is not longer in the database)
+ * 
+ * Note: This method will also delete all the 
+ * parts associated with the supplier.
+ */
 router.delete('/:supplierObjID', 
               isAuthorized(PERMS.SUPPLIER_WRITE),
               async function(req, res) {
-    
+    try {
+        await SupplierModel.deleteOne({ _id: req.params.supplierObjID });
+        await PartModel.deleteMany({ supplier: req.params.supplierObjID });
+        return res.status(200).send('Deleted supplier');
+    } catch(err) {
+        return res.status(400).send('Unable to delete supplier');
+    }
 })
 
 module.exports = {
