@@ -96,7 +96,7 @@ router.get('/:supplierObjID',
  * Mounted on /api/v1/supplier
  * 
  * Creates a new supplier, using the fields provided
- * in the request. 
+ * in the request (JSON)
  * 
  * Note: only `username` is a compulsory field that
  * must be provided in the request.
@@ -120,6 +120,39 @@ router.post('/',
     } catch(err) {
         logger.error(`POST /supplier: Could not create new supplier: ${err}`);
         return res.status(400).send('Unable to create new supplier');
+    }
+})
+
+/**
+ * Mounted on /api/v1/supplier/:supplierObjID
+ * 
+ * Updates the fields of the supplier document,
+ * as identified by `:supplierObjID`.
+ * 
+ * Note: Even the name of the supplier can be
+ * changed, as the relationship between parts and
+ * suppliers is by ObjectID, not by supplier name
+ * 
+ * Note: The `parts` data associated with the 
+ * supplier cannot be modified here. Use the PARTS
+ * API for that.
+ */
+router.patch('/:supplierObjID',
+             isAuthorized(PERMS.SUPPLIER_WRITE),
+             async function(req, res) {
+    const { name, address, telephone, fax, additionalInfo } = req.body;
+    try {
+        const supplierDoc = await SupplierModel.findOne({ _id: req.params.supplierObjID});
+        if (name) { supplierDoc.name = name; }
+        if (address) { supplierDoc.address = address; }
+        if (telephone) { supplierDoc.telephone = telephone; }
+        if (fax) { supplierDoc.fax = fax; }
+        if (additionalInfo) { supplierDoc.additionalInfo = additionalInfo; }
+        await supplierDoc.save();
+        return res.status(200).send('Successfully updated supplier');
+    } catch(err) {
+        logger.error(`PATCH /supplier: Could not patch supplier: ${err}`);
+        return res.status(400).send('Unable to patch supplier information');
     }
 })
 

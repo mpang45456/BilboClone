@@ -227,7 +227,7 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
      * ----------------------------
      */
     it(`POST /: User with SUPPLIER_WRITE perm should
-        be able to create a new user`, async (done) => {
+        be able to create a new supplier`, async (done) => {
         await authenticatedAdminAgent
                 .post(supplierEndpoint)
                 .send(newSupplier)
@@ -243,7 +243,7 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
     })
 
     it(`POST /: User with SUPPLIER_WRITE perm should
-        not be able to create a new user if the supplier
+        not be able to create a new supplier if the supplier
         name field is missing`, async (done) => {
         let newSupplierWithoutName = {
             address: newSupplier.address,
@@ -261,7 +261,7 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
     })
 
     it(`POST /: User with SUPPLIER_WRITE perm should
-        not be able to create a new user with parts
+        not be able to create a new supplier with parts
         even if parts are provided in the request`, async (done) => {
         let newSupplierWithParts = JSON.parse(JSON.stringify(newSupplier));
         newSupplierWithParts.parts = [{
@@ -295,7 +295,7 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
     })
 
     it(`POST /: User without SUPPLIER_WRITE perm should
-        not be able to create a new user`, async (done) => {
+        not be able to create a new supplier`, async (done) => {
         // Has SUPPLIER_READ perm
         await authenticatedReadAgent
                 .post(supplierEndpoint)
@@ -310,6 +310,65 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
         
         done();
     })
+
+    /**
+     * ----------------------------------
+     * PATCH (Update Details of Supplier)
+     * ----------------------------------
+     */
+    it(`PATCH /:supplierObjID: User with SUPPLIER_WRITE perm
+        should be able to update supplier details, and the
+        changes are persisted`, async (done) => {
+        let fieldsToUpdate = {
+            name: newSupplier.name, 
+            address: newSupplier.address
+        }
+
+        await authenticatedAdminAgent
+                .patch(`${supplierEndpoint}/${supplierObjID}`)
+                .send(fieldsToUpdate)
+                .expect(200)
+        
+        await authenticatedAdminAgent
+                .get(`${supplierEndpoint}/${supplierObjID}`)
+                .expect(200)
+                .expect(res => {
+                    // Updated fields
+                    expect(res.body.name).toBe(fieldsToUpdate.name);
+                    expect(res.body.address).toBe(fieldsToUpdate.address);
+
+                    // Unchanged fields
+                    expect(res.body.telephone).toBe(testSuppliersWithParts[0].telephone);
+                    expect(res.body.fax).toBe(testSuppliersWithParts[0].fax);
+                    expect(res.body.additionalInfo).toBe(testSuppliersWithParts[0].additionalInfo);
+                })
+        
+        done();
+    })
+
+    it(`PATCH: /:supplierObjID: User without SUPPLIER_WRITE
+        perm should not be able to update supplier details`, async (done) => {
+        let fieldsToUpdate = {
+            name: newSupplier.name, 
+            address: newSupplier.address
+        }
+
+        // Has SUPPLIER_READ perm
+        await authenticatedReadAgent
+                .patch(`${supplierEndpoint}/${supplierObjID}`)
+                .send(fieldsToUpdate)
+                .expect(403)
+        
+        // Has neither SUPPLIER_READ nor SUPPLIER_WRITE perm
+        await authenticatedUnauthorizedAgent
+                .patch(`${supplierEndpoint}/${supplierObjID}`)
+                .send(fieldsToUpdate)
+                .expect(403)
+        
+        done();
+    })
+
+
 
 
 
