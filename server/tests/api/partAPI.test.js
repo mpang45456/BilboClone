@@ -16,12 +16,16 @@ describe('Testing /api/v1/part endpoint', () => {
     let authenticatedAdminAgent = null; // PART_READ, PART_WRITE
     let authenticatedReadAgent = null; // PART_READ
     let authenticatedUnauthorizedAgent = null; // No access to PART API
+    
     let allTestParts = [];
+    let supplierObjID = null;
+    let partObjID = null;
 
     beforeAll(async (done) => {
         dbi = new DatabaseInteractor();
         await dbi.initConnection(true);
 
+        // Find all Parts
         for (let testSupplier of testSuppliersWithParts) {
             allTestParts = allTestParts.concat(testSupplier.parts);
         }
@@ -44,6 +48,11 @@ describe('Testing /api/v1/part endpoint', () => {
 
         // Seed Database
         await dbi.addSuppliersAndParts(...testSuppliersWithParts);
+
+        // Obtain supplierObjID and partObjID (for testing)
+        let partObj = await PartModel.findOne({});
+        partObjID = partObj.id;
+        supplierObjID = partObj.supplier;
 
         // Login
         const admin = testUsers[0];
@@ -208,7 +217,92 @@ describe('Testing /api/v1/part endpoint', () => {
         done();
     })
 
+    /**
+     * -------------------------------------
+     * GET /:partObjID (Individual Resource)
+     * -------------------------------------
+     */
+    it(`GET /:partObjID: User with PART_READ perm should
+        be able to access the endpoint and retrieve part
+        data with default query fields`, async (done) => {
+        await authenticatedAdminAgent
+                .get(`${partEndpoint}/${partObjID}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.supplier).toBeTruthy();
+                    expect(res.body.partNumber).toBeTruthy();
+                    expect(res.body.priceHistory).toBeTruthy();
+                    expect(res.body.description).toBeTruthy();
+                    expect(res.body.status).toBeTruthy();
+                    expect(res.body.additionalInfo).toBeTruthy();
+                })
+
+        done();
+    })
+
+    it(`GET /:partObjID: User with PART_READ perm should
+        be able to access the endpoint and retrieve part
+        data with custom query fields`, async (done) => {
+        // Include `supplier` and `partNumber` fields
+        let query = queryString.stringify({ inc: ['supplier', 'partNumber']})
+        await authenticatedAdminAgent
+                .get(`${partEndpoint}/${partObjID}?${query}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.supplier).toBeTruthy();
+                    expect(res.body.partNumber).toBeTruthy();
+                    expect(res.body.priceHistory).not.toBeTruthy();
+                    expect(res.body.description).not.toBeTruthy();
+                    expect(res.body.status).not.toBeTruthy();
+                    expect(res.body.additionalInfo).not.toBeTruthy();
+                })
+
+        // Include `supplier` field only
+        query = queryString.stringify({ inc: 'supplier'})
+        await authenticatedAdminAgent
+                .get(`${partEndpoint}/${partObjID}?${query}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.supplier).toBeTruthy();
+                    expect(res.body.partNumber).not.toBeTruthy();
+                    expect(res.body.priceHistory).not.toBeTruthy();
+                    expect(res.body.description).not.toBeTruthy();
+                    expect(res.body.status).not.toBeTruthy();
+                    expect(res.body.additionalInfo).not.toBeTruthy();
+                })
+
+        done();
+    })
+
+    it(`GET /:partObjID: User with PART_READ perm should
+        not be able to access an invalid partObjID`, async (done) => {
+        await authenticatedAdminAgent
+                .get(`${partEndpoint}/${supplierObjID}`)
+                .expect(400)
+
+        done();
+    })
+
+    it(`GET /:partObjID: User without PART_READ perm should
+        not be able to access the endpoint and retrieve
+        part data`, async (done) => {
+        await authenticatedUnauthorizedAgent
+                .get(`${partEndpoint}/partObjID`)
+                .expect(403)
+        
+        done();
+    })
+
+    
+    
+    
+    
+    
+    
+    
     it(`testing...`, async (done) => {
+        console.log(supplierObjID);
+        console.log(partObjID);
         let test = `
             unauthenticated users should not be able to access the Supplier API
         `

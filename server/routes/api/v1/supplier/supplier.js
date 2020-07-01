@@ -81,6 +81,9 @@ router.get('/:supplierObjID',
         inc = ['name', 'address', 'telephone', 'fax', 'additionalInfo', 'parts']
     } = req.query;
 
+    // Convert `inc`/`sort` to array if only a single field is specified
+    if (!Array.isArray(inc)) { inc = [inc]; }
+
     try {
         let supplier = await SupplierModel.findOne({ _id: req.params.supplierObjID}, inc.join(' '));
         if (!supplier) {

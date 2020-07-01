@@ -199,6 +199,20 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
                     expect(res.body.additionalInfo).not.toBeTruthy();
                     expect(res.body.parts).not.toBeTruthy();
                 })
+        
+        // Include `name` only
+        query = queryString.stringify({ inc: 'name'})
+        await authenticatedReadAgent
+                .get(`${supplierEndpoint}/${supplierObjID}?${query}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.name).toBeTruthy();
+                    expect(res.body.address).not.toBeTruthy();
+                    expect(res.body.telephone).not.toBeTruthy();
+                    expect(res.body.fax).not.toBeTruthy();
+                    expect(res.body.additionalInfo).not.toBeTruthy();
+                    expect(res.body.parts).not.toBeTruthy();
+                })
         done();
     })
 

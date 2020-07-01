@@ -64,6 +64,44 @@ router.get('/',
     }
 })
 
+/**
+ * Mounted on /api/v1/part/:partObjID
+ * 
+ * Gets part information on the part identified
+ * by `:partObjID`
+ * 
+ * Request query string can specify:
+ * 1. Fields to include (`inc`)
+ * 
+ * Note: The `supplier` path will not be populated,
+ * even if `supplier` is included. Only the ObjectID
+ * will be returned in the response (if included)
+ * 
+ * Note: Will return 400 status code is the 
+ * `partObjID` is invalid
+ */
+router.get('/:partObjID',
+           isAuthorized(PERMS.PART_READ),
+           async function(req, res) {
+    let {
+        inc = ['supplier', 'partNumber', 'priceHistory', 'description', 'status', 'additionalInfo'],
+    } = req.query;
+
+    // Convert `inc`/`sort` to array if only a single field is specified
+    if (!Array.isArray(inc)) { inc = [inc]; }
+
+    try {
+        let part = await PartModel.findOne({ _id: req.params.partObjID}, inc.join(' '));
+        if (!part) {
+            return res.status(400).send('Invalid part ID');
+        }
+        return res.status(200).json(part);
+    } catch(err) {
+        logger.error(`GET /part/:partObjID: Could not get part: ${err}`);
+        return res.sendStatus(500);
+    }
+})
+
 module.exports = {
     partRouter: router
 }
