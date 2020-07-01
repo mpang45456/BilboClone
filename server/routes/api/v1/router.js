@@ -7,6 +7,9 @@ router.use('/auth', authRouter);
 const { userRouter } = require('./user/user');
 router.use('/user', userRouter);
 
+const { supplierRouter } = require('./supplier/supplier');
+router.use('/supplier', supplierRouter);
+
 module.exports = {
     apiV1Router: router
 }

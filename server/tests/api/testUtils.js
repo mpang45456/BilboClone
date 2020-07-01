@@ -7,6 +7,7 @@ export const loginEndpoint = '/api/v1/auth/login';
 export const logoutEndpoint = '/api/v1/auth/logout';
 export const tokenEndpoint = '/api/v1/auth/token';
 export const userEndpoint = '/api/v1/user';
+export const supplierEndpoint = '/api/v1/supplier';
 
 /**
  * Returns a supertest agent that has already sent a POST

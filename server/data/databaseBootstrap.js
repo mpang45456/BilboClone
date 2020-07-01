@@ -28,7 +28,7 @@ const users = [
     {
         "username": "user3",
         "password": "asd",
-        "permissions": [PERMS.PURCHASES_READ, PERMS.SALES_READ],
+        "permissions": [PERMS.SUPPLIER_READ],
         "name": "Gandalf",
         "position": "Sales Intern",
         "reportsTo": "user1"

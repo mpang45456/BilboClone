@@ -121,7 +121,6 @@ function isAuthenticated(req, res, next) {
         return res.sendStatus(401); // FIXME: Initially 403
     }
 
-    logger.debug(user);
     req.user = user;
     next();
 }

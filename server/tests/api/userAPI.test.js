@@ -11,7 +11,7 @@ const { loginEndpoint,
         getAuthenticatedAgent, 
         parseCookiesFromResponse } = require('./testUtils');
 
-describe('Testing /api/v1/auth/user endpoint', () => {
+describe('Testing /api/v1/user endpoint', () => {
     let authenticatedAdminAgent = null;
     let authenticatedUnauthorizedAgent = null;
     let server = null;
