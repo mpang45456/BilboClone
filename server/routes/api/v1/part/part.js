@@ -102,8 +102,19 @@ router.get('/:partObjID',
     }
 })
 
-// price is an initial price quotation
-// can create with/without initial price
+/**
+ * Mounted at /api/v1/part
+ * 
+ * Create a new part. 
+ * 
+ * Note: The initial `unitPrice` and `additionalInfo` 
+ * for the initial price is optional. If it is included,
+ * then it will form the first price in the `priceHistory`
+ * 
+ * Note: When a new part is created, the supplier 
+ * document associated with the part is also updated
+ * to include the new part.
+ */
 router.post('/', 
             isAuthorized(PERMS.PART_WRITE),
             async function(req, res) {
@@ -116,6 +127,7 @@ router.post('/',
             additionalInfo } = req.body;
     
     try {
+        // Create New Part
         const newPart = new PartModel({ supplier: supplierObjID, 
                                         partNumber, 
                                         description, 
@@ -128,6 +140,7 @@ router.post('/',
         }
         await newPart.save();
 
+        // Update Supplier with New Part
         const supplier = await SupplierModel.findOne({ _id: supplierObjID });
         supplier.parts.push(newPart._id);
         await supplier.save();
