@@ -346,6 +346,36 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
         done();
     })
 
+    it.only(`PATCH: /:supplierObjID: User with SUPPLIER_WRITE
+        perm should not be able to update any data when 
+        an invalid supplierObjID is provided`, async (done) => {
+        let fieldsToUpdate = {
+            name: newSupplier.name, 
+            address: newSupplier.address
+        }
+        let originalData = null;
+        await authenticatedAdminAgent
+                .get(supplierEndpoint)
+                .expect(200)
+                .then(res => {
+                    originalData = res.body;
+                })
+
+        await authenticatedAdminAgent
+                .patch(`${supplierEndpoint}/${partObjID}`)
+                .send(fieldsToUpdate)
+                .expect(400)
+
+        await authenticatedAdminAgent
+                .get(supplierEndpoint)
+                .expect(200)
+                .then(res => {
+                    expect(res.body).toEqual(originalData);
+                })
+        
+        done();
+    })
+
     it(`PATCH: /:supplierObjID: User without SUPPLIER_WRITE
         perm should not be able to update supplier details`, async (done) => {
         let fieldsToUpdate = {

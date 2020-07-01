@@ -156,6 +156,12 @@ router.patch('/:supplierObjID',
     }
 })
 
+router.delete('/:supplierObjID', 
+              isAuthorized(PERMS.SUPPLIER_WRITE),
+              async function(req, res) {
+    
+})
+
 module.exports = {
     supplierRouter: router,
 }
