@@ -8,7 +8,7 @@ CONFIG.DATABASE_URL = `mongodb://localhost/${CONFIG.NODE_ENV}`;
 
 // Authentication/Authorization
 CONFIG.ACCESS_TOKEN_SECRET = 'accessTokenSecret';
-CONFIG.ACCESS_TOKEN_EXPIRY = '10m'; //10 minutes
+CONFIG.ACCESS_TOKEN_EXPIRY = '600000'; //10 minutes
 CONFIG.REFRESH_TOKEN_SECRET = 'refreshTokenSecret';
 
 // Pagination
