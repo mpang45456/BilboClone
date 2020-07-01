@@ -102,6 +102,43 @@ router.get('/:partObjID',
     }
 })
 
+// price is an initial price quotation
+// can create with/without initial price
+router.post('/', 
+            isAuthorized(PERMS.PART_WRITE),
+            async function(req, res) {
+    const { supplierObjID, 
+            partNumber, 
+            unitPrice, 
+            priceAdditionalInfo, 
+            description, 
+            status, 
+            additionalInfo } = req.body;
+    
+    try {
+        const newPart = new PartModel({ supplier: supplierObjID, 
+                                        partNumber, 
+                                        description, 
+                                        status,
+                                        additionalInfo });
+        if (unitPrice) {
+            newPart.priceHistory.push({ createdBy: req.user.username, 
+                                        unitPrice, 
+                                        additionalInfo: priceAdditionalInfo });
+        }
+        await newPart.save();
+
+        const supplier = await SupplierModel.findOne({ _id: supplierObjID });
+        supplier.parts.push(newPart._id);
+        await supplier.save();
+
+        return res.status(200).send(`Successfully created new part: ${newPart}`);
+    } catch(err) {
+        logger.error(`POST /part: Could not create new part: ${err}`);
+        return res.status(400).send('Unable to create new part');
+    }
+})
+
 module.exports = {
     partRouter: router
 }

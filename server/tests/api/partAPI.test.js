@@ -7,6 +7,7 @@ let testSuppliersWithParts = require('../../data/databaseBootstrap').suppliers;
 let testUsers = require('../../data/databaseBootstrap').users;
 const { DatabaseInteractor } = require('../../data/DatabaseInteractor');
 const { partEndpoint,
+        supplierEndpoint,
         getAuthenticatedAgent } = require('./testUtils');
 const CONFIG = require('../../config');
 
@@ -20,6 +21,20 @@ describe('Testing /api/v1/part endpoint', () => {
     let allTestParts = [];
     let supplierObjID = null;
     let partObjID = null;
+
+    let newPartWithPrice = {
+        partNumber: 'AA-101',
+        unitPrice: 0.01,
+        priceAdditionalInfo: 'Stable price',
+        description: 'Double A Batteries',
+        additionalInfo: 'Company has offered a bulk purchase discount'
+    }
+
+    let newPartWithoutPrice = {
+        partNumber: 'AAA-102',
+        description: 'Triple A batteries',
+        additionalInfo: 'NIL'
+    }
 
     beforeAll(async (done) => {
         dbi = new DatabaseInteractor();
@@ -293,6 +308,134 @@ describe('Testing /api/v1/part endpoint', () => {
         done();
     })
 
+    /**
+     * ------------------------
+     * POST (Create a New Part)
+     * ------------------------
+     */
+    it(`POST /: User with PART_WRITE perm should be able to
+        access the endpoint and create a new part (with initial
+        price quotation)`, async (done) => {
+        // Set up part with supplierObjID
+        let newPart = JSON.parse(JSON.stringify(newPartWithPrice));
+        newPart.supplierObjID = supplierObjID;
+
+        await authenticatedAdminAgent
+                .post(partEndpoint)
+                .send(newPart)
+                .expect(200)
+
+        await authenticatedAdminAgent
+                .get(partEndpoint)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.length).toBe(allTestParts.length + 1);
+                })
+        
+        done();
+    })
+
+    it(`POST /: User with PART_WRITE perm should be able to
+        access the endpoint and create a new part (without initial
+        price quotation)`, async (done) => {
+        // Set up part with supplierObjID
+        let newPart = JSON.parse(JSON.stringify(newPartWithoutPrice));
+        newPart.supplierObjID = supplierObjID;
+
+        await authenticatedAdminAgent
+                .post(partEndpoint)
+                .send(newPart)
+                .expect(200)
+
+        await authenticatedAdminAgent
+                .get(partEndpoint)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.length).toBe(allTestParts.length + 1);
+                })
+        
+        done();
+    })
+
+    it(`POST /: User with PART_WRITE perm should not be 
+        able to create a new part if the required fields are
+        missing`, async (done) => {
+        // `supplerObjID` missing
+        let newPart = JSON.parse(JSON.stringify(newPartWithPrice));
+        await authenticatedAdminAgent
+                .post(partEndpoint)
+                .send(newPart)
+                .expect(400)
+
+        // `partNumber` missing
+        newPart = JSON.parse(JSON.stringify(newPartWithPrice));
+        newPart.supplierObjID = supplierObjID;
+        delete newPart.partNumber;
+        await authenticatedAdminAgent
+                .post(partEndpoint)
+                .send(newPart)
+                .expect(400)
+        
+        // Both `supplierObjID` and `partNumber` missing
+        newPart = JSON.parse(JSON.stringify(newPartWithPrice));
+        delete newPart.partNumber;
+        await authenticatedAdminAgent
+                .post(partEndpoint)
+                .send(newPart)
+                .expect(400)
+
+        done();
+    })
+
+    it(`POST /: User with PART_WRITE perm should be able
+        to create a new part, and the supplier document associated
+        with that part should also be updated to reflect the new
+        part`, async (done) => {
+        let initialNumberOfParts = null;
+        await authenticatedAdminAgent
+                .get(`${supplierEndpoint}/${supplierObjID}`)
+                .expect(200)
+                .expect(res => {
+                    initialNumberOfParts = res.body.parts.length;
+                })
+        
+        // Set up part with supplierObjID
+        let newPart = JSON.parse(JSON.stringify(newPartWithoutPrice));
+        newPart.supplierObjID = supplierObjID;
+
+        await authenticatedAdminAgent
+                .post(partEndpoint)
+                .send(newPart)
+                .expect(200)
+
+        await authenticatedAdminAgent
+                .get(`${supplierEndpoint}/${supplierObjID}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.parts.length).toBe(initialNumberOfParts + 1);
+                })
+        
+        done();
+    })
+
+    it(`POST /: User without PART_WRITE perm should not
+        be able to access the endpoint and create a new
+        part`, async (done) => {
+        // With PART_READ perm
+        await authenticatedReadAgent
+                .post(partEndpoint)
+                .send(newPartWithPrice)
+                .expect(403);
+
+        // With neither PART_READ nor PART_WRITE perm
+        await authenticatedUnauthorizedAgent
+                .post(partEndpoint)
+                .send(newPartWithPrice)
+                .expect(403);
+
+        done();
+    })
+
     
     
     
@@ -301,8 +444,6 @@ describe('Testing /api/v1/part endpoint', () => {
     
     
     it(`testing...`, async (done) => {
-        console.log(supplierObjID);
-        console.log(partObjID);
         let test = `
             unauthenticated users should not be able to access the Supplier API
         `
