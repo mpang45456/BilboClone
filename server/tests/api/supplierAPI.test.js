@@ -72,7 +72,7 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
      * ----------------
      */
     it(`GET /: User with SUPPLIER_READ perm should be able
-        to access the collectionendpoint and retrieve the supplier
+        to access the collection endpoint and retrieve the supplier
         data with default query fields`, async (done) => {
         await authenticatedReadAgent
                 .get(supplierEndpoint)

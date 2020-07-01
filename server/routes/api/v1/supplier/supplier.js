@@ -35,6 +35,7 @@ router.use(isAuthenticated);
 router.get('/',
            isAuthorized(PERMS.SUPPLIER_READ),
            async function(req, res) {
+    // TODO: Add filtering
     let {
         page = 1, 
         limit = CONFIG.DEFAULT_PAGE_LIMIT, 
