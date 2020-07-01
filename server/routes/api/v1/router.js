@@ -10,6 +10,9 @@ router.use('/user', userRouter);
 const { supplierRouter } = require('./supplier/supplier');
 router.use('/supplier', supplierRouter);
 
+const { partRouter } = require('./part/part');
+router.use('/part', partRouter);
+
 module.exports = {
     apiV1Router: router
 }
