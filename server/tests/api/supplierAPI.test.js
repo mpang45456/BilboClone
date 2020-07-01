@@ -18,6 +18,8 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
     let authenticatedAdminAgent = null; // SUPPLIER_READ, SUPPLIER_WRITE
     let authenticatedReadAgent = null; // SUPPLIER_READ
     let authenticatedUnauthorizedAgent = null; // No access to SUPPLIER API
+    let supplierObjID = null;
+    let partObjID = null;
 
     beforeAll(async (done) => {
         dbi = new DatabaseInteractor();
@@ -42,6 +44,11 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
         // Seed Database
         await dbi.addSuppliersAndParts(...testSuppliersWithParts);
 
+        // Obtain supplierObjID and partObjID (for testing)
+        let supplierObj = await SupplierModel.findOne({});
+        supplierObjID = supplierObj.id;
+        partObjID = supplierObj.parts[0];
+
         // Login
         const admin = testUsers[0];
         authenticatedAdminAgent = await getAuthenticatedAgent(server, admin.username, admin.password);
@@ -53,10 +60,15 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
         done();
     })
 
-    it(`GET: User with SUPPLIER_READ perm should be able
-        to access the endpoint and retrieve the supplier
+    /**
+     * ----------------
+     * GET (collection)
+     * ----------------
+     */
+    it(`GET /: User with SUPPLIER_READ perm should be able
+        to access the collectionendpoint and retrieve the supplier
         data with default query fields`, async (done) => {
-        await authenticatedAdminAgent
+        await authenticatedReadAgent
                 .get(supplierEndpoint)
                 .expect(200)
                 .expect(res => {
@@ -66,15 +78,16 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
                     expect(res.body[0].telephone).toBeTruthy();
                     expect(res.body[0].fax).toBeTruthy();
                     expect(res.body[0].additionalInfo).toBeTruthy();
+                    expect(res.body[0].parts).toBeTruthy();
                 })
         done();
     })
 
-    it(`GET: User with SUPPLIER_READ perm should be able
+    it(`GET /: User with SUPPLIER_READ perm should be able
         to specify which fields to include in query`, async (done) => {
         // `name` and `telephone` are to be included in response
         let query = queryString.stringify({ inc: ['name', 'telephone']});
-        await authenticatedAdminAgent
+        await authenticatedReadAgent
                 .get(`${supplierEndpoint}?${query}`)
                 .expect(200)
                 .expect(res => {
@@ -84,15 +97,16 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
                     expect(res.body[0].telephone).toBeTruthy();
                     expect(res.body[0].fax).not.toBeTruthy();
                     expect(res.body[0].additionalInfo).not.toBeTruthy();
+                    expect(res.body[0].parts).not.toBeTruthy();
                 })
         done();
     })
 
-    it(`GET: User with SUPPLIER_READ perm should be able
+    it(`GET /: User with SUPPLIER_READ perm should be able
         to paginate the request`, async (done) => {
         // First Page
         let query = queryString.stringify({ page: 1, limit: 2});
-        await authenticatedAdminAgent
+        await authenticatedReadAgent
                 .get(`${supplierEndpoint}?${query}`)
                 .expect(200)
                 .expect(res => {
@@ -103,7 +117,7 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
         
         // Second Page
         query = queryString.stringify({ page: 2, limit: 2});
-        await authenticatedAdminAgent
+        await authenticatedReadAgent
                 .get(`${supplierEndpoint}?${query}`)
                 .expect(200)
                 .expect(res => {
@@ -114,11 +128,11 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
         done();
     })
 
-    it(`GET: User with SUPPLIER_READ perm should be able
+    it(`GET /: User with SUPPLIER_READ perm should be able
         to sort the request`, async (done) => {
         // Sort by descending order for `name` field
         let query = queryString.stringify({ sort: '-name' });
-        await authenticatedAdminAgent
+        await authenticatedReadAgent
                 .get(`${supplierEndpoint}?${query}`)
                 .expect(200)
                 .expect(res => {
@@ -131,11 +145,70 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
         done();
     })
 
-    it(`GET: User without SUPPLIER_READ perm should not be
+    it(`GET /: User without SUPPLIER_READ perm should not be
         able to access the endpoint and retrieve supplier
         data`, async (done) => {
         await authenticatedUnauthorizedAgent
                 .get(supplierEndpoint)
+                .expect(403);
+        done();
+    })
+
+
+    /**
+     * -------------------------
+     * GET (individual resource)
+     * -------------------------
+     */
+    it(`GET /:supplierObjID: User with SUPPLIER_READ perm
+        should be able to access supplier data with default
+        query fields`, async (done) => {
+        await authenticatedReadAgent
+                .get(`${supplierEndpoint}/${supplierObjID}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.name).toBeTruthy();
+                    expect(res.body.address).toBeTruthy();
+                    expect(res.body.telephone).toBeTruthy();
+                    expect(res.body.fax).toBeTruthy();
+                    expect(res.body.additionalInfo).toBeTruthy();
+                    expect(res.body.parts).toBeTruthy();
+                })
+        done();
+    })
+
+    it(`GET /:supplierObjID: User with SUPPLIER_READ perm
+        should be able to access supplier data and specify
+        fields to include in query`, async (done) => {
+        // Include `name` and `telephone` fields
+        let query = queryString.stringify({ inc: ['name', 'telephone']})
+        await authenticatedReadAgent
+                .get(`${supplierEndpoint}/${supplierObjID}?${query}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.name).toBeTruthy();
+                    expect(res.body.address).not.toBeTruthy();
+                    expect(res.body.telephone).toBeTruthy();
+                    expect(res.body.fax).not.toBeTruthy();
+                    expect(res.body.additionalInfo).not.toBeTruthy();
+                    expect(res.body.parts).not.toBeTruthy();
+                })
+        done();
+    })
+
+    it(`GET /:supplierObjID: User with SUPPLIER_READ perm
+        should not be able to access an invalid supplierObjID`, async (done) => {
+        await authenticatedReadAgent
+                .get(`${supplierEndpoint}/${partObjID}`)
+                .expect(400);
+        done();
+    })
+
+    it(`GET /:supplierObjID: User without SUPPLIER_READ perm 
+        should not be able to access the endpoint and retrieve
+        supplier data`, async(done) => {
+        await authenticatedUnauthorizedAgent
+                .get(`${supplierEndpoint}/${supplierObjID}`)
                 .expect(403);
         done();
     })
