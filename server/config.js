@@ -11,4 +11,7 @@ CONFIG.ACCESS_TOKEN_SECRET = 'accessTokenSecret';
 CONFIG.ACCESS_TOKEN_EXPIRY = '10000';
 CONFIG.REFRESH_TOKEN_SECRET = 'refreshTokenSecret';
 
+// Pagination
+CONFIG.DEFAULT_PAGE_LIMIT = 20;
+
 module.exports = CONFIG;
