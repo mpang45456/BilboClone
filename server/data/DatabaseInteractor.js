@@ -76,7 +76,6 @@ class DatabaseInteractor {
 
     /**
      * Close the database connection
-     * // FIXME: Calling this method in `resetAndSeedDatabase.js` in Cypress causes an error
      */
     async closeConnection() {
         await mongoose.disconnect();
@@ -131,7 +130,7 @@ class DatabaseInteractor {
             // Add Parts 
             for (let part of supplier.parts) {
                 let partDoc = PartModel({
-                    supplier: supplier.name, 
+                    supplier: supplierDoc,
                     partNumber: part.partNumber, 
                     priceHistory: part.priceHistory, 
                     description: part.description,
