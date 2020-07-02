@@ -28,6 +28,12 @@ router.use(isAuthenticated);
  * 3. Pagination (`page`, `limit`)
  *    - e.g. ?page=1&limit=20
  * 
+ * The query can also be filtered. The filter
+ * must be provided in the BODY of the request,
+ * not the query string. It must be provided in
+ * JSON. All mongoose filter syntax is acceptable.
+ * See `supplierAPI.test.js` for an example.
+ * 
  * Note: if `parts` is included in the query, 
  * note that it is not populated (i.e. the ObjectIDs 
  * will be present, but not the Part documents)
@@ -35,13 +41,14 @@ router.use(isAuthenticated);
 router.get('/',
            isAuthorized(PERMS.SUPPLIER_READ),
            async function(req, res) {
-    // TODO: Add filtering
     let {
         page = 1, 
         limit = CONFIG.DEFAULT_PAGE_LIMIT, 
         inc = ['name', 'address', 'telephone', 'fax', 'additionalInfo', 'parts'],
         sort = ['name']
     } = req.query;
+
+    let filter = req.body; // FIXME: Using the req body directly as the filter to the Mongoose query might pose a significant security risk
 
     // Convert `inc`/`sort` to array if only a single field is specified
     if (!Array.isArray(inc)) { inc = [inc]; }
@@ -53,7 +60,7 @@ router.get('/',
             skip: (Number(page) - 1) * Number(limit),
             sort: sort.join(' '),
         }
-        let suppliers = await SupplierModel.find({}, inc.join(' '), options);
+        let suppliers = await SupplierModel.find(filter, inc.join(' '), options);
         return res.status(200).json(suppliers);
     } catch(err) {
         logger.error(`GET /supplier: Could not get suppliers: ${err}`);

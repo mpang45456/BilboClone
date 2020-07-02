@@ -109,6 +109,34 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
     })
 
     it(`GET /: User with SUPPLIER_READ perm should be able
+        to retrieve supplier data with custom filters`, async (done) => {
+        // Filter for suppliers with 'drive' (case-insensitive)
+        // in their `address` field
+        await authenticatedReadAgent
+                .get(supplierEndpoint)
+                .send({
+                    "address": { "$regex": "Drive", "$options": "i"}
+                })
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.length).toBe(2);
+                })
+
+        // Filter for suppliers whose `telephone` field ends with
+        // `9213`
+        await authenticatedReadAgent
+                .get(supplierEndpoint)
+                .send({
+                    "telephone": { "$regex": "9213$", "$options": "i"}
+                })
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.length).toBe(1);
+                })
+        done();
+    })
+
+    it(`GET /: User with SUPPLIER_READ perm should be able
         to paginate the request`, async (done) => {
         // First Page
         let query = queryString.stringify({ page: 1, limit: 2});
