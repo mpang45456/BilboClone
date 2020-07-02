@@ -114,6 +114,9 @@ router.get('/:partObjID',
  * Note: When a new part is created, the supplier 
  * document associated with the part is also updated
  * to include the new part.
+ * 
+ * Note: If the request is successful, the response will
+ * send the newly-created part back as JSON in the body.
  */
 router.post('/', 
             isAuthorized(PERMS.PART_WRITE),
@@ -134,7 +137,7 @@ router.post('/',
                                         status,
                                         additionalInfo });
         if (unitPrice) {
-            newPart.priceHistory.push({ createdBy: req.user.username, 
+            newPart.priceHistory.push({ createdBy: req.user.username, // set by `isAuthenticated` middleware
                                         unitPrice, 
                                         additionalInfo: priceAdditionalInfo });
         }
@@ -145,10 +148,61 @@ router.post('/',
         supplier.parts.push(newPart._id);
         await supplier.save();
 
-        return res.status(200).send(`Successfully created new part: ${newPart}`);
+        return res.status(200).json(newPart);
     } catch(err) {
         logger.error(`POST /part: Could not create new part: ${err}`);
         return res.status(400).send('Unable to create new part');
+    }
+})
+
+/**
+ * Mounted on /api/v1/part/:partObjID
+ * 
+ * Updates the details of the part identified
+ * by `:partObjID`
+ * 
+ * Note: The supplier field in the part cannot
+ * be changed. If a change is required, delete 
+ * the part and make a new one with the required
+ * changes. 
+ * 
+ * Note: All fields (except `priceHistory` and
+ * `supplier`) are updated in place. 
+ * 
+ * Note: Changes to `priceHistory` are appended,
+ * not updated in-place
+ * 
+ * Note: Change of status from 'ACTIVE' to 'ARCHIVED'
+ * and vice versa should be done here.
+ */
+router.patch('/:partObjID',
+             isAuthorized(PERMS.PART_WRITE),
+             async function(req, res) {
+    const { partNumber, 
+            unitPrice, 
+            priceAdditionalInfo, 
+            description, 
+            status, 
+            additionalInfo} = req.body;
+
+    try {
+        const part = await PartModel.findOne({ _id: req.params.partObjID });
+        if (partNumber) { part.partNumber = partNumber; }
+        if (description) { part.description = description; }
+        if (status) { part.status = status; }
+        if (additionalInfo) { part.additionalInfo = additionalInfo; }
+        if (unitPrice || priceAdditionalInfo) {
+            part.priceHistory.push({
+                createdBy: req.user.username, // set by `isAuthenticated` middleware
+                unitPrice: unitPrice, 
+                additionalInfo: priceAdditionalInfo
+            })
+        }
+        await part.save();
+        return res.status(200).send('Successfully updated part');
+    } catch(err) {
+        logger.error(`PATCH /part: Could not update part: ${err}`);
+        return res.status(400).send('Unable to update part');
     }
 })
 

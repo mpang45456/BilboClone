@@ -313,18 +313,40 @@ describe('Testing /api/v1/part endpoint', () => {
      * POST (Create a New Part)
      * ------------------------
      */
-    it(`POST /: User with PART_WRITE perm should be able to
+    it.only(`POST /: User with PART_WRITE perm should be able to
         access the endpoint and create a new part (with initial
         price quotation)`, async (done) => {
         // Set up part with supplierObjID
         let newPart = JSON.parse(JSON.stringify(newPartWithPrice));
         newPart.supplierObjID = supplierObjID;
 
+        let newPartObjID = null;
         await authenticatedAdminAgent
                 .post(partEndpoint)
                 .send(newPart)
                 .expect(200)
+                .then(res => {
+                    newPartObjID = res.body._id;
+                })
 
+        // Should be able to view new part (individually)
+        await authenticatedAdminAgent
+                .get(`${partEndpoint}/${newPartObjID}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.partNumber).toBe(newPart.partNumber);
+                    expect(res.body.supplier).toBe(supplierObjID.toString());
+                    expect(res.body.priceHistory[0].unitPrice).toBe(newPartWithPrice.unitPrice);
+                    expect(res.body.priceHistory[0].additionalInfo).toBe(newPartWithPrice.priceAdditionalInfo);
+                    expect(res.body.priceHistory[0].createdBy).toBe(testUsers[0].username);
+                    expect(res.body.priceHistory[0].createdAt).toBeTruthy();
+                    expect(res.body.priceHistory[0].updatedAt).toBeTruthy();
+                    expect(res.body.description).toBe(newPart.description);
+                    expect(res.body.status).toBe('ACTIVE');
+                    expect(res.body.additionalInfo).toBe(newPart.additionalInfo);
+                })
+
+        // Should be able to view new part (in collection) 
         await authenticatedAdminAgent
                 .get(partEndpoint)
                 .expect(200)
@@ -342,11 +364,29 @@ describe('Testing /api/v1/part endpoint', () => {
         let newPart = JSON.parse(JSON.stringify(newPartWithoutPrice));
         newPart.supplierObjID = supplierObjID;
 
+        let newPartObjID = null;
         await authenticatedAdminAgent
                 .post(partEndpoint)
                 .send(newPart)
                 .expect(200)
+                .then(res => {
+                    newPartObjID = res.body._id;
+                })
 
+        // Should be able to view new part (individually)
+        await authenticatedAdminAgent
+                .get(`${partEndpoint}/${newPartObjID}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.partNumber).toBe(newPart.partNumber);
+                    expect(res.body.supplier).toBe(supplierObjID.toString());
+                    expect(res.body.priceHistory.length).toBe(0);
+                    expect(res.body.description).toBe(newPart.description);
+                    expect(res.body.status).toBe('ACTIVE');
+                    expect(res.body.additionalInfo).toBe(newPart.additionalInfo);
+                })
+
+        // Should be able to view new part (in collection) 
         await authenticatedAdminAgent
                 .get(partEndpoint)
                 .expect(200)
@@ -436,7 +476,91 @@ describe('Testing /api/v1/part endpoint', () => {
         done();
     })
 
-    
+    /**
+     * ---------------------
+     * PATCH (Update a Part)
+     * ---------------------
+     */
+    it(`PATCH /:partObjID: User with PART_WRITE perm should be
+        able to access the endpoint and update part details
+        (non-priceHistory)`, async (done) => {
+        await authenticatedAdminAgent
+                .patch(`${partEndpoint}/${partObjID}`)
+                .send({
+                    partNumber: newPartWithPrice.partNumber,
+                    status: 'ARCHIVED'
+                })
+                .expect(200)
+
+        await authenticatedAdminAgent
+                .get(`${partEndpoint}/${partObjID}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body).toBeTruthy();
+                    expect(res.body.partNumber).toBe(newPartWithPrice.partNumber);
+                    expect(res.body.status).toBe('ARCHIVED');
+                })
+
+        done();
+    })
+
+    it(`PATCH /:partObjID: User with PART_WRITE perm should be
+        able to access the endpoint and update part details
+        (priceHistory). PriceHistory should be appended, not 
+        updated in place`, async (done) => {
+        let newPriceQuotation = {
+            unitPrice: 0.99,
+            priceAdditionalInfo: 'Huge increase in price'
+        }
+
+        // Get original PriceHistory
+        let origPriceHistory = [];
+        await authenticatedAdminAgent
+                .get(`${partEndpoint}/${partObjID}`)
+                .expect(200)
+                .expect(res => {
+                    origPriceHistory = res.body.priceHistory;
+                })
+
+        await authenticatedAdminAgent
+                .patch(`${partEndpoint}/${partObjID}`)
+                .send(newPriceQuotation)
+                .expect(200)
+
+        await authenticatedAdminAgent
+                .get(`${partEndpoint}/${partObjID}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body).toBeTruthy();
+                    expect(res.body.priceHistory.length).toBe(origPriceHistory.length + 1);
+                    expect(res.body.priceHistory[res.body.priceHistory.length - 1].createdBy)
+                            .toBe(testUsers[0].username);
+                    expect(res.body.priceHistory[res.body.priceHistory.length - 1].unitPrice)
+                            .toBe(newPriceQuotation.unitPrice);
+                    expect(res.body.priceHistory[res.body.priceHistory.length - 1].additionalInfo)
+                            .toBe(newPriceQuotation.priceAdditionalInfo);
+                })
+
+        done();
+    })
+
+    it(`PATCH /:partObjID: User without PART_WRITE perm
+        should not be able to access the endpoint and update
+        part details`, async (done) => {
+        // With PART_READ perm
+        await authenticatedReadAgent
+                .patch(`${partEndpoint}/${partObjID}`)
+                .send(newPartWithPrice)
+                .expect(403);
+
+        // With neither PART_READ nor PART_WRITE perm
+        await authenticatedUnauthorizedAgent
+                .patch(`${partEndpoint}/${partObjID}`)
+                .send(newPartWithPrice)
+                .expect(403);
+
+        done();
+    })
     
     
     

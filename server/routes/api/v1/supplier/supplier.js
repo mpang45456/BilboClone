@@ -108,6 +108,9 @@ router.get('/:supplierObjID',
  * Note: even if `parts` information is provided in the
  * request, the data will not be persisted. To persist,
  * parts data, use the PARTS API instead.
+ * 
+ * Note: If the request is successful, the response will
+ * send the newly-created supplier back as JSON in the body.
  */
 router.post('/', 
             isAuthorized(PERMS.SUPPLIER_WRITE),
@@ -120,7 +123,7 @@ router.post('/',
                                                 fax,
                                                 additionalInfo });
         await newSupplier.save();
-        return res.status(200).send(`Successfully created new supplier: ${newSupplier}`);
+        return res.status(200).json(newSupplier);
     } catch(err) {
         logger.error(`POST /supplier: Could not create new supplier: ${err}`);
         return res.status(400).send('Unable to create new supplier');
