@@ -313,7 +313,7 @@ describe('Testing /api/v1/part endpoint', () => {
      * POST (Create a New Part)
      * ------------------------
      */
-    it.only(`POST /: User with PART_WRITE perm should be able to
+    it(`POST /: User with PART_WRITE perm should be able to
         access the endpoint and create a new part (with initial
         price quotation)`, async (done) => {
         // Set up part with supplierObjID
@@ -561,16 +561,156 @@ describe('Testing /api/v1/part endpoint', () => {
 
         done();
     })
-    
-    
-    
-    
-    
-    
-    it(`testing...`, async (done) => {
-        let test = `
-            unauthenticated users should not be able to access the Supplier API
-        `
+
+    /**
+     * ---------------------------
+     * DELETE (An Individual Part)
+     * ---------------------------
+     */
+    it(`DELETE /:partObjID: User with PART_WRITE perm
+        should be able to access the endpoint and delete
+        a part. Part should not longer be accessible via
+        the PART API`, async (done) => {
+        await authenticatedAdminAgent
+                .delete(`${partEndpoint}/${partObjID}`)
+                .expect(200)
+
+        // Unable to retrieve individual part details
+        await authenticatedAdminAgent
+                .get(`${partEndpoint}/${partObjID}`)
+                .expect(400)
+
+        // Unable to retrieve deleted part's details in collection
+        await authenticatedAdminAgent
+                .get(partEndpoint)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.length).toBe(allTestParts.length - 1);
+                })
+
+        done();
+    })
+
+    it(`DELETE /:partObjID: User with PART_WRITE perm
+        should be able to access the endpoint and delete
+        a part. Part should not longer be found via
+        the SUPPLIER API`, async (done) => {
+        await authenticatedAdminAgent
+            .delete(`${partEndpoint}/${partObjID}`)
+            .expect(200)
+
+        await authenticatedAdminAgent
+            .get(`${supplierEndpoint}/${supplierObjID}`)
+            .expect(200)
+            .expect(res => {
+                expect(res.body.parts.length).toBe(0);
+            })
+
+        done();
+    })
+
+    it(`DELETE /:partObjID: User with PART_WRITE perm
+        deleting a non-existent part should still result
+        in a 200 status code response`, async (done) => {
+        await authenticatedAdminAgent
+            .delete(`${partEndpoint}/${supplierObjID}`)
+            .expect(200)
+
+        // Nothing should have been deleted
+        await authenticatedAdminAgent
+            .get(partEndpoint)
+            .expect(200)
+            .expect(res => {
+                expect(res.body.length).toBe(allTestParts.length);
+            })
+        done();
+    })
+
+    it(`DELETE /:partObjID: User with PART_WRITE perm
+        deleting an already-deleted part should still result
+        in a 200 status code response`, async (done) => {
+        // Delete existing part
+        await authenticatedAdminAgent
+            .delete(`${partEndpoint}/${partObjID}`)
+            .expect(200)
+
+        // Part should have been deleted
+        await authenticatedAdminAgent
+            .get(partEndpoint)
+            .expect(200)
+            .expect(res => {
+                expect(res.body.length).toBe(allTestParts.length - 1);
+            })
+        
+        // Delete already-deleted part
+        await authenticatedAdminAgent
+            .delete(`${partEndpoint}/${partObjID}`)
+            .expect(200)
+        
+        // No other parts should have been deleted
+        await authenticatedAdminAgent
+            .get(supplierEndpoint)
+            .expect(200)
+            .expect(res => {
+                expect(res.body.length).toBe(allTestParts.length - 1);
+            })
+        
+        done();
+    })
+
+    it(`DELETE /:partObjID: User without PART_WRITE perm
+        should not be able to access the endpoint and delete
+        a part`, async (done) => {
+        // With PART_READ perm
+        await authenticatedReadAgent
+                .delete(`${partEndpoint}/${partObjID}`)
+                .send(newPartWithPrice)
+                .expect(403);
+
+        // With neither PART_READ nor PART_WRITE perm
+        await authenticatedUnauthorizedAgent
+                .delete(`${partEndpoint}/${partObjID}`)
+                .send(newPartWithPrice)
+                .expect(403);
+
+        done();
+    })
+
+    /**
+     * -------
+     * General
+     * -------
+     */
+    it(`Unauthenticated users should not be able to access
+        the Part API`, async (done) => {
+        // Set up part with supplierObjID
+        let newPart = JSON.parse(JSON.stringify(newPartWithPrice));
+        newPart.supplierObjID = supplierObjID;
+
+        await request(server)
+                .get(partEndpoint)
+                .expect(401)
+
+        await request(server)
+                .get(`${partEndpoint}/${partObjID}`)
+                .expect(401)
+
+        await request(server)
+                .post(partEndpoint)
+                .send(newPart)
+                .expect(401)
+
+        await request(server)
+                .patch(`${partEndpoint}/${partObjID}`)
+                .send({
+                    status: 'ARCHIVE'
+                })
+                .expect(401)
+
+        await request(server)
+                .delete(`${partEndpoint}/${partObjID}`)
+                .expect(401)
+        
         done();
     })
 

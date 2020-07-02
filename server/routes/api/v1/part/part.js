@@ -206,6 +206,21 @@ router.patch('/:partObjID',
     }
 })
 
+// have to update supplier as well
+// does not do idempotent delete ??
+router.delete('/:partObjID',
+              isAuthorized(PERMS.PART_WRITE),
+              async function(req, res) {
+    try {
+        // const partObj = await PartModel.findOne({ _id: req.params.partObjID });
+        await SupplierModel.findOneAndUpdate({ parts: req.params.partObjID }, { $pull: {parts: req.params.partObjID }});
+        await PartModel.deleteOne({ _id: req.params.partObjID });
+        return res.status(200).send('Deleted part');
+    } catch(err) {
+        return res.status(400).send('Unable to delete part');
+    }
+})
+
 module.exports = {
     partRouter: router
 }
