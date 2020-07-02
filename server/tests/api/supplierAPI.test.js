@@ -78,13 +78,13 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
                 .get(supplierEndpoint)
                 .expect(200)
                 .expect(res => {
-                    expect(res.body.length).toBeLessThanOrEqual(CONFIG.DEFAULT_PAGE_LIMIT);
-                    expect(res.body[0].name).toBeTruthy();
-                    expect(res.body[0].address).toBeTruthy();
-                    expect(res.body[0].telephone).toBeTruthy();
-                    expect(res.body[0].fax).toBeTruthy();
-                    expect(res.body[0].additionalInfo).toBeTruthy();
-                    expect(res.body[0].parts).toBeTruthy();
+                    expect(res.body.suppliers.length).toBeLessThanOrEqual(CONFIG.DEFAULT_PAGE_LIMIT);
+                    expect(res.body.suppliers[0].name).toBeTruthy();
+                    expect(res.body.suppliers[0].address).toBeTruthy();
+                    expect(res.body.suppliers[0].telephone).toBeTruthy();
+                    expect(res.body.suppliers[0].fax).toBeTruthy();
+                    expect(res.body.suppliers[0].additionalInfo).toBeTruthy();
+                    expect(res.body.suppliers[0].parts).toBeTruthy();
                 })
         done();
     })
@@ -97,13 +97,13 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
                 .get(`${supplierEndpoint}?${query}`)
                 .expect(200)
                 .expect(res => {
-                    expect(res.body.length).toBeLessThanOrEqual(CONFIG.DEFAULT_PAGE_LIMIT);
-                    expect(res.body[0].name).toBeTruthy();
-                    expect(res.body[0].address).not.toBeTruthy();
-                    expect(res.body[0].telephone).toBeTruthy();
-                    expect(res.body[0].fax).not.toBeTruthy();
-                    expect(res.body[0].additionalInfo).not.toBeTruthy();
-                    expect(res.body[0].parts).not.toBeTruthy();
+                    expect(res.body.suppliers.length).toBeLessThanOrEqual(CONFIG.DEFAULT_PAGE_LIMIT);
+                    expect(res.body.suppliers[0].name).toBeTruthy();
+                    expect(res.body.suppliers[0].address).not.toBeTruthy();
+                    expect(res.body.suppliers[0].telephone).toBeTruthy();
+                    expect(res.body.suppliers[0].fax).not.toBeTruthy();
+                    expect(res.body.suppliers[0].additionalInfo).not.toBeTruthy();
+                    expect(res.body.suppliers[0].parts).not.toBeTruthy();
                 })
         done();
     })
@@ -119,7 +119,7 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
                 })
                 .expect(200)
                 .expect(res => {
-                    expect(res.body.length).toBe(2);
+                    expect(res.body.suppliers.length).toBe(2);
                 })
 
         // Filter for suppliers whose `telephone` field ends with
@@ -131,7 +131,7 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
                 })
                 .expect(200)
                 .expect(res => {
-                    expect(res.body.length).toBe(1);
+                    expect(res.body.suppliers.length).toBe(1);
                 })
         done();
     })
@@ -144,9 +144,11 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
                 .get(`${supplierEndpoint}?${query}`)
                 .expect(200)
                 .expect(res => {
-                    expect(res.body.length).toBe(2);
-                    expect(res.body[0].name).toBe(testSuppliersWithParts[0].name);
-                    expect(res.body[1].name).toBe(testSuppliersWithParts[1].name);
+                    expect(res.body.suppliers.length).toBe(2);
+                    expect(res.body.suppliers[0].name).toBe(testSuppliersWithParts[0].name);
+                    expect(res.body.suppliers[1].name).toBe(testSuppliersWithParts[1].name);
+                    expect(res.body.totalPages).toBe(2);
+                    expect(res.body.currentPage).toBe(1);
                 })
         
         // Second Page
@@ -155,10 +157,28 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
                 .get(`${supplierEndpoint}?${query}`)
                 .expect(200)
                 .expect(res => {
-                    expect(res.body.length).toBe(2);
-                    expect(res.body[0].name).toBe(testSuppliersWithParts[2].name);
-                    expect(res.body[1].name).toBe(testSuppliersWithParts[3].name);
+                    expect(res.body.suppliers.length).toBe(2);
+                    expect(res.body.suppliers[0].name).toBe(testSuppliersWithParts[2].name);
+                    expect(res.body.suppliers[1].name).toBe(testSuppliersWithParts[3].name);
+                    expect(res.body.totalPages).toBe(2);
+                    expect(res.body.currentPage).toBe(2);
                 })
+        done();
+    })
+
+    it(`GET /: User with SUPPLIER_READ perm should be able
+        to paginate the request, but response should have no
+        suppliers if page exceeds total number of pages`, async (done) => {
+        let query = queryString.stringify({ page: 10, limit: 20 });
+        await authenticatedReadAgent
+                .get(`${supplierEndpoint}?${query}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.suppliers.length).toBe(0);
+                    expect(res.body.totalPages).toBe(1);
+                    expect(res.body.currentPage).toBe(10);
+                })
+        
         done();
     })
 
@@ -170,11 +190,11 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
                 .get(`${supplierEndpoint}?${query}`)
                 .expect(200)
                 .expect(res => {
-                    expect(res.body.length).toBe(testSuppliersWithParts.length);
-                    expect(res.body[0].name).toBe(testSuppliersWithParts[3].name);
-                    expect(res.body[1].name).toBe(testSuppliersWithParts[2].name);
-                    expect(res.body[2].name).toBe(testSuppliersWithParts[1].name);
-                    expect(res.body[3].name).toBe(testSuppliersWithParts[0].name);
+                    expect(res.body.suppliers.length).toBe(testSuppliersWithParts.length);
+                    expect(res.body.suppliers[0].name).toBe(testSuppliersWithParts[3].name);
+                    expect(res.body.suppliers[1].name).toBe(testSuppliersWithParts[2].name);
+                    expect(res.body.suppliers[2].name).toBe(testSuppliersWithParts[1].name);
+                    expect(res.body.suppliers[3].name).toBe(testSuppliersWithParts[0].name);
                 })
         done();
     })
@@ -277,7 +297,7 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
                 .get(supplierEndpoint)
                 .expect(200)
                 .then(res => {
-                    expect(res.body.length).toBe(testSuppliersWithParts.length + 1);
+                    expect(res.body.suppliers.length).toBe(testSuppliersWithParts.length + 1);
                 })
         done();
     })
@@ -327,8 +347,9 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
                 .get(supplierEndpoint)
                 .expect(200)
                 .expect(res => {
-                    expect(res.body[res.body.length - 1]).toBeTruthy();
-                    expect(res.body[res.body.length - 1].parts.length).toBe(0);
+                    console.log(res.body)
+                    expect(res.body.suppliers[res.body.suppliers.length - 1]).toBeTruthy();
+                    expect(res.body.suppliers[res.body.suppliers.length - 1].parts.length).toBe(0);
                 })
         
         done();
@@ -454,7 +475,7 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
                 .get(supplierEndpoint)
                 .expect(200)
                 .expect(res => {
-                    expect(res.body.length).toBe(testSuppliersWithParts.length - 1);
+                    expect(res.body.suppliers.length).toBe(testSuppliersWithParts.length - 1);
                 })
         
         await authenticatedAdminAgent

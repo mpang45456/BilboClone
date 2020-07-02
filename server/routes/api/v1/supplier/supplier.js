@@ -54,14 +54,24 @@ router.get('/',
     if (!Array.isArray(inc)) { inc = [inc]; }
     if (!Array.isArray(sort)) { sort = [sort]; }
 
+    // Convert to Number
+    limit = Number(limit);
+    page = Number(page);
+
     try {
         const options = {
-            limit: Number(limit), 
-            skip: (Number(page) - 1) * Number(limit),
+            limit,  
+            skip: (page - 1) * limit,
             sort: sort.join(' '),
         }
         let suppliers = await SupplierModel.find(filter, inc.join(' '), options);
-        return res.status(200).json(suppliers);
+
+        const totalNumSuppliers = await SupplierModel.countDocuments();
+        return res.status(200).json({
+            suppliers,
+            totalPages: Math.ceil(totalNumSuppliers / limit),
+            currentPage: page
+        });
     } catch(err) {
         logger.error(`GET /supplier: Could not get suppliers: ${err}`);
         return res.sendStatus(500);
