@@ -347,7 +347,6 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
                 .get(supplierEndpoint)
                 .expect(200)
                 .expect(res => {
-                    console.log(res.body)
                     expect(res.body.suppliers[res.body.suppliers.length - 1]).toBeTruthy();
                     expect(res.body.suppliers[res.body.suppliers.length - 1].parts.length).toBe(0);
                 })
