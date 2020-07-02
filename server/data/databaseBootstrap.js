@@ -176,6 +176,7 @@ for (let i = 0; i < numSupplierDataFillers; i++) {
             description: `Part ${j} by ${i+1}-th Supplier`
         })
     }
+    suppliers.push(supplier);
 }
 
 module.exports = {

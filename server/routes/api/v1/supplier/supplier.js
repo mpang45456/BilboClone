@@ -70,6 +70,8 @@ router.get('/',
         let suppliers = await SupplierModel.find(filter, inc.join(' '), options);
 
         const totalNumSuppliers = await SupplierModel.countDocuments();
+        console.error(totalNumSuppliers);
+        console.error(Math.ceil(totalNumSuppliers / limit));
         return res.status(200).json({
             suppliers,
             totalPages: Math.ceil(totalNumSuppliers / limit),

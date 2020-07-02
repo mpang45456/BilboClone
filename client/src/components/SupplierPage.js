@@ -5,6 +5,7 @@ import { Menu, Table } from 'antd';
 import { PlusOutlined } from "@ant-design/icons";
 import PropTypes from 'prop-types';
 import { bax, useAuth, PERMS, redirectToErrorPage } from '../context/AuthContext';
+import queryString from 'query-string';
 
 export default function SupplierPage(props) {
     const { permissionsList } = useAuth();
@@ -63,21 +64,20 @@ function SupplierList(props) {
     }, []) //TODO: for now, run only on component mounting
 
     const handleTableChange = (pagination, filters, sorter) => {
-        getSupplierData(pagination)
+        getSupplierData(pagination);
     }
 
     const getSupplierData = (pagination) => {
         setIsLoading(true);
-        bax.get('/api/v1/supplier', { withCredentials: true})
+        let query = queryString.stringify({page: pagination.current, limit: pagination.pageSize});
+        bax.get(`/api/v1/supplier?${query}`, { withCredentials: true})
             .then(res => {
                 if (res.status === 200) {
-                    console.log(res.data)
                     setDataSource(res.data.suppliers);
-                    // TODO: DEBUG
                     setPagination({
                         current: res.data.currentPage,
                         pageSize: pagination.pageSize,
-                        total: res.data.totalPages
+                        total: res.data.totalPages * pagination.pageSize,
                     })
                     setIsLoading(false);
                 }
@@ -110,7 +110,7 @@ function SupplierList(props) {
                rowKey={record => record._id}
                loading={isLoading}
                pagination={pagination}
-
+               onChange={handleTableChange}
         />
     )
 }
