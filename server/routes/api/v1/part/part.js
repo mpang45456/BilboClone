@@ -33,6 +33,9 @@ router.use(isAuthenticated);
  * Note: The `supplier` path will not be populated.
  * Only the ObjectID in the `supplier` path will be
  * returned in the response (if included).
+ * 
+ * Note: response includes `parts`, `totalPages` and
+ * `currentPage`.
  */
 router.get('/', 
            isAuthorized(PERMS.PART_READ),
@@ -50,14 +53,24 @@ router.get('/',
     if (!Array.isArray(inc)) { inc = [inc]; }
     if (!Array.isArray(sort)) { sort = [sort]; }
 
+    // Convert to Number
+    limit = Number(limit);
+    page = Number(page);
+
     try {
         const options = {
-            limit: Number(limit), 
-            skip: (Number(page) - 1) * Number(limit),
+            limit: limit, 
+            skip: (page - 1) * limit,
             sort: sort.join(' '),
         }
         let parts = await PartModel.find(filter, inc.join(' '), options);
-        return res.status(200).json(parts);
+
+        const totalNumParts = await PartModel.countDocuments();
+        return res.status(200).json({
+            parts,
+            totalPages: Math.ceil(totalNumParts / limit),
+            currentPage: page
+        });
     } catch(err) {
         logger.error(`GET /part: Could not get parts: ${err}`);
         return res.sendStatus(500);

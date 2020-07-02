@@ -93,14 +93,16 @@ describe('Testing /api/v1/part endpoint', () => {
                 .get(partEndpoint)
                 .expect(200)
                 .expect(res => {
-                    expect(res.body.length).toBeLessThanOrEqual(CONFIG.DEFAULT_PAGE_LIMIT);
-                    expect(res.body.length).toBe(allTestParts.length);
-                    expect(res.body[0].supplier).toBeTruthy();
-                    expect(res.body[0].partNumber).toBeTruthy();
-                    expect(res.body[0].priceHistory).toBeTruthy();
-                    expect(res.body[0].description).toBeTruthy();
-                    expect(res.body[0].status).toBeTruthy();
-                    expect(res.body[0].additionalInfo).toBeTruthy();
+                    expect(res.body.parts.length).toBeLessThanOrEqual(CONFIG.DEFAULT_PAGE_LIMIT);
+                    expect(res.body.parts.length).toBe(allTestParts.length);
+                    expect(res.body.parts[0].supplier).toBeTruthy();
+                    expect(res.body.parts[0].partNumber).toBeTruthy();
+                    expect(res.body.parts[0].priceHistory).toBeTruthy();
+                    expect(res.body.parts[0].description).toBeTruthy();
+                    expect(res.body.parts[0].status).toBeTruthy();
+                    expect(res.body.parts[0].additionalInfo).toBeTruthy();
+                    expect(res.body.totalPages).toBe(1);
+                    expect(res.body.currentPage).toBe(1);
                 })
         
         done();
@@ -116,16 +118,16 @@ describe('Testing /api/v1/part endpoint', () => {
                 .expect(200)
                 .expect(res => {
                     // Total number of results should still be the same
-                    expect(res.body.length).toBeLessThanOrEqual(CONFIG.DEFAULT_PAGE_LIMIT);
-                    expect(res.body.length).toBe(allTestParts.length);
+                    expect(res.body.parts.length).toBeLessThanOrEqual(CONFIG.DEFAULT_PAGE_LIMIT);
+                    expect(res.body.parts.length).toBe(allTestParts.length);
 
                     // Fields included in response should be customised
-                    expect(res.body[0].supplier).toBeTruthy();
-                    expect(res.body[0].partNumber).toBeTruthy();
-                    expect(res.body[0].priceHistory).not.toBeTruthy();
-                    expect(res.body[0].description).not.toBeTruthy();
-                    expect(res.body[0].status).not.toBeTruthy();
-                    expect(res.body[0].additionalInfo).not.toBeTruthy();
+                    expect(res.body.parts[0].supplier).toBeTruthy();
+                    expect(res.body.parts[0].partNumber).toBeTruthy();
+                    expect(res.body.parts[0].priceHistory).not.toBeTruthy();
+                    expect(res.body.parts[0].description).not.toBeTruthy();
+                    expect(res.body.parts[0].status).not.toBeTruthy();
+                    expect(res.body.parts[0].additionalInfo).not.toBeTruthy();
                 })
 
         // Negative inclusion (include everything except ____)
@@ -134,7 +136,7 @@ describe('Testing /api/v1/part endpoint', () => {
                 .get(`${partEndpoint}?${query}`)
                 .expect(200)
                 .expect(res => {
-                    for (let part of res.body) {
+                    for (let part of res.body.parts) {
                         expect(part.description).not.toBeTruthy();
                     }
                 })
@@ -150,7 +152,9 @@ describe('Testing /api/v1/part endpoint', () => {
                 .get(`${partEndpoint}?${query}`)
                 .expect(200)
                 .expect(res => {
-                    expect(res.body.length).toBe(allTestParts.length-1);
+                    expect(res.body.parts.length).toBe(allTestParts.length-1);
+                    expect(res.body.totalPages).toBe(2);
+                    expect(res.body.currentPage).toBe(1);
                 })
         
         // Second Page
@@ -159,8 +163,26 @@ describe('Testing /api/v1/part endpoint', () => {
                 .get(`${partEndpoint}?${query}`)
                 .expect(200)
                 .expect(res => {
-                    expect(res.body.length).toBe(1);
+                    expect(res.body.parts.length).toBe(1);
+                    expect(res.body.totalPages).toBe(2);
+                    expect(res.body.currentPage).toBe(2);
                 })
+        done();
+    })
+
+    it(`GET /: User with PART_READ perm should be able
+        to paginate the request, but response should have no
+        parts data if page exceeds total number of pages`, async (done) => {
+        let query = queryString.stringify({ page: 10, limit: 20 });
+        await authenticatedReadAgent
+                .get(`${partEndpoint}?${query}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.parts.length).toBe(0);
+                    expect(res.body.totalPages).toBe(1);
+                    expect(res.body.currentPage).toBe(10);
+                })
+        
         done();
     })
 
@@ -181,9 +203,9 @@ describe('Testing /api/v1/part endpoint', () => {
                 .get(`${partEndpoint}?${query}`)
                 .expect(200)
                 .expect(res => {
-                    expect(res.body.length).toBe(allTestParts.length);
-                    expect(res.body[0].partNumber).toBe(sortedParts[0].partNumber);
-                    expect(res.body[res.body.length-1].partNumber).toBe(sortedParts[sortedParts.length-1].partNumber);
+                    expect(res.body.parts.length).toBe(allTestParts.length);
+                    expect(res.body.parts[0].partNumber).toBe(sortedParts[0].partNumber);
+                    expect(res.body.parts[res.body.parts.length-1].partNumber).toBe(sortedParts[sortedParts.length-1].partNumber);
                 })
         
         // Descending Sort
@@ -192,9 +214,9 @@ describe('Testing /api/v1/part endpoint', () => {
                 .get(`${partEndpoint}?${query}`)
                 .expect(200)
                 .expect(res => {
-                    expect(res.body.length).toBe(allTestParts.length);
-                    expect(res.body[0].partNumber).toBe(sortedParts[sortedParts.length-1].partNumber);
-                    expect(res.body[res.body.length-1].partNumber).toBe(sortedParts[0].partNumber);
+                    expect(res.body.parts.length).toBe(allTestParts.length);
+                    expect(res.body.parts[0].partNumber).toBe(sortedParts[sortedParts.length-1].partNumber);
+                    expect(res.body.parts[res.body.parts.length-1].partNumber).toBe(sortedParts[0].partNumber);
                 })
         done();
     })
@@ -208,7 +230,7 @@ describe('Testing /api/v1/part endpoint', () => {
                 .send(filter)
                 .expect(200)
                 .expect(res => {
-                    expect(res.body.length).toBe(2);
+                    expect(res.body.parts.length).toBe(2);
                 })
         
         filter = {"$or": [{"description": "RFID receiver"}, {"description": "RFID transmitter"}]};
@@ -217,7 +239,7 @@ describe('Testing /api/v1/part endpoint', () => {
                 .send(filter)
                 .expect(200)
                 .expect(res => {
-                    expect(res.body.length).toBe(2);
+                    expect(res.body.parts.length).toBe(2);
                 })
         done();
     })
@@ -351,7 +373,7 @@ describe('Testing /api/v1/part endpoint', () => {
                 .get(partEndpoint)
                 .expect(200)
                 .expect(res => {
-                    expect(res.body.length).toBe(allTestParts.length + 1);
+                    expect(res.body.parts.length).toBe(allTestParts.length + 1);
                 })
         
         done();
@@ -391,7 +413,7 @@ describe('Testing /api/v1/part endpoint', () => {
                 .get(partEndpoint)
                 .expect(200)
                 .expect(res => {
-                    expect(res.body.length).toBe(allTestParts.length + 1);
+                    expect(res.body.parts.length).toBe(allTestParts.length + 1);
                 })
         
         done();
@@ -585,7 +607,7 @@ describe('Testing /api/v1/part endpoint', () => {
                 .get(partEndpoint)
                 .expect(200)
                 .expect(res => {
-                    expect(res.body.length).toBe(allTestParts.length - 1);
+                    expect(res.body.parts.length).toBe(allTestParts.length - 1);
                 })
 
         done();
@@ -621,7 +643,7 @@ describe('Testing /api/v1/part endpoint', () => {
             .get(partEndpoint)
             .expect(200)
             .expect(res => {
-                expect(res.body.length).toBe(allTestParts.length);
+                expect(res.body.parts.length).toBe(allTestParts.length);
             })
         done();
     })
@@ -639,7 +661,7 @@ describe('Testing /api/v1/part endpoint', () => {
             .get(partEndpoint)
             .expect(200)
             .expect(res => {
-                expect(res.body.length).toBe(allTestParts.length - 1);
+                expect(res.body.parts.length).toBe(allTestParts.length - 1);
             })
         
         // Delete already-deleted part
@@ -649,10 +671,10 @@ describe('Testing /api/v1/part endpoint', () => {
         
         // No other parts should have been deleted
         await authenticatedAdminAgent
-            .get(supplierEndpoint)
+            .get(partEndpoint)
             .expect(200)
             .expect(res => {
-                expect(res.body.length).toBe(allTestParts.length - 1);
+                expect(res.body.parts.length).toBe(allTestParts.length - 1);
             })
         
         done();

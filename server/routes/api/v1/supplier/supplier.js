@@ -37,6 +37,9 @@ router.use(isAuthenticated);
  * Note: if `parts` is included in the query, 
  * note that it is not populated (i.e. the ObjectIDs 
  * will be present, but not the Part documents)
+ * 
+ * Note: response includes `suppliers`, `totalPages` and
+ * `currentPage`.
  */
 router.get('/',
            isAuthorized(PERMS.SUPPLIER_READ),
