@@ -101,7 +101,7 @@ describe('Testing /api/v1/part endpoint', () => {
                     expect(res.body.parts[0].description).toBeTruthy();
                     expect(res.body.parts[0].status).toBeTruthy();
                     expect(res.body.parts[0].additionalInfo).toBeTruthy();
-                    expect(res.body.totalPages).toBe(1);
+                    expect(res.body.totalPages).toBe(Math.ceil(allTestParts.length / CONFIG.DEFAULT_PAGE_LIMIT));
                     expect(res.body.currentPage).toBe(1);
                 })
         
@@ -179,7 +179,7 @@ describe('Testing /api/v1/part endpoint', () => {
                 .expect(200)
                 .expect(res => {
                     expect(res.body.parts.length).toBe(0);
-                    expect(res.body.totalPages).toBe(1);
+                    expect(res.body.totalPages).toBe(Math.ceil(allTestParts.length / 20));
                     expect(res.body.currentPage).toBe(10);
                 })
         

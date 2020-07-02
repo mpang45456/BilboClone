@@ -147,7 +147,7 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
                     expect(res.body.suppliers.length).toBe(2);
                     expect(res.body.suppliers[0].name).toBe(testSuppliersWithParts[0].name);
                     expect(res.body.suppliers[1].name).toBe(testSuppliersWithParts[1].name);
-                    expect(res.body.totalPages).toBe(2);
+                    expect(res.body.totalPages).toBe(Math.ceil(testSuppliersWithParts.length / 2));
                     expect(res.body.currentPage).toBe(1);
                 })
         
@@ -160,7 +160,7 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
                     expect(res.body.suppliers.length).toBe(2);
                     expect(res.body.suppliers[0].name).toBe(testSuppliersWithParts[2].name);
                     expect(res.body.suppliers[1].name).toBe(testSuppliersWithParts[3].name);
-                    expect(res.body.totalPages).toBe(2);
+                    expect(res.body.totalPages).toBe(Math.ceil(testSuppliersWithParts.length / 2));
                     expect(res.body.currentPage).toBe(2);
                 })
         done();
@@ -191,10 +191,10 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
                 .expect(200)
                 .expect(res => {
                     expect(res.body.suppliers.length).toBe(testSuppliersWithParts.length);
-                    expect(res.body.suppliers[0].name).toBe(testSuppliersWithParts[3].name);
-                    expect(res.body.suppliers[1].name).toBe(testSuppliersWithParts[2].name);
-                    expect(res.body.suppliers[2].name).toBe(testSuppliersWithParts[1].name);
-                    expect(res.body.suppliers[3].name).toBe(testSuppliersWithParts[0].name);
+                    expect(res.body.suppliers[0].name).toBe(testSuppliersWithParts[testSuppliersWithParts.length - 1].name);
+                    expect(res.body.suppliers[1].name).toBe(testSuppliersWithParts[testSuppliersWithParts.length - 2].name);
+                    expect(res.body.suppliers[2].name).toBe(testSuppliersWithParts[testSuppliersWithParts.length - 3].name);
+                    expect(res.body.suppliers[3].name).toBe(testSuppliersWithParts[testSuppliersWithParts.length - 4].name);
                 })
         done();
     })
@@ -347,8 +347,8 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
                 .get(supplierEndpoint)
                 .expect(200)
                 .expect(res => {
-                    expect(res.body.suppliers[res.body.suppliers.length - 1]).toBeTruthy();
-                    expect(res.body.suppliers[res.body.suppliers.length - 1].parts.length).toBe(0);
+                    expect(res.body.suppliers[2]).toBeTruthy();
+                    expect(res.body.suppliers[2].parts.length).toBe(0);
                 })
         
         done();
