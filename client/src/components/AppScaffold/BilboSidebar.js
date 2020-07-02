@@ -100,9 +100,9 @@ class Sidebar extends React.Component {
                 <SubMenu key={CONFIG.DATA_SUB_MENU_KEY} 
                          icon={<BarChartOutlined />} 
                          title="Data">
-                  <Menu.Item key={this.__getMenuKeyFromURL(CONFIG.INVENTORY_URL)} >
-                    <NavLink to={CONFIG.INVENTORY_URL}>
-                        Inventory
+                  <Menu.Item key={this.__getMenuKeyFromURL(CONFIG.PARTS_URL)} >
+                    <NavLink to={CONFIG.PARTS_URL}>
+                        Parts
                     </NavLink>
                   </Menu.Item>
                   <Menu.Item key={this.__getMenuKeyFromURL(CONFIG.SUPPLIER_URL)} >

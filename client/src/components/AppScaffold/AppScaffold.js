@@ -9,7 +9,7 @@ import BilboContent from './BilboContent';
 import HomePage from '../HomePage';
 import SalesPage from '../SalesPage';
 import PurchasePage from '../PurchasePage';
-import InventoryPage from '../InventoryPage';
+import PartsPage from '../PartsPage';
 import SupplierPage from '../SupplierPage';
 import SettingsPage from '../SettingsPage';
 import CustomerPage from '../CustomerPage';
@@ -48,7 +48,7 @@ export default class AppScaffold extends React.Component {
               <Route exact path={CONFIG.HOME_URL} component={HomePage} />
               <Route path={CONFIG.SALES_ORDERS_URL} component={SalesPage} />
               <Route path={CONFIG.PURCHASE_ORDERS_URL} component={PurchasePage} />
-              <Route path={CONFIG.INVENTORY_URL} component={InventoryPage} />
+              <Route path={CONFIG.PARTS_URL} component={PartsPage} />
               <Route path={CONFIG.SUPPLIER_URL} component={SupplierPage} />
               <Route path={CONFIG.CUSTOMER_URL} component={CustomerPage} />
               <Route path={`${CONFIG.USER_URL}add`} component={UserAddPage} />
