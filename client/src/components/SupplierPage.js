@@ -155,6 +155,7 @@ function SupplierList(props) {
                loading={isLoading}
                pagination={pagination}
                onChange={handleTableChange}
+               bordered
         />
     )
 }

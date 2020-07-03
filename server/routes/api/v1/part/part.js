@@ -210,10 +210,11 @@ router.patch('/:partObjID',
 
     try {
         const part = await PartModel.findOne({ _id: req.params.partObjID });
+        // For fields where an empty string is a valid value, must explicitly check for undefined
         if (partNumber) { part.partNumber = partNumber; }
-        if (description) { part.description = description; }
+        if (description !== undefined) { part.description = description; }
         if (status) { part.status = status; }
-        if (additionalInfo) { part.additionalInfo = additionalInfo; }
+        if (additionalInfo !== undefined) { part.additionalInfo = additionalInfo; }
         if (unitPrice || priceAdditionalInfo) {
             part.priceHistory.push({
                 createdBy: req.user.username, // set by `isAuthenticated` middleware

@@ -180,11 +180,12 @@ router.patch('/:supplierObjID',
     const { name, address, telephone, fax, additionalInfo } = req.body;
     try {
         const supplierDoc = await SupplierModel.findOne({ _id: req.params.supplierObjID});
+        // For fields where an empty string is a valid value, must explicitly check for undefined
         if (name) { supplierDoc.name = name; }
-        if (address) { supplierDoc.address = address; }
-        if (telephone) { supplierDoc.telephone = telephone; }
-        if (fax) { supplierDoc.fax = fax; }
-        if (additionalInfo) { supplierDoc.additionalInfo = additionalInfo; }
+        if (address !== undefined) { supplierDoc.address = address; }
+        if (telephone !== undefined) { supplierDoc.telephone = telephone; }
+        if (fax !== undefined) { supplierDoc.fax = fax; }
+        if (additionalInfo !== undefined) { supplierDoc.additionalInfo = additionalInfo; }
         await supplierDoc.save();
         return res.status(200).send('Successfully updated supplier');
     } catch(err) {
