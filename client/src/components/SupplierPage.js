@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ShowMoreButton, BilboPageHeader, BilboDivider } from './UtilComponents';
-import { Menu, Table, Input, Button } from 'antd';
+import { Menu, Table, Input, Button, Row } from 'antd';
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import PropTypes from 'prop-types';
 import { bax, useAuth, PERMS, redirectToErrorPage } from '../context/AuthContext';
@@ -65,18 +65,27 @@ function SupplierList(props) {
     let nameSearchInput = null;
 
     useEffect(() => {
+        console.log('using effect');
         getSupplierData(pagination);
-    }, []) //TODO: for now, run only on component mounting
+    }, [nameSearchKey]) //TODO: for now, run only on component mounting
 
-    const handleTableChange = (pagination, filters, sorter) => {
-        getSupplierData(pagination);
+    // Only makes an API call when the table pagination settings change
+    const handleTableChange = (tablePagination, filters, sorter) => {
+        if ((tablePagination.current !== pagination.current) || 
+            (tablePagination.pagSize !== pagination.pageSize)) {
+            getSupplierData(tablePagination);
+        }
+        // console.log('using table change')
+        // getSupplierData(pagination);
     }
 
     const getSupplierData = (pagination) => {
+        console.log('calling getSupplierData')
         setIsLoading(true);
         let query = queryString.stringify({page: pagination.current, 
                                            limit: pagination.pageSize, 
                                            filter: JSON.stringify({"name": { "$regex": nameSearchKey, "$options": "i"}})});
+        console.log('nameSearchKey: ', nameSearchKey);
         bax.get(`/api/v1/supplier?${query}`, { withCredentials: true })
             .then(res => {
                 if (res.status === 200) {
@@ -90,8 +99,24 @@ function SupplierList(props) {
                     setIsLoading(false);
                 }
             }).catch(err => {
+                if (err.response.status === 400) {
+                    console.log('error')
+                    setDataSource([]);
+                    setIsLoading(false);
+                    return;
+                }
                 redirectToErrorPage(err, history);
             })
+    }
+    
+    const handleSearch = (selectedKeys, confirm) => {
+        confirm();
+        console.log("SelectedKeys:", selectedKeys);
+        if (!selectedKeys[0]) {
+            setNameSearchKey('');
+        } else {
+            setNameSearchKey(selectedKeys[0]);
+        }
     }
 
     const columns = [
@@ -104,22 +129,24 @@ function SupplierList(props) {
                     <div>
                         <Input placeholder='Search Supplier Name'
                             ref={node => { nameSearchInput = node; }}
-                            defaultValue={nameSearchKey}
-                            onChange={e => setNameSearchKey(e.target.value)}
-                            onPressEnter={() => {getSupplierData(pagination)}}
-                            style={{width: 188, marginBottom: 8, display: 'block'}}
+                            value={selectedKeys[0]}
+                            onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                            onPressEnter={() => {handleSearch(selectedKeys, confirm)}}
+                            style={{width: 188, display: 'block'}}
                         />
-                        <Button type='primary'
-                                onClick={() => {getSupplierData(pagination)}}
-                                icon={<SearchOutlined />}
-                                size="small"
-                                style={{ width: 90 }}>
-                            Search
-                        </Button>
                     </div>
                 )
             },
-            filterIcon: filtered => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
+            filterIcon: filtered => {
+                return (
+            <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />)
+            },
+            onFilter: (value, record) => {
+                // console.log('value', value);
+                // console.log('record', record)
+                // return record['name'].toString().toLowerCase().includes(value.toLowerCase());
+                return true;
+            },
             onFilterDropdownVisibleChange: visible => {
                 if (visible) {
                     setTimeout(() => {

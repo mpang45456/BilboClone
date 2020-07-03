@@ -87,7 +87,7 @@ router.get('/',
         });
     } catch(err) {
         logger.error(`GET /supplier: Could not get suppliers: ${err}`);
-        return res.sendStatus(500);
+        return res.sendStatus(400);
     }
 })
 
