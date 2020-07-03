@@ -126,6 +126,7 @@ bax.interceptors.response.use(
  * ```
  */
 export function redirectToErrorPage(err, history) {
+    if (!history) { throw new Error('A `history` object must be provided to `redirectToErrorPage`'); }
     try {
         console.error(err);
         let statusCode = err.response.status;

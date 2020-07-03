@@ -57,10 +57,12 @@ AllSuppliersShowMoreButton.propTypes = {
 function SupplierList(props) {
     const [dataSource, setDataSource] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [pagination, setPagination] = useState({current: 1, pageSize: 10})
+    const [pagination, setPagination] = useState({current: 1, pageSize: 5})
 
     // TODO: Experimental
     const [nameSearchKey, setNameSearchKey] = useState('');
+    const history = useHistory();
+    let nameSearchInput = null;
 
     useEffect(() => {
         getSupplierData(pagination);
@@ -72,15 +74,13 @@ function SupplierList(props) {
 
     const getSupplierData = (pagination) => {
         setIsLoading(true);
-        let query = queryString.stringify({page: pagination.current, limit: pagination.pageSize});
-        bax.get(`/api/v1/supplier?${query}`, { 
-            withCredentials: true,
-            data: {
-                "name": { "$regex": nameSearchKey, "$options": "i"}
-            }
-            })
+        let query = queryString.stringify({page: pagination.current, 
+                                           limit: pagination.pageSize, 
+                                           filter: JSON.stringify({"name": { "$regex": nameSearchKey, "$options": "i"}})});
+        bax.get(`/api/v1/supplier?${query}`, { withCredentials: true })
             .then(res => {
                 if (res.status === 200) {
+                    console.log(res.data);
                     setDataSource(res.data.suppliers);
                     setPagination({
                         current: res.data.currentPage,
@@ -90,7 +90,7 @@ function SupplierList(props) {
                     setIsLoading(false);
                 }
             }).catch(err => {
-                redirectToErrorPage(err);
+                redirectToErrorPage(err, history);
             })
     }
 
@@ -103,7 +103,8 @@ function SupplierList(props) {
                 return (
                     <div>
                         <Input placeholder='Search Supplier Name'
-                            value={nameSearchKey}
+                            ref={node => { nameSearchInput = node; }}
+                            defaultValue={nameSearchKey}
                             onChange={e => setNameSearchKey(e.target.value)}
                             onPressEnter={() => {getSupplierData(pagination)}}
                             style={{width: 188, marginBottom: 8, display: 'block'}}
@@ -119,6 +120,13 @@ function SupplierList(props) {
                 )
             },
             filterIcon: filtered => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
+            onFilterDropdownVisibleChange: visible => {
+                if (visible) {
+                    setTimeout(() => {
+                        nameSearchInput.select();
+                    })
+                }
+            }
         },
         {
             title: 'Address',

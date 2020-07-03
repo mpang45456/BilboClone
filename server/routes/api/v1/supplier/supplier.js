@@ -48,14 +48,18 @@ router.get('/',
         page = 1, 
         limit = CONFIG.DEFAULT_PAGE_LIMIT, 
         inc = ['name', 'address', 'telephone', 'fax', 'additionalInfo', 'parts'],
-        sort = ['name']
+        sort = ['name'],
+        filter = {} // FIXME: Using the req params directly as the filter to the Mongoose query might pose a significant security risk
     } = req.query;
-
-    let filter = req.body; // FIXME: Using the req body directly as the filter to the Mongoose query might pose a significant security risk
 
     // Convert `inc`/`sort` to array if only a single field is specified
     if (!Array.isArray(inc)) { inc = [inc]; }
     if (!Array.isArray(sort)) { sort = [sort]; }
+
+    // Convert filter to object
+    if (typeof filter === 'string') {
+        filter = JSON.parse(filter);
+    }
 
     // Convert to Number
     limit = Number(limit);
@@ -69,7 +73,7 @@ router.get('/',
         }
         let suppliers = await SupplierModel.find(filter, inc.join(' '), options);
 
-        const totalNumSuppliers = await SupplierModel.countDocuments();
+        const totalNumSuppliers = await SupplierModel.countDocuments(filter);
         return res.status(200).json({
             suppliers,
             totalPages: Math.ceil(totalNumSuppliers / limit),
