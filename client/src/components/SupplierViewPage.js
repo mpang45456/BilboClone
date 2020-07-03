@@ -1,14 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Input, Spin, Descriptions, Button, Row } from 'antd';
+import { Input, Spin, Descriptions, Button, Row, Modal, Menu } from 'antd';
+const { confirm } = Modal;
+import { DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import { bax, useAuth, redirectToErrorPage, PERMS } from '../context/AuthContext';
 import CONFIG from '../config';
-import { BilboDescriptions, BilboPageHeader, BilboDivider, EditableItem } from './UtilComponents';
+import { BilboDescriptions, BilboPageHeader, BilboDivider, EditableItem, ShowMoreButton } from './UtilComponents';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
+/**
+ * React Component for the View Page
+ * of a single Supplier. 
+ * 
+ * // TODO: Update docs
+ */
 export default function SupplierViewPage(props) {
     const history = useHistory();
+    const { permissionsList } = useAuth();
     const [isLoadingSupplierDetails, setIsLoadingSupplierDetails] = useState(true);
     const [supplier, setSupplier] = useState({});
 
@@ -39,16 +48,24 @@ export default function SupplierViewPage(props) {
                   })
     }
     
-    // TODO: Consider adding show more button later
+    const isEditingEnabled = permissionsList.includes(PERMS.SUPPLIER_WRITE);
     const title = (
         <div>
             <BilboPageHeader 
                 title='Supplier Details'
                 onBack={() => history.push(CONFIG.SUPPLIER_URL)}
+                extra={[
+                    <DeleteSupplierShowMoreButton 
+                        key='deleteSupplierShowMoreButton'
+                        supplierID={props.match.params.supplierID}
+                        disabled={!isEditingEnabled}
+                    />
+                ]}
             />
             <BilboDivider />
         </div>
     )
+
     return (
         <div>
             <Spin spinning={isLoadingSupplierDetails}>
@@ -58,28 +75,28 @@ export default function SupplierViewPage(props) {
                     <Descriptions.Item label="Supplier Name" style={{padding: '5px 16px', lineHeight: 2}}>
                         <EditableItem value={supplier.name} 
                                       update={(newName) => updateField('name', newName)}
-                                      requiredPerm={PERMS.SUPPLIER_WRITE} />
+                                      isEditingEnabled={isEditingEnabled} />
                     </Descriptions.Item>
                     <Descriptions.Item label="Address" style={{padding: '5px 16px', lineHeight: 2}}>
                         <EditableItem value={supplier.address} 
                                       update={(newAddress) => updateField('address', newAddress)}
-                                      requiredPerm={PERMS.SUPPLIER_WRITE} />
+                                      isEditingEnabled={isEditingEnabled} />
                     </Descriptions.Item>
                     <Descriptions.Item label="Telephone" style={{padding: '5px 16px', lineHeight: 2}}>
                         <EditableItem value={supplier.telephone} 
                                       update={(newTelephone) => updateField('telephone', newTelephone)}
-                                      requiredPerm={PERMS.SUPPLIER_WRITE} />
+                                      isEditingEnabled={isEditingEnabled} />
                     </Descriptions.Item>
                     <Descriptions.Item label="Fax" style={{padding: '5px 16px', lineHeight: 2}}>
                         <EditableItem value={supplier.fax} 
                                       update={(newFax) => updateField('fax', newFax)}
-                                      requiredPerm={PERMS.SUPPLIER_WRITE} />
+                                      isEditingEnabled={isEditingEnabled} />
                     </Descriptions.Item>
                     <Descriptions.Item label="Additional Information" style={{padding: '5px 16px', lineHeight: 2}}>
                         <EditableItem value={supplier.additionalInfo} 
                                       update={(newAdditionalInfo) => updateField('additionalInfo', newAdditionalInfo)}
                                       isTextArea={true}
-                                      requiredPerm={PERMS.SUPPLIER_WRITE} />
+                                      isEditingEnabled={isEditingEnabled} />
                     </Descriptions.Item>
                 </BilboDescriptions>
             </Spin>
@@ -87,3 +104,48 @@ export default function SupplierViewPage(props) {
     );
 }
 
+function DeleteSupplierShowMoreButton(props) {
+    const history = useHistory();
+
+    // Handler when Delete Button is clicked on (will display a modal)
+    const buttonClicked = ({item, key, keyPath, domEvent}) => {
+        if (key === 'deleteSupplier') {
+            confirm({
+                icon: <ExclamationCircleOutlined />,
+                content: 'Are you sure you wish to delete this supplier?',
+                onOk: () => {
+                    bax.delete(`/api/v1/supplier/${props.supplierID}`)
+                        .then(res => {
+                            if (res.status === 200) {
+                                history.push(CONFIG.SUPPLIER_URL);
+                            }
+                        }).catch(err => {
+                            redirectToErrorPage(err, history);
+                        })
+                },
+                okText: 'Confirm'
+            })
+        }
+    }
+
+    const menu = (
+        <Menu onClick={buttonClicked}>
+            <Menu.Item 
+                key='deleteSupplier'
+                icon={<DeleteOutlined/>}>
+                Delete Supplier
+            </Menu.Item>
+        </Menu>
+    )
+    return (
+        <ShowMoreButton 
+            dropdownKey='deleteSupplierShowMoreDropdown'
+            menu={menu}
+            disabled={props.disabled}
+        />
+    )
+}
+DeleteSupplierShowMoreButton.propTypes = {
+    supplierID: PropTypes.string.isRequired,
+    disabled: PropTypes.bool.isRequired
+}

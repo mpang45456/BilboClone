@@ -8,6 +8,16 @@ import { bax, useAuth, PERMS, redirectToErrorPage } from '../context/AuthContext
 import CONFIG from '../config';
 import queryString from 'query-string';
 
+/**
+ * React Component for entire View All Suppliers
+ * Page. Consist of 2 main parts:
+ * 1. BilboPageHeader
+ *    - Title and ShowMoreButton
+ * 2. SupplierList 
+ *    - Allows for display of list of 
+ *      suppliers, searching/filtering
+ *      and pagination
+ */
 export default function SupplierPage(props) {
     const { permissionsList } = useAuth();
     return (
@@ -23,7 +33,6 @@ export default function SupplierPage(props) {
                 ]}
             />
             <BilboDivider />
-
             <SupplierList />
         </div>
     );
@@ -55,6 +64,10 @@ AllSuppliersShowMoreButton.propTypes = {
     disabled: PropTypes.bool.isRequired
 }
 
+/**
+ * React Component to Display and Filter/Search 
+ * the list of Suppliers
+ */
 function SupplierList(props) {
     const [dataSource, setDataSource] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -84,6 +97,7 @@ function SupplierList(props) {
     // API call to obtain supplier data
     const getSupplierData = (pagination) => {
         setIsLoading(true);
+        // Send filter in query string
         let filter = JSON.stringify({
             "name": { "$regex": nameFilterQuery, "$options": "i"},
             "address": { "$regex": addressFilterQuery, "$options": "i"},

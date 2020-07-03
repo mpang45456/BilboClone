@@ -5,7 +5,6 @@ import { EllipsisOutlined, SearchOutlined, CloseCircleOutlined, CheckCircleOutli
 import Highlighter from 'react-highlight-words';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { useAuth } from '../context/AuthContext';
 
 /**
  * Customises the regular <button> HTML element, 
@@ -222,7 +221,6 @@ export const BilboSearchTable = {
  * of the Supplier.
  */
 export function EditableItem(props) {
-    const { permissionsList } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
     const [editItemValue, setEditItemValue] = useState(props.value);
 
@@ -282,7 +280,7 @@ export function EditableItem(props) {
             <Button onClick={() => { setIsEditing(true); }}
                     icon={<EditOutlined />} 
                     style={{background: 'none', border: 'none', boxShadow: 'none'}}
-                    disabled={!permissionsList.includes(props.requiredPerm)}
+                    disabled={!props.isEditingEnabled}
                 >
                 Edit
             </Button>
@@ -306,8 +304,8 @@ EditableItem.propTypes = {
     value: PropTypes.string,
     // Function to call when value change is confirmed (`save` is invoked)
     update: PropTypes.func.isRequired,
-    // Required Permission to click on Edit button
-    requiredPerm: PropTypes.string.isRequired,
+    // Whether editing should be enabled in `EditableItem` (based on permissions check)
+    isEditingEnabled: PropTypes.bool.isRequired,
 }
 EditableItem.defaultProps = {
     isTextArea: false
