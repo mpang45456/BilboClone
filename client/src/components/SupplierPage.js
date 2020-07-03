@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ShowMoreButton, BilboPageHeader, BilboDivider } from './UtilComponents';
-import { Menu, Table } from 'antd';
-import { PlusOutlined } from "@ant-design/icons";
+import { Menu, Table, Input, Button } from 'antd';
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import PropTypes from 'prop-types';
 import { bax, useAuth, PERMS, redirectToErrorPage } from '../context/AuthContext';
 import queryString from 'query-string';
@@ -59,6 +59,9 @@ function SupplierList(props) {
     const [isLoading, setIsLoading] = useState(true);
     const [pagination, setPagination] = useState({current: 1, pageSize: 10})
 
+    // TODO: Experimental
+    const [nameSearchKey, setNameSearchKey] = useState('');
+
     useEffect(() => {
         getSupplierData(pagination);
     }, []) //TODO: for now, run only on component mounting
@@ -70,7 +73,12 @@ function SupplierList(props) {
     const getSupplierData = (pagination) => {
         setIsLoading(true);
         let query = queryString.stringify({page: pagination.current, limit: pagination.pageSize});
-        bax.get(`/api/v1/supplier?${query}`, { withCredentials: true})
+        bax.get(`/api/v1/supplier?${query}`, { 
+            withCredentials: true,
+            data: {
+                "name": { "$regex": nameSearchKey, "$options": "i"}
+            }
+            })
             .then(res => {
                 if (res.status === 200) {
                     setDataSource(res.data.suppliers);
@@ -90,7 +98,27 @@ function SupplierList(props) {
         {
             title: 'Supplier Name',
             dataIndex: 'name',
-            key: 'name'
+            key: 'name',
+            filterDropdown: ({setSelectedKeys, selectedKeys, confirm, clearFilters}) => {
+                return (
+                    <div>
+                        <Input placeholder='Search Supplier Name'
+                            value={nameSearchKey}
+                            onChange={e => setNameSearchKey(e.target.value)}
+                            onPressEnter={() => {getSupplierData(pagination)}}
+                            style={{width: 188, marginBottom: 8, display: 'block'}}
+                        />
+                        <Button type='primary'
+                                onClick={() => {getSupplierData(pagination)}}
+                                icon={<SearchOutlined />}
+                                size="small"
+                                style={{ width: 90 }}>
+                            Search
+                        </Button>
+                    </div>
+                )
+            },
+            filterIcon: filtered => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
         },
         {
             title: 'Address',
