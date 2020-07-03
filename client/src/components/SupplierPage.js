@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ShowMoreButton, BilboPageHeader, BilboDivider } from './UtilComponents';
-import { Menu, Table, Input, Button, Row } from 'antd';
+import { Menu, Table, Input, Button, Row, Space } from 'antd';
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import PropTypes from 'prop-types';
 import { bax, useAuth, PERMS, redirectToErrorPage } from '../context/AuthContext';
@@ -67,29 +67,27 @@ function SupplierList(props) {
     useEffect(() => {
         console.log('using effect');
         getSupplierData(pagination);
-    }, [nameSearchKey]) //TODO: for now, run only on component mounting
+    }, [nameSearchKey])
 
     // Only makes an API call when the table pagination settings change
     const handleTableChange = (tablePagination, filters, sorter) => {
         if ((tablePagination.current !== pagination.current) || 
-            (tablePagination.pagSize !== pagination.pageSize)) {
+            (tablePagination.pageSize !== pagination.pageSize)) {
+            console.log('table')
             getSupplierData(tablePagination);
         }
-        // console.log('using table change')
-        // getSupplierData(pagination);
     }
 
     const getSupplierData = (pagination) => {
-        console.log('calling getSupplierData')
+        console.log('calling')
         setIsLoading(true);
         let query = queryString.stringify({page: pagination.current, 
                                            limit: pagination.pageSize, 
                                            filter: JSON.stringify({"name": { "$regex": nameSearchKey, "$options": "i"}})});
-        console.log('nameSearchKey: ', nameSearchKey);
         bax.get(`/api/v1/supplier?${query}`, { withCredentials: true })
             .then(res => {
                 if (res.status === 200) {
-                    console.log(res.data);
+                    console.log('success')
                     setDataSource(res.data.suppliers);
                     setPagination({
                         current: res.data.currentPage,
@@ -100,40 +98,64 @@ function SupplierList(props) {
                 }
             }).catch(err => {
                 if (err.response.status === 400) {
-                    console.log('error')
+                    console.log('err')
                     setDataSource([]);
                     setIsLoading(false);
-                    return;
+                } else {
+                    redirectToErrorPage(err, history);
                 }
-                redirectToErrorPage(err, history);
             })
     }
     
     const handleSearch = (selectedKeys, confirm) => {
+        console.log('handlesearch')
         confirm();
-        console.log("SelectedKeys:", selectedKeys);
         if (!selectedKeys[0]) {
+            console.log('inside1')
             setNameSearchKey('');
         } else {
+            console.log('inside2')
             setNameSearchKey(selectedKeys[0]);
         }
     }
 
-    const columns = [
-        {
-            title: 'Supplier Name',
-            dataIndex: 'name',
-            key: 'name',
+    const getColumnSearchProps = (dataIndex, setAPIFilterQuery) => {
+        // To obtain a reference to the <Input /> and `select` when the dropdown appears
+        let inputNode = null;
+
+        return {
             filterDropdown: ({setSelectedKeys, selectedKeys, confirm, clearFilters}) => {
                 return (
                     <div>
-                        <Input placeholder='Search Supplier Name'
-                            ref={node => { nameSearchInput = node; }}
+                        <Input placeholder={`Search ${dataIndex}`}
+                            ref={node => { inputNode = node; }}
                             value={selectedKeys[0]}
-                            onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-                            onPressEnter={() => {handleSearch(selectedKeys, confirm)}}
+                            onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [''])}
+                            onPressEnter={() => {
+                                confirm();
+                                setAPIFilterQuery(selectedKeys[0]);
+                            }}
                             style={{width: 188, display: 'block'}}
                         />
+                        <Space>
+                            <Button type='primary'
+                                    onClick={() => {
+                                        confirm();
+                                        setAPIFilterQuery(selectedKeys[0]);
+                                    }}
+                                    icon={<SearchOutlined />}
+                                    size='small'>
+                                Search
+                            </Button>
+                            <Button onClick={() => {
+                                        clearFilters();
+                                        setSelectedKeys(['']);
+                                        setAPIFilterQuery('');
+                                    }}
+                                    size='small'>
+                                Clear
+                            </Button>
+                        </Space>
                     </div>
                 )
             },
@@ -150,10 +172,19 @@ function SupplierList(props) {
             onFilterDropdownVisibleChange: visible => {
                 if (visible) {
                     setTimeout(() => {
-                        nameSearchInput.select();
+                        inputNode.select();
                     })
                 }
             }
+        }
+    }
+    const columns = [
+        {
+            title: 'Supplier Name',
+            dataIndex: 'name',
+            key: 'name',
+            // TODO: ADD HERE
+            ...getColumnSearchProps('name', setNameSearchKey)
         },
         {
             title: 'Address',
