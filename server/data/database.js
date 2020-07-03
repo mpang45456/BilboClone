@@ -73,11 +73,11 @@ const PartModel = mongoose.model('Part', PartSchema);
  */
 const SupplierSchema = new Schema({
     name: { type: String, required: true, unique: true, index: true },
-    address: { type: String },
-    telephone: { type: String },
-    fax: { type: String },
+    address: { type: String, default: '' },
+    telephone: { type: String, default: '' },
+    fax: { type: String, default: '' },
     parts: [{ type: Schema.Types.ObjectId, ref: 'Part'}], // Must be carefully kept in sync with PartModel
-    additionalInfo: { type: String }
+    additionalInfo: { type: String, default: ''}
 })
 
 const SupplierModel = mongoose.model('Supplier', SupplierSchema);

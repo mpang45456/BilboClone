@@ -135,18 +135,22 @@ export const BilboSearchTable = {
                             onChange={e => {
                                 // When `e.target.value` is an empty string,
                                 // it is equivalent to no filtering
-                                setSelectedKeys([e.target.value])
+                                setSelectedKeys(e.target.value ? [e.target.value] : [''])
                             }}
                             onPressEnter={() => {
                                 confirm();
-                                setAPIFilterQuery(selectedKeys[0]);
+                                // ternary expression ensures that selected keys is always defined
+                                // regardless of when async call to `setSelectedKeys` completes
+                                setAPIFilterQuery(selectedKeys[0] ? selectedKeys[0]: '');
                             }}
                             style={{width: 200, marginBottom: 5, display: 'block'}}
                         />
                         <Button type='primary'
                                 onClick={() => {
                                     confirm();
-                                    setAPIFilterQuery(selectedKeys[0]);
+                                    // ternary expression ensures that selected keys is always defined
+                                    // regardless of when async call to `setSelectedKeys` completes
+                                    setAPIFilterQuery(selectedKeys[0] ? selectedKeys[0]: '');
                                 }}
                                 icon={<SearchOutlined />}
                                 style={{width: 100, marginRight: 5}}

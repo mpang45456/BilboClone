@@ -60,34 +60,36 @@ function SupplierList(props) {
     const [pagination, setPagination] = useState({current: 1, pageSize: 5})
 
     // TODO: Experimental
-    const [nameSearchKey, setNameSearchKey] = useState('');
+    const [nameFilterQuery, setNameFilterQuery] = useState('');
+    const [addressFilterQuery, setAddressFilterQuery] = useState('');
+    const [telephoneFilterQuery, setTelephoneFilterQuery] = useState('');
     const history = useHistory();
-    let nameSearchInput = null;
 
     useEffect(() => {
-        console.log('using effect');
         getSupplierData(pagination);
-    }, [nameSearchKey])
+    }, [nameFilterQuery, addressFilterQuery, telephoneFilterQuery])
 
     // Only makes an API call when the table pagination settings change
     const handleTableChange = (tablePagination, filters, sorter) => {
         if ((tablePagination.current !== pagination.current) || 
             (tablePagination.pageSize !== pagination.pageSize)) {
-            console.log('table')
             getSupplierData(tablePagination);
         }
     }
 
     const getSupplierData = (pagination) => {
-        console.log('calling')
         setIsLoading(true);
+        let filter = JSON.stringify({
+            "name": { "$regex": nameFilterQuery, "$options": "i"},
+            "address": { "$regex": addressFilterQuery, "$options": "i"},
+            "telephone": { "$regex": telephoneFilterQuery, "$options": "i"},
+        });
         let query = queryString.stringify({page: pagination.current, 
                                            limit: pagination.pageSize, 
-                                           filter: JSON.stringify({"name": { "$regex": nameSearchKey, "$options": "i"}})});
+                                           filter});
         bax.get(`/api/v1/supplier?${query}`, { withCredentials: true })
             .then(res => {
                 if (res.status === 200) {
-                    console.log('success')
                     setDataSource(res.data.suppliers);
                     setPagination({
                         current: res.data.currentPage,
@@ -98,7 +100,6 @@ function SupplierList(props) {
                 }
             }).catch(err => {
                 if (err.response.status === 400) {
-                    console.log('err')
                     setDataSource([]);
                     setIsLoading(false);
                 } else {
@@ -112,17 +113,19 @@ function SupplierList(props) {
             title: 'Supplier Name',
             dataIndex: 'name',
             key: 'name',
-            ...BilboSearchTable.getColumnSearchProps('name', setNameSearchKey)
+            ...BilboSearchTable.getColumnSearchProps('name', setNameFilterQuery)
         },
         {
             title: 'Address',
             dataIndex: 'address',
-            key: 'address'
+            key: 'address',
+            ...BilboSearchTable.getColumnSearchProps('address', setAddressFilterQuery)
         },
         {
             title: 'Telephone',
             dataIndex: 'telephone',
-            key: 'telephone'
+            key: 'telephone',
+            ...BilboSearchTable.getColumnSearchProps('telephone', setTelephoneFilterQuery)
         },
     ]
 
