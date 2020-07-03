@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { ShowMoreButton, BilboPageHeader, BilboDivider, BilboSearchTable } from './UtilComponents';
-import { Menu, Table, Input, Button, Row, Space } from 'antd';
+import { ShowMoreButton, BilboPageHeader, BilboDivider, BilboSearchTable, BilboNavLink } from './UtilComponents';
+import { Menu, Table, Input, Button, Row, Space, Tag } from 'antd';
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import PropTypes from 'prop-types';
 import { bax, useAuth, PERMS, redirectToErrorPage } from '../context/AuthContext';
+import CONFIG from '../config';
 import queryString from 'query-string';
 
 export default function SupplierPage(props) {
@@ -59,7 +60,7 @@ function SupplierList(props) {
     const [isLoading, setIsLoading] = useState(true);
     const [pagination, setPagination] = useState({current: 1, pageSize: 5})
 
-    // TODO: Experimental
+    // State for Filter Queries
     const [nameFilterQuery, setNameFilterQuery] = useState('');
     const [addressFilterQuery, setAddressFilterQuery] = useState('');
     const [telephoneFilterQuery, setTelephoneFilterQuery] = useState('');
@@ -69,14 +70,18 @@ function SupplierList(props) {
         getSupplierData(pagination);
     }, [nameFilterQuery, addressFilterQuery, telephoneFilterQuery])
 
-    // Only makes an API call when the table pagination settings change
+    // Only makes an API call when the table's pagination settings change
     const handleTableChange = (tablePagination, filters, sorter) => {
+        // Note that `tablePagination` is different from `pagination`
+        // `tablePagination`: from `onChange` in <Table />
+        // `pagination`: state in this React component
         if ((tablePagination.current !== pagination.current) || 
             (tablePagination.pageSize !== pagination.pageSize)) {
             getSupplierData(tablePagination);
         }
     }
 
+    // API call to obtain supplier data
     const getSupplierData = (pagination) => {
         setIsLoading(true);
         let filter = JSON.stringify({
@@ -108,6 +113,7 @@ function SupplierList(props) {
             })
     }
     
+    // Configuration of Columns
     const columns = [
         {
             title: 'Supplier Name',
@@ -126,6 +132,15 @@ function SupplierList(props) {
             dataIndex: 'telephone',
             key: 'telephone',
             ...BilboSearchTable.getColumnSearchProps('telephone', telephoneFilterQuery, setTelephoneFilterQuery)
+        },
+        {
+            title: 'Action',
+            key: 'action',
+            render: (text, record) => (
+                <BilboNavLink to={`${CONFIG.SUPPLIER_URL}/${record._id}`}>
+                    view
+                </BilboNavLink>
+            ),
         },
     ]
 

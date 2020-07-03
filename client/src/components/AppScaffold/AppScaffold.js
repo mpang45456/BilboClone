@@ -11,6 +11,7 @@ import SalesPage from '../SalesPage';
 import PurchasePage from '../PurchasePage';
 import PartsPage from '../PartsPage';
 import SupplierPage from '../SupplierPage';
+import SupplierViewPage from '../SupplierViewPage';
 import SettingsPage from '../SettingsPage';
 import CustomerPage from '../CustomerPage';
 import UserPage from '../User/UserPage';
@@ -49,6 +50,7 @@ export default class AppScaffold extends React.Component {
               <Route path={CONFIG.SALES_ORDERS_URL} component={SalesPage} />
               <Route path={CONFIG.PURCHASE_ORDERS_URL} component={PurchasePage} />
               <Route path={CONFIG.PARTS_URL} component={PartsPage} />
+              <Route path={`${CONFIG.SUPPLIER_URL}/:supplierID`} component={SupplierViewPage} />
               <Route path={CONFIG.SUPPLIER_URL} component={SupplierPage} />
               <Route path={CONFIG.CUSTOMER_URL} component={CustomerPage} />
               <Route path={`${CONFIG.USER_URL}add`} component={UserAddPage} />
