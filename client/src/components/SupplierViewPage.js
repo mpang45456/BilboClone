@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Input, Spin, Descriptions, Button } from 'antd';
+import { Input, Spin, Descriptions, Button, Row } from 'antd';
+import { CloseCircleOutlined, EditOutlined, CheckCircleOutlined, CheckCircleTwoTone } from "@ant-design/icons";
 import { bax, useAuth, redirectToErrorPage } from '../context/AuthContext';
 import CONFIG from '../config';
 import { BilboDescriptions, BilboPageHeader, BilboDivider } from './UtilComponents';
+import PropTypes from 'prop-types';
+import styled from 'styled-components';
 
 export default function SupplierViewPage(props) {
     const history = useHistory();
@@ -50,7 +53,7 @@ export default function SupplierViewPage(props) {
                 <BilboDescriptions title={title}
                                    bordered
                                    column={1}>
-                    <Descriptions.Item label="Supplier Name">
+                    <Descriptions.Item label="Supplier Name" style={{padding: '5px 16px', lineHeight: 2}}>
                         <EditableItem value={supplier.name} update={updateSupplierName}/>
                     </Descriptions.Item>
                 </BilboDescriptions>
@@ -59,40 +62,77 @@ export default function SupplierViewPage(props) {
     );
 }
 
+/**
+ * React Component to display a value, while
+ * giving the user to option to click on edit
+ * to begin editing details. 
+ * 
+ * After editing, the user can then cancel or 
+ * save the changes made. What happens when the 
+ * changes are saved is entirely dependent on the
+ * `update` function passed through the props. 
+ * 
+ * In the case of `SupplierViewPage`, this triggers
+ * an API PATCH method call to update the fields
+ * of the Supplier.
+ * 
+ */
 function EditableItem(props) {
     const [isEditing, setIsEditing] = useState(false);
     const [editItemValue, setEditItemValue] = useState(props.value);
 
+    // For `Cancel`/`Save` Icon Button when Editing
+    // `transformColor` is the color of the icon upon mouse hover
+    const StyledIconButton = styled(Button)`
+        background: none;
+        border: none; 
+        box-shadow: none;
+
+        &:hover {
+            transform: scale(1.2);
+            background: none;
+            color: ${props => props.transformcolor}
+        }
+    `
+
+    // React Component to Display While Editing
     const isEditingItem = (
-        <div>
+        <div style={{display: 'inline'}}>
             <Input defaultValue={props.value}
-                   onChange={e => setEditItemValue(e.target.value)} />
-            <Button onClick={() => {
-                setEditItemValue(props.value);
-                setIsEditing(false);
-            }}>
-                Cancel
-            </Button>
-            <Button onClick={() => {
-                props.update(editItemValue);
-                setIsEditing(false)
-            }}>
-                Save
-            </Button>
+                   onChange={e => setEditItemValue(e.target.value)} 
+                   style={{width: '50%'}}
+                   />
+            <StyledIconButton onClick={() => {
+                        setEditItemValue(props.value);
+                        setIsEditing(false);
+                    }}
+                    transformcolor='#c93623'
+                    icon={<CloseCircleOutlined />}
+            >
+            </StyledIconButton>
+            <StyledIconButton onClick={() => {
+                        props.update(editItemValue);
+                        setIsEditing(false)
+                    }}
+                    transformcolor='#52c41a'
+                    icon={<CheckCircleOutlined />}
+            >
+            </StyledIconButton>
         </div>
     )
 
+    // React Component to Display While Viewing
     const notIsEditingItem = (
-        <div>
-            <div>
+        <Row>
+            <span style={{width: '50%'}}>
                 {props.value}
-            </div>
-            <Button onClick={() => {
-                setIsEditing(true);
-            }}>
+            </span>
+            <Button onClick={() => { setIsEditing(true); }}
+                    icon={<EditOutlined />} 
+                    style={{background: 'none', border: 'none', boxShadow: 'none'}}>
                 Edit
             </Button>
-        </div>
+        </Row>
     )
 
     return (
@@ -104,5 +144,10 @@ function EditableItem(props) {
             }
         </div>
     )
-
+}
+EditableItem.propTypes = {
+    // The value to be displayed
+    value: PropTypes.string.isRequired,
+    // Function to call when value change is confirmed (`save` is invoked)
+    update: PropTypes.func.isRequired
 }
