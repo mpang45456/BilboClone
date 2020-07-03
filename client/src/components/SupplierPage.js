@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { ShowMoreButton, BilboPageHeader, BilboDivider } from './UtilComponents';
+import { ShowMoreButton, BilboPageHeader, BilboDivider, BilboSearchTable } from './UtilComponents';
 import { Menu, Table, Input, Button, Row, Space } from 'antd';
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import PropTypes from 'prop-types';
@@ -107,84 +107,12 @@ function SupplierList(props) {
             })
     }
     
-    const handleSearch = (selectedKeys, confirm) => {
-        console.log('handlesearch')
-        confirm();
-        if (!selectedKeys[0]) {
-            console.log('inside1')
-            setNameSearchKey('');
-        } else {
-            console.log('inside2')
-            setNameSearchKey(selectedKeys[0]);
-        }
-    }
-
-    const getColumnSearchProps = (dataIndex, setAPIFilterQuery) => {
-        // To obtain a reference to the <Input /> and `select` when the dropdown appears
-        let inputNode = null;
-
-        return {
-            filterDropdown: ({setSelectedKeys, selectedKeys, confirm, clearFilters}) => {
-                return (
-                    <div style={{padding: 5}}>
-                        <Input placeholder={`Search ${dataIndex}`}
-                            ref={node => { inputNode = node; }}
-                            value={selectedKeys[0]}
-                            onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [''])}
-                            onPressEnter={() => {
-                                confirm();
-                                setAPIFilterQuery(selectedKeys[0]);
-                            }}
-                            style={{width: 200, marginBottom: 5, display: 'block'}}
-                        />
-                            <Button type='primary'
-                                    onClick={() => {
-                                        confirm();
-                                        setAPIFilterQuery(selectedKeys[0]);
-                                    }}
-                                    icon={<SearchOutlined />}
-                                    style={{width: 100, marginRight: 5}}
-                                    size='small'>
-                                Search
-                            </Button>
-                            <Button onClick={() => {
-                                        clearFilters();
-                                        setSelectedKeys(['']);
-                                        setAPIFilterQuery('');
-                                    }}
-                                    style={{width: 95}}
-                                    size='small'>
-                                Clear
-                            </Button>
-                    </div>
-                )
-            },
-            filterIcon: filtered => {
-                return (
-            <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />)
-            },
-            onFilter: (value, record) => {
-                // console.log('value', value);
-                // console.log('record', record)
-                // return record['name'].toString().toLowerCase().includes(value.toLowerCase());
-                return true;
-            },
-            onFilterDropdownVisibleChange: visible => {
-                if (visible) {
-                    setTimeout(() => {
-                        inputNode.select();
-                    })
-                }
-            }
-        }
-    }
     const columns = [
         {
             title: 'Supplier Name',
             dataIndex: 'name',
             key: 'name',
-            // TODO: ADD HERE
-            ...getColumnSearchProps('name', setNameSearchKey)
+            ...BilboSearchTable.getColumnSearchProps('name', setNameSearchKey)
         },
         {
             title: 'Address',

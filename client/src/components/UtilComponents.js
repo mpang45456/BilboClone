@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { PageHeader, Dropdown, Button, Spin, Descriptions, Divider } from 'antd';
-import { EllipsisOutlined } from "@ant-design/icons";
+import { PageHeader, Dropdown, Button, Spin, Descriptions, Divider, Input } from 'antd';
+import { EllipsisOutlined, SearchOutlined } from "@ant-design/icons";
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
@@ -93,3 +93,93 @@ export const BilboDivider = styled(Divider)`
         border-top: 1px solid ${props => props.theme.colors.lightGrey };
     }
 `;
+
+// Utilities associated with a Search Table
+export const BilboSearchTable = {
+    getColumnSearchProps: (dataIndex, setAPIFilterQuery) => {
+        // To obtain a reference to the <Input /> and `select` when the dropdown appears
+        let inputNode = null;
+
+        return {
+            /**
+             * The dropdown search filter UI
+             * 
+             * Note: `selectedKeys` must be an array
+             * 
+             * Note: `selectedKeys` and setSelectedKeys` are only
+             * used internally by the dropdown. To actually
+             * change the filer value, call `setAPIFilterQuery` 
+             * with the new filter value. 
+             * 
+             * Note: The code in this function will only
+             * call `setAPIFilterQuery`, but it is up 
+             * to the parent component to decide what to
+             * do when the `APIFilterQuery` has been set.
+             * Typically, `useEffect()` should be applied
+             * whenever the `APIFilterQuery` changes value.
+             * 
+             * Note: `confirm` closes the dropdown menu
+             * and makes the search icon change to the 
+             * colour when it is `filtered`
+             * 
+             * Note: On the flip side, `clearFilters` closes
+             * the dropdown menu and makes the search icon
+             * change to the colour when it is not `filtered`
+             */
+            filterDropdown: ({setSelectedKeys, selectedKeys, confirm, clearFilters}) => {
+                return (
+                    <div style={{padding: 5}}>
+                        <Input placeholder={`Search ${dataIndex}`}
+                            ref={node => { inputNode = node; }}
+                            value={selectedKeys[0]}
+                            onChange={e => {
+                                // When `e.target.value` is an empty string,
+                                // it is equivalent to no filtering
+                                setSelectedKeys([e.target.value])
+                            }}
+                            onPressEnter={() => {
+                                confirm();
+                                setAPIFilterQuery(selectedKeys[0]);
+                            }}
+                            style={{width: 200, marginBottom: 5, display: 'block'}}
+                        />
+                        <Button type='primary'
+                                onClick={() => {
+                                    confirm();
+                                    setAPIFilterQuery(selectedKeys[0]);
+                                }}
+                                icon={<SearchOutlined />}
+                                style={{width: 100, marginRight: 5}}
+                                size='small'>
+                            Search
+                        </Button>
+                        <Button onClick={() => {
+                                    clearFilters();
+                                    setSelectedKeys(['']);
+                                    setAPIFilterQuery('');
+                                }}
+                                style={{width: 95}}
+                                size='small'>
+                            Clear
+                        </Button>
+                    </div>
+                )
+            },
+            // Sets Filter Icon appearance (depending on whether `filtered` or not)
+            filterIcon: filtered => {
+                return (
+                    <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+                )
+            },
+            // When the filter dropdown appears, focus on the `inputNode`
+            // (so the user can begin typing immediately)
+            onFilterDropdownVisibleChange: visible => {
+                if (visible) {
+                    setTimeout(() => {
+                        inputNode.select();
+                    })
+                }
+            }
+        }
+    }
+}
