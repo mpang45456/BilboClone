@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { PageHeader, Dropdown, Button, Spin, Descriptions, Divider, Input } from 'antd';
-import { EllipsisOutlined, SearchOutlined } from "@ant-design/icons";
+import { PageHeader, Row, Dropdown, Button, Spin, Descriptions, Divider, Input } from 'antd';
+import { EllipsisOutlined, SearchOutlined, CloseCircleOutlined, CheckCircleOutlined, EditOutlined } from "@ant-design/icons";
 import Highlighter from 'react-highlight-words';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { useAuth } from '../context/AuthContext';
 
 /**
  * Customises the regular <button> HTML element, 
@@ -204,4 +205,127 @@ export const BilboSearchTable = {
             }
         }
     }
+}
+
+/**
+ * React Component to display a value, while
+ * giving the user to option to click on edit
+ * to begin editing details. 
+ * 
+ * After editing, the user can then cancel or 
+ * save the changes made. What happens when the 
+ * changes are saved is entirely dependent on the
+ * `update` function passed through the props. 
+ * 
+ * In the case of `SupplierViewPage`, this triggers
+ * an API PATCH method call to update the fields
+ * of the Supplier.
+ */
+export function EditableItem(props) {
+    const { permissionsList } = useAuth();
+    const [isEditing, setIsEditing] = useState(false);
+    const [editItemValue, setEditItemValue] = useState(props.value);
+
+    const onSave = () => {
+        props.update(editItemValue)
+             .then(res => setIsEditing(false))
+             .catch(err => redirectToErrorPage(err)) // TODO: Update with proper UI error handling (wrt <Input />)
+    }
+    
+    const textAreaAutoSizeConfig = { minRows: 3, maxRows: 10 };
+
+    // React Component to Display While Editing
+    const isEditingItem = (
+        <div style={{display: 'inline'}}>
+            {
+                props.isTextArea
+                ? <Input.TextArea defaultValue={props.value}
+                                  onChange={e => setEditItemValue(e.target.value)} 
+                                  style={{width: '70%'}}
+                                  autoSize={textAreaAutoSizeConfig}
+                  />
+                : <Input defaultValue={props.value}
+                   onChange={e => setEditItemValue(e.target.value)} 
+                   style={{width: '70%'}}
+                  />
+            }
+            <EditableItemStyledIconButton onClick={() => {
+                        setEditItemValue(props.value);
+                        setIsEditing(false);
+                    }}
+                    transformcolor='#c93623'
+                    icon={<CloseCircleOutlined />}
+            >
+            </EditableItemStyledIconButton>
+            <EditableItemStyledIconButton onClick={onSave}
+                    transformcolor='#52c41a'
+                    icon={<CheckCircleOutlined />}
+            >
+            </EditableItemStyledIconButton>
+        </div>
+    )
+
+    // React Component to Display While Viewing
+    const notIsEditingItem = (
+        <Row>
+            {
+                props.isTextArea
+                ? <Input.TextArea value={props.value}
+                                  style={{width: '70%'}}
+                                  readOnly
+                                  autoSize={textAreaAutoSizeConfig}
+                  />
+                : <span style={{width: '70%'}}>
+                      {props.value}
+                  </span>
+            }
+            <Button onClick={() => { setIsEditing(true); }}
+                    icon={<EditOutlined />} 
+                    style={{background: 'none', border: 'none', boxShadow: 'none'}}
+                    disabled={!permissionsList.includes(props.requiredPerm)}
+                >
+                Edit
+            </Button>
+        </Row>
+    )
+
+    return (
+        <div>
+            {
+                isEditing 
+                ? isEditingItem
+                : notIsEditingItem
+            }
+        </div>
+    )
+}
+EditableItem.propTypes = {
+    // Whether an <Input /> or <Input.TextArea /> is displayed
+    isTextArea: PropTypes.bool.isRequired,
+    // The value to be displayed
+    value: PropTypes.string,
+    // Function to call when value change is confirmed (`save` is invoked)
+    update: PropTypes.func.isRequired,
+    // Required Permission to click on Edit button
+    requiredPerm: PropTypes.string.isRequired,
+}
+EditableItem.defaultProps = {
+    isTextArea: false
+}
+
+// For `Cancel`/`Save` Icon Button when Editing
+// `transformColor` is the color of the icon upon mouse hover
+const EditableItemStyledIconButton = styled(Button)`
+    background: none;
+    border: none; 
+    box-shadow: none;
+
+    &:hover {
+        transform: scale(1.2);
+        background: none;
+        color: ${props => props.transformcolor}
+    }
+`
+EditableItemStyledIconButton.propTypes = {
+    transformcolor: PropTypes.string.isRequired
 }
