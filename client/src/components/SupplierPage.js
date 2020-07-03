@@ -113,19 +113,19 @@ function SupplierList(props) {
             title: 'Supplier Name',
             dataIndex: 'name',
             key: 'name',
-            ...BilboSearchTable.getColumnSearchProps('name', setNameFilterQuery)
+            ...BilboSearchTable.getColumnSearchProps('name', nameFilterQuery, setNameFilterQuery)
         },
         {
             title: 'Address',
             dataIndex: 'address',
             key: 'address',
-            ...BilboSearchTable.getColumnSearchProps('address', setAddressFilterQuery)
+            ...BilboSearchTable.getColumnSearchProps('address', addressFilterQuery, setAddressFilterQuery)
         },
         {
             title: 'Telephone',
             dataIndex: 'telephone',
             key: 'telephone',
-            ...BilboSearchTable.getColumnSearchProps('telephone', setTelephoneFilterQuery)
+            ...BilboSearchTable.getColumnSearchProps('telephone', telephoneFilterQuery, setTelephoneFilterQuery)
         },
     ]
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { PageHeader, Dropdown, Button, Spin, Descriptions, Divider, Input } from 'antd';
 import { EllipsisOutlined, SearchOutlined } from "@ant-design/icons";
+import Highlighter from 'react-highlight-words';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
@@ -96,9 +97,12 @@ export const BilboDivider = styled(Divider)`
 
 // Utilities associated with a Search Table
 export const BilboSearchTable = {
-    getColumnSearchProps: (dataIndex, setAPIFilterQuery) => {
+    getColumnSearchProps: (dataIndex, APIFilterQuery, setAPIFilterQuery) => {
         // To obtain a reference to the <Input /> and `select` when the dropdown appears
         let inputNode = null;
+
+        // Boolean to determine if the column is being filtered via search terms
+        let isBeingFilered = false;
 
         return {
             /**
@@ -170,18 +174,32 @@ export const BilboSearchTable = {
                 )
             },
             // Sets Filter Icon appearance (depending on whether `filtered` or not)
-            filterIcon: filtered => {
+            filterIcon: (filtered) => {
+                isBeingFilered = filtered;
                 return (
                     <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
                 )
             },
             // When the filter dropdown appears, focus on the `inputNode`
             // (so the user can begin typing immediately)
-            onFilterDropdownVisibleChange: visible => {
+            onFilterDropdownVisibleChange: (visible) => {
                 if (visible) {
                     setTimeout(() => {
                         inputNode.select();
                     })
+                }
+            },
+            // Add text highlighting
+            render: (text) => {
+                if (isBeingFilered) {
+                    return (
+                        <Highlighter highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+                                     searchWords={[APIFilterQuery]}
+                                     autoEscape
+                                     textToHighlight={text.toString()}/>
+                    )
+                } else {
+                    return text;
                 }
             }
         }
