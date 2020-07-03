@@ -126,7 +126,7 @@ function SupplierList(props) {
         return {
             filterDropdown: ({setSelectedKeys, selectedKeys, confirm, clearFilters}) => {
                 return (
-                    <div>
+                    <div style={{padding: 5}}>
                         <Input placeholder={`Search ${dataIndex}`}
                             ref={node => { inputNode = node; }}
                             value={selectedKeys[0]}
@@ -135,15 +135,15 @@ function SupplierList(props) {
                                 confirm();
                                 setAPIFilterQuery(selectedKeys[0]);
                             }}
-                            style={{width: 188, display: 'block'}}
+                            style={{width: 200, marginBottom: 5, display: 'block'}}
                         />
-                        <Space>
                             <Button type='primary'
                                     onClick={() => {
                                         confirm();
                                         setAPIFilterQuery(selectedKeys[0]);
                                     }}
                                     icon={<SearchOutlined />}
+                                    style={{width: 100, marginRight: 5}}
                                     size='small'>
                                 Search
                             </Button>
@@ -152,10 +152,10 @@ function SupplierList(props) {
                                         setSelectedKeys(['']);
                                         setAPIFilterQuery('');
                                     }}
+                                    style={{width: 95}}
                                     size='small'>
                                 Clear
                             </Button>
-                        </Space>
                     </div>
                 )
             },
