@@ -27,12 +27,18 @@ router.use(isAuthenticated);
  *    - e.g. ?sort=name&sort=-telephone (multiple fields for sorting)
  * 3. Pagination (`page`, `limit`)
  *    - e.g. ?page=1&limit=20
- * 
- * The query can also be filtered. The filter
- * must be provided in the BODY of the request,
- * not the query string. It must be provided in
- * JSON. All mongoose filter syntax is acceptable.
- * See `supplierAPI.test.js` for an example.
+ * * 4. Filter (`filter`)
+ *    - e.g. ?filter={"address":{"$regex":"Jurong","$options":"i"}}
+ *      - Note: Remember to call JSON.stringify() on 
+ *              the filter before sending in query string
+ *    - All mongoose filter syntax is acceptable.
+ *      See `supplierAPI.test.js` for an example.
+ *    - Only a SINGLE filter query is acceptable, 
+ *      otherwise the conversion from String to Object
+ *      will fail and a 400 status code response is sent.
+ *      If multiple filters are required, simply construct
+ *      a single filter that can account for all the
+ *      required filters (must be valid Mongoose syntax)
  * 
  * Note: if `parts` is included in the query, 
  * note that it is not populated (i.e. the ObjectIDs 

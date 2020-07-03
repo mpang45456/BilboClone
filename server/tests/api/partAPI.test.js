@@ -224,22 +224,40 @@ describe('Testing /api/v1/part endpoint', () => {
     it(`GET /: User with PART_READ perm should be able
         to access and the endpoint and retrieve parts
         data with custom filters`, async (done) => {
+        // Single Filter (simple Mongoose syntax)
         let filter = {"priceHistory.unitPrice": 0.040};
+        let query = queryString.stringify({
+            filter: JSON.stringify(filter)
+        })
         await authenticatedAdminAgent
-                .get(partEndpoint)
-                .send(filter)
+                .get(`${partEndpoint}?${query}`)
                 .expect(200)
                 .expect(res => {
                     expect(res.body.parts.length).toBe(2);
                 })
         
+        // Single Filter (complex Mongoose syntax)
         filter = {"$or": [{"description": "RFID receiver"}, {"description": "RFID transmitter"}]};
+        query = queryString.stringify({
+            filter: JSON.stringify(filter)
+        })
         await authenticatedAdminAgent
-                .get(partEndpoint)
-                .send(filter)
+                .get(`${partEndpoint}?${query}`)
                 .expect(200)
                 .expect(res => {
                     expect(res.body.parts.length).toBe(2);
+                })
+
+        // Multiple Filters combined into 1
+        filter = {"partNumber":{"$regex":"^PN121","$options":"i"},"description":{"$regex":"hammer","$options":"i"}};
+        query = queryString.stringify({
+            filter: JSON.stringify(filter)
+        })
+        await authenticatedAdminAgent
+                .get(`${partEndpoint}?${query}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.parts.length).toBe(1);
                 })
         done();
     })

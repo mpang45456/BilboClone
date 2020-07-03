@@ -112,11 +112,12 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
         to retrieve supplier data with custom filters`, async (done) => {
         // Filter for suppliers with 'drive' (case-insensitive)
         // in their `address` field
+        let filter = { "address": { "$regex": "Drive", "$options": "i"}};
+        let query = queryString.stringify({
+            filter: JSON.stringify(filter)
+        });
         await authenticatedReadAgent
-                .get(supplierEndpoint)
-                .send({
-                    "address": { "$regex": "Drive", "$options": "i"}
-                })
+                .get(`${supplierEndpoint}?${query}`)
                 .expect(200)
                 .expect(res => {
                     expect(res.body.suppliers.length).toBe(2);
@@ -124,11 +125,12 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
 
         // Filter for suppliers whose `telephone` field ends with
         // `9213`
+        filter = {"telephone": { "$regex": "9213$", "$options": "i"}};
+        query = queryString.stringify({
+            filter: JSON.stringify(filter)
+        });
         await authenticatedReadAgent
-                .get(supplierEndpoint)
-                .send({
-                    "telephone": { "$regex": "9213$", "$options": "i"}
-                })
+                .get(`${supplierEndpoint}?${query}`)
                 .expect(200)
                 .expect(res => {
                     expect(res.body.suppliers.length).toBe(1);
