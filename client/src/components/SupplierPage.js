@@ -58,7 +58,7 @@ AllSuppliersShowMoreButton.propTypes = {
 function SupplierList(props) {
     const [dataSource, setDataSource] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [pagination, setPagination] = useState({current: 1, pageSize: 5})
+    const [pagination, setPagination] = useState({current: 1, pageSize: 10}) // TODO: Abstract this into CONFIG after completion
 
     // State for Filter Queries
     const [nameFilterQuery, setNameFilterQuery] = useState('');
@@ -119,23 +119,27 @@ function SupplierList(props) {
             title: 'Supplier Name',
             dataIndex: 'name',
             key: 'name',
+            width: '20%',
             ...BilboSearchTable.getColumnSearchProps('name', nameFilterQuery, setNameFilterQuery)
         },
         {
             title: 'Address',
             dataIndex: 'address',
             key: 'address',
+            width: '35%',
             ...BilboSearchTable.getColumnSearchProps('address', addressFilterQuery, setAddressFilterQuery)
         },
         {
             title: 'Telephone',
             dataIndex: 'telephone',
             key: 'telephone',
+            width: '35%',
             ...BilboSearchTable.getColumnSearchProps('telephone', telephoneFilterQuery, setTelephoneFilterQuery)
         },
         {
             title: 'Action',
             key: 'action',
+            width: '10%',
             render: (text, record) => (
                 <BilboNavLink to={`${CONFIG.SUPPLIER_URL}/${record._id}`}>
                     view
