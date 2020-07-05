@@ -6,7 +6,11 @@ const { confirm } = Modal;
 import { DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import { bax, useAuth, redirectToErrorPage, PERMS } from '../../../context/AuthContext';
 import CONFIG from '../../../config';
-import { BilboDescriptions, BilboPageHeader, BilboDivider, EditableItem, ShowMoreButton, BilboSearchTable, BilboNavLink } from '../../UtilComponents';
+import { BilboDescriptions, 
+         BilboPageHeader, 
+         BilboDivider, 
+         EditableItem, 
+         ShowMoreButton } from '../../UtilComponents';
 import PartsTabContent from './PartsTabContent';
 import PurchaseOrdersTabContent from './PurchaseOrdersTabContent';
 import PropTypes from 'prop-types';

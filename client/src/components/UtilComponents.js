@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
 import { NavLink, useHistory } from 'react-router-dom';
-import { PageHeader, Row, Dropdown, Button, Spin, Descriptions, Divider, Input, Select, Tag } from 'antd';
+import { PageHeader, Row, Dropdown, 
+         Button, Spin, Descriptions, 
+         Divider, Input, Select, Tag } from 'antd';
 const { Option } = Select;
-import { EllipsisOutlined, SearchOutlined, CloseCircleOutlined, CheckCircleOutlined, EditOutlined } from "@ant-design/icons";
+import { EllipsisOutlined, 
+         SearchOutlined, 
+         CloseCircleOutlined, 
+         CheckCircleOutlined, 
+         EditOutlined } from "@ant-design/icons";
 import { redirectToErrorPage } from '../context/AuthContext';
 import Highlighter from 'react-highlight-words';
 import PropTypes from 'prop-types';

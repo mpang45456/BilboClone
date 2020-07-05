@@ -3,13 +3,10 @@ import { LoginPage } from './LoginPage';
 import AppScaffold from './AppScaffold/AppScaffold';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute';
-import { bax, AuthContext } from '../context/AuthContext';
-import { BilboLoadingSpinner } from './UtilComponents';
+import { AuthContext } from '../context/AuthContext';
 
 import ThemeWrapper from './Theme';
 import "../styles/styles.less";
-
-import { getPermissionsList } from '../context/AuthContext';
 /**
  * Root React Component Class for Bilbo App
  * 
