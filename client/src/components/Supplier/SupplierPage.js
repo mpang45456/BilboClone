@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { ShowMoreButton, BilboPageHeader, BilboDivider, BilboSearchTable, BilboNavLink } from './UtilComponents';
+import { ShowMoreButton, BilboPageHeader, BilboDivider, BilboSearchTable, BilboNavLink } from '../UtilComponents';
 import { Menu, Table, Input, Button, Row, Space, Tag } from 'antd';
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import PropTypes from 'prop-types';
-import { bax, useAuth, PERMS, redirectToErrorPage } from '../context/AuthContext';
-import CONFIG from '../config';
+import { bax, useAuth, PERMS, redirectToErrorPage } from '../../context/AuthContext';
+import CONFIG from '../../config';
 import queryString from 'query-string';
 
 /**
