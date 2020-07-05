@@ -95,22 +95,25 @@ export default function SupplierViewPage(props) {
                     <Descriptions.Item label="Address" >
                         <EditableItem value={supplier.address} 
                                       update={(newAddress) => updateField('address', newAddress)}
+                                      itemType='input'
                                       isEditingEnabled={isEditingEnabled} />
                     </Descriptions.Item>
                     <Descriptions.Item label="Telephone" >
                         <EditableItem value={supplier.telephone} 
                                       update={(newTelephone) => updateField('telephone', newTelephone)}
+                                      itemType='input'
                                       isEditingEnabled={isEditingEnabled} />
                     </Descriptions.Item>
                     <Descriptions.Item label="Fax" >
                         <EditableItem value={supplier.fax} 
                                       update={(newFax) => updateField('fax', newFax)}
+                                      itemType='input'
                                       isEditingEnabled={isEditingEnabled} />
                     </Descriptions.Item>
                     <Descriptions.Item label="Additional Information" >
                         <EditableItem value={supplier.additionalInfo} 
                                       update={(newAdditionalInfo) => updateField('additionalInfo', newAdditionalInfo)}
-                                      isTextArea={true}
+                                      itemType='textArea'
                                       isEditingEnabled={isEditingEnabled} />
                     </Descriptions.Item>
                 </BilboDescriptions>

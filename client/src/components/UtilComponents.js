@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, useHistory } from 'react-router-dom';
-import { PageHeader, Row, Dropdown, Button, Spin, Descriptions, Divider, Input } from 'antd';
+import { PageHeader, Row, Dropdown, Button, Spin, Descriptions, Divider, Input, Select, Tag } from 'antd';
+const { Option } = Select;
 import { EllipsisOutlined, SearchOutlined, CloseCircleOutlined, CheckCircleOutlined, EditOutlined } from "@ant-design/icons";
 import { redirectToErrorPage } from '../context/AuthContext';
 import Highlighter from 'react-highlight-words';
@@ -224,15 +225,54 @@ export const BilboSearchTable = {
  * changes are saved is entirely dependent on the
  * `update` function passed through the props. 
  * 
- * In the case of `SupplierViewPage`, this triggers
- * an API PATCH method call to update the fields
- * of the Supplier.
+ * There are 2 states: 
+ * 1. Display state:
+ *    - `props.value` is displayed. The exact
+ *      HTML structure used to display it is
+ *      dependent on `props.itemType`
+ * 2. Editing state:
+ *    - The edit component will display the 
+ *      current `props.value`. Upon changes, 
+ *      the `editItemValue` will be updated. 
+ *      The actual `props.value` is NOT yet
+ *      updated at this stage.
+ *    - When the user clicks on the `save`
+ *      icon, the `onSave` handler is triggered,
+ *      which then calls `props.update` with 
+ *      the latest value of `editItemValue`.
+ *    - `props.update` determines what happens
+ *      with the latest change. In the current
+ *      implementation for `SupplierViewPage`
+ *      and `PartViewPage`, the `props.update`
+ *      function will make an API PATCH call
+ *      to update the field of the part/supplier,
+ *      and then make another API GET call to
+ *      set the part/supplier state to the 
+ *      updated version. 
+ *    - This change of state triggers a re-render
+ *      of children components, and `EditableItem`
+ *      is one of them, because `props.value` 
+ *      is a field of the part/supplier state.
+ * 
+ * Note: `props.itemType` determines how `EditableItem`
+ * looks like during the display/editing stages. 
+ * There are 3 possible values: 
+ * 1. `props.itemType` === 'input'
+ * 2. `props.itemType` === 'textArea'
+ * 3. `props.itemType` === 'selectWithTags'
+ *    - Displaying: Displays a tag
+ *    - Editing: Select with multiple tag options
+ *    - MUST BE USED together with `props.tagOptions`
+ *      See the propTypes specification below for the
+ *      format of `props.tagOptions`.
  */
 export function EditableItem(props) {
     const [isEditing, setIsEditing] = useState(false);
     const [editItemValue, setEditItemValue] = useState(props.value);
     const history = useHistory();
+    const itemWidth = '70%'; // Determines where the edit button displays
 
+    // Called when `save` icon is clicked in the editing state
     const onSave = () => {
         props.update(editItemValue)
              .then(res => setIsEditing(false))
@@ -241,23 +281,50 @@ export function EditableItem(props) {
              })
     }
     
+    // Editing Stage
     const textAreaAutoSizeConfig = { minRows: 3, maxRows: 10 };
+    let isEditingItemEditComponent = null;
+    switch (props.itemType) {
+        case ('selectWithTags'):
+            isEditingItemEditComponent = (
+                <Select defaultValue={props.value}
+                    style={{width: itemWidth}}
+                    onChange={(value) => setEditItemValue(value)}>
+                    {
+                        props.tagOptions.map((tagOption, index) => {
+                            return (
+                                <Option value={tagOption.value} key={index}>
+                                    <Tag color={tagOption.color}>{tagOption.value}</Tag>
+                                </Option>
+                            )
+                        })
+                    }
+                </Select>
+            );
+            break;
+        case ('textArea'):
+            isEditingItemEditComponent = (
+                <Input.TextArea defaultValue={props.value}
+                onChange={e => setEditItemValue(e.target.value)} 
+                style={{width: itemWidth}}
+                autoSize={textAreaAutoSizeConfig}
+                />
+            );
+            break;
+        default: // includes case ('input')
+            isEditingItemEditComponent = (
+                <Input defaultValue={props.value}
+                   onChange={e => setEditItemValue(e.target.value)} 
+                   style={{width: itemWidth}}
+                  />
+            );
+            break;
+    }
 
-    // React Component to Display While Editing
+    // React Component to Display during Editing Stage
     const isEditingItem = (
         <div style={{display: 'inline'}}>
-            {
-                props.isTextArea
-                ? <Input.TextArea defaultValue={props.value}
-                                  onChange={e => setEditItemValue(e.target.value)} 
-                                  style={{width: '70%'}}
-                                  autoSize={textAreaAutoSizeConfig}
-                  />
-                : <Input defaultValue={props.value}
-                   onChange={e => setEditItemValue(e.target.value)} 
-                   style={{width: '70%'}}
-                  />
-            }
+            { isEditingItemEditComponent }
             <EditableItemStyledIconButton onClick={() => {
                         setEditItemValue(props.value);
                         setIsEditing(false);
@@ -274,20 +341,50 @@ export function EditableItem(props) {
         </div>
     )
 
-    // React Component to Display While Viewing
+    // Display Stage
+    let notIsEditingItemDisplayComponent = null;
+    switch (props.itemType) {
+        case ('selectWithTags'):
+            let tagColor = null;
+            // try-catch necessary because props.value may be `undefined` initially
+            try {
+                let selectedTagOption = props.tagOptions.filter(tagOption => {
+                    return tagOption.value.toLowerCase() === props.value.toLowerCase()
+                })[0]
+                tagColor = selectedTagOption.color;
+            } catch(err) {
+                tagColor = ''; // default grey color
+            }
+            notIsEditingItemDisplayComponent = (
+                <div style={{width: itemWidth}}>
+                    <Tag color={tagColor}>
+                        {props.value}
+                    </Tag>
+                </div>
+            );
+            break;
+        case ('textArea'):
+            notIsEditingItemDisplayComponent = (
+                <Input.TextArea value={props.value}
+                                style={{width: itemWidth}}
+                                readOnly
+                                autoSize={textAreaAutoSizeConfig}
+                />
+            );
+            break;
+        default: 
+            notIsEditingItemDisplayComponent = (
+                <span style={{width: itemWidth}}>
+                    {props.value}
+                </span>
+            );
+            break;
+    }
+
+    // React Component to Display during Display Stage
     const notIsEditingItem = (
         <Row>
-            {
-                props.isTextArea
-                ? <Input.TextArea value={props.value}
-                                  style={{width: '70%'}}
-                                  readOnly
-                                  autoSize={textAreaAutoSizeConfig}
-                  />
-                : <span style={{width: '70%'}}>
-                      {props.value}
-                  </span>
-            }
+            { notIsEditingItemDisplayComponent }
             <Button onClick={() => { setIsEditing(true); }}
                     icon={<EditOutlined />} 
                     style={{background: 'none', border: 'none', boxShadow: 'none'}}
@@ -309,17 +406,26 @@ export function EditableItem(props) {
     )
 }
 EditableItem.propTypes = {
-    // Whether an <Input /> or <Input.TextArea /> is displayed
-    isTextArea: PropTypes.bool.isRequired,
     // The value to be displayed
     value: PropTypes.string,
     // Function to call when value change is confirmed (`save` is invoked)
     update: PropTypes.func.isRequired,
     // Whether editing should be enabled in `EditableItem` (based on permissions check)
     isEditingEnabled: PropTypes.bool.isRequired,
-}
-EditableItem.defaultProps = {
-    isTextArea: false
+    // Type of Component Rendered
+    itemType: PropTypes.string.isRequired,
+    /*
+    Value and Color of the various options of each <Tag /> in <Select />
+    Takes the form: 
+    [
+        // This is one tagOption
+        {
+            color: 'green', 
+            value: 'ACTIVE'
+        }
+    ]
+    */
+    tagOptions: PropTypes.array
 }
 
 // For `Cancel`/`Save` Icon Button when Editing

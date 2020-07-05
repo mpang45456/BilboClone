@@ -54,12 +54,15 @@ export default function PartViewPage(props) {
     // General function to make API PATCH call when a field is edited and saved
     // Returns a promise (child component is supposed to implement `catch` handler)
     const updateField = (fieldName, newFieldValue) => {
+        // Populate the `supplier`'s `name` field
+        let query = queryString.stringify({supplierPopulate: 'name'});
+        // Populate body of PATCH API call
         let patchBody = {};
         patchBody[fieldName] = newFieldValue;
         return bax.patch(`/api/v1/part/${props.match.params.partID}`, patchBody)
                   .then(res => {
                         // Obtain updated part information (to update UI)
-                        return bax.get(`/api/v1/part/${props.match.params.partID}`);
+                        return bax.get(`/api/v1/part/${props.match.params.partID}?${query}`);
                   }).then(res => {
                     setPart(res.data);
                     message.success('Part Information successfully changed!');
@@ -100,23 +103,26 @@ export default function PartViewPage(props) {
                     <Descriptions.Item label="Part Number" >
                         <EditableItem value={part.partNumber} 
                                       update={(newPartNumber) => updateField('partNumber', newPartNumber)}
+                                      itemType='input'
                                       isEditingEnabled={isEditingEnabled} />
                     </Descriptions.Item>
                     <Descriptions.Item label="Description" >
-                        <EditableItem value={part.description} 
+                        <EditableItem value={part.description}
                                       update={(newDescription) => updateField('description', newDescription)}
-                                      isTextArea={true}
+                                      itemType='textArea'
                                       isEditingEnabled={isEditingEnabled} />
                     </Descriptions.Item>
                     <Descriptions.Item label="Status" >
                         <EditableItem value={part.status} 
                                       update={(newStatus) => updateField('status', newStatus)}
+                                      itemType='selectWithTags'
+                                      tagOptions={[{value: 'ACTIVE', color: CONFIG.ACTIVE_TAG_COLOR}, {value: 'ARCHIVED', color: CONFIG.ARCHIVED_TAG_COLOR}]}
                                       isEditingEnabled={isEditingEnabled} />
                     </Descriptions.Item>
                     <Descriptions.Item label="Additional Information" >
                         <EditableItem value={part.additionalInfo} 
                                       update={(newAdditionalInfo) => updateField('additionalInfo', newAdditionalInfo)}
-                                      isTextArea={true}
+                                      itemType='textArea'
                                       isEditingEnabled={isEditingEnabled} />
                     </Descriptions.Item>
                 </BilboDescriptions>
