@@ -41,7 +41,6 @@ export default function SupplierPage(props) {
 function AllSuppliersShowMoreButton(props) {
     const history = useHistory();
 
-    // TODO: Add click handler for `addSupplier` menu item
     const buttonClicked = ({item, key, keyPath, domEvent}) => {
         if (key === 'addSupplierItem') {
             history.push(`${CONFIG.SUPPLIER_URL}add`);

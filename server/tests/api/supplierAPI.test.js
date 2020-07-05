@@ -356,6 +356,24 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
         done();
     })
 
+    it(`POST /: User with SUPPLIER_WRITE perm should
+        not be able to create a new supplier with a
+        duplicate supplier name. A custom error message
+        should be returned in the response.`, async (done) => {
+        let newSupplierWithDuplicateName = JSON.parse(JSON.stringify(newSupplier));
+        newSupplierWithDuplicateName.name = testSuppliersWithParts[0].name;
+
+        await authenticatedAdminAgent
+                .post(supplierEndpoint)
+                .send(newSupplierWithDuplicateName)
+                .expect(400)
+                .expect(res => {
+                    expect(res.error.text).toBe('Duplicate Supplier Name');
+                })
+        
+        done();
+    })
+
     it(`POST /: User without SUPPLIER_WRITE perm should
         not be able to create a new supplier`, async (done) => {
         // Has SUPPLIER_READ perm
