@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
-import { PageHeader, Row, Dropdown, Button, Spin, Descriptions, Divider, Input, message } from 'antd';
+import { NavLink, useHistory } from 'react-router-dom';
+import { PageHeader, Row, Dropdown, Button, Spin, Descriptions, Divider, Input } from 'antd';
 import { EllipsisOutlined, SearchOutlined, CloseCircleOutlined, CheckCircleOutlined, EditOutlined } from "@ant-design/icons";
+import { redirectToErrorPage } from '../context/AuthContext';
 import Highlighter from 'react-highlight-words';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
@@ -230,12 +231,13 @@ export const BilboSearchTable = {
 export function EditableItem(props) {
     const [isEditing, setIsEditing] = useState(false);
     const [editItemValue, setEditItemValue] = useState(props.value);
+    const history = useHistory();
 
     const onSave = () => {
         props.update(editItemValue)
              .then(res => setIsEditing(false))
              .catch(err => {
-                 redirectToErrorPage(err) // TODO: Update with proper UI error handling (wrt <Input />)
+                 redirectToErrorPage(err, history) // TODO: Update with proper UI error handling (wrt <Input />)
              })
     }
     

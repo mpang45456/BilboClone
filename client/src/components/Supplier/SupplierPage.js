@@ -42,8 +42,13 @@ function AllSuppliersShowMoreButton(props) {
     const history = useHistory();
 
     // TODO: Add click handler for `addSupplier` menu item
+    const buttonClicked = ({item, key, keyPath, domEvent}) => {
+        if (key === 'addSupplierItem') {
+            history.push(`${CONFIG.SUPPLIER_URL}add`);
+        }
+    }
     const menu = (
-        <Menu>
+        <Menu onClick={buttonClicked}>
             <Menu.Item
                 key='addSupplierItem'
                 icon={<PlusOutlined />}>

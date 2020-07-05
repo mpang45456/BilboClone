@@ -156,7 +156,11 @@ router.post('/',
         return res.status(200).json(newSupplier);
     } catch(err) {
         logger.error(`POST /supplier: Could not create new supplier: ${err}`);
-        return res.status(400).send('Unable to create new supplier');
+        if (err.toString().toLowerCase().includes('duplicate key error')) {
+            return res.status(400).send('Duplicate Supplier Name');
+        } else {
+            return res.status(400).send('Unable to create new supplier');
+        }
     }
 })
 

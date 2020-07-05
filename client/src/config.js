@@ -28,6 +28,10 @@ CONFIG.ERROR_500_URL = '/error500'; // Internal Server Error
 --- Edit Users: CONFIG.USER_URL + '/:username/edit'
 --- Add Users: CONFIG.USER_URL + 'add' (Note: the add has no / prefix, so it is concatenated to /users)
 
+-- Suppliers
+--- Specific Supplier (View + Edit): CONFIG.SUPPLIER_URL + '/:supplierObjID'
+--- Add Supplier: CONFIG.SUPPLIER_URL + 'add' (Note: the add has no / prefix, so it is concatenated to /suppliers)
+
 
 */
 

@@ -61,7 +61,8 @@ export default function SupplierViewPage(props) {
                   })
     }
     
-    // Editing Permission (for `showMoreButton` and the `EditableItem`s in `BilboDescriptions`)
+    // Editing Permission (for `showMoreButton` and the 
+    // `EditableItem`s in `BilboDescriptions`)
     const isEditingEnabled = permissionsList.includes(PERMS.SUPPLIER_WRITE);
     const title = (
         <div>
@@ -80,6 +81,8 @@ export default function SupplierViewPage(props) {
         </div>
     )
 
+    // Note that all fields are editable except the 
+    // supplier's name
     return (
         <div>
             <Spin spinning={isLoadingSupplierDetails}>
@@ -87,9 +90,7 @@ export default function SupplierViewPage(props) {
                                    bordered
                                    column={1}>
                     <Descriptions.Item label="Supplier Name">
-                        <EditableItem value={supplier.name} 
-                                      update={(newName) => updateField('name', newName)}
-                                      isEditingEnabled={isEditingEnabled} />
+                        {supplier.name}
                     </Descriptions.Item>
                     <Descriptions.Item label="Address" >
                         <EditableItem value={supplier.address} 
@@ -134,7 +135,8 @@ SupplierViewPage.propTypes = {
 }
 
 /**
- * Customised `showMoreButton` in `SupplierViewPage` header
+ * Customised `showMoreButton` in `SupplierViewPage` header.
+ * Dropdown has option to delete supplier.
  */
 function DeleteSupplierShowMoreButton(props) {
     const history = useHistory();
@@ -149,6 +151,7 @@ function DeleteSupplierShowMoreButton(props) {
                     bax.delete(`/api/v1/supplier/${props.supplierID}`)
                         .then(res => {
                             if (res.status === 200) {
+                                message.success('Successfully deleted supplier');
                                 history.push(CONFIG.SUPPLIER_URL);
                             }
                         }).catch(err => {
