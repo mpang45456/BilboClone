@@ -10,7 +10,7 @@ import HomePage from '../HomePage';
 import SalesPage from '../SalesPage';
 import PurchasePage from '../PurchasePage';
 import PartPage from '../Part/PartPage';
-import PartViewPage from '../Part/PartViewPage';
+import PartViewPage from '../Part/PartViewPage/PartViewPage';
 import SupplierPage from '../Supplier/SupplierPage';
 import SupplierViewPage from '../Supplier/SupplierViewPage/SupplierViewPage';
 import SupplierAddPage from '../Supplier/SupplierAddPage';
