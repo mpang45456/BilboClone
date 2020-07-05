@@ -124,6 +124,7 @@ const suppliers = [
                     additionalInfo: 'Increase in price owing to disruption in supply chain'
                 }],
                 description: 'RFID receiver',
+                status: 'ARCHIVED'
             },
             {
                 partNumber: 'BA2133-21Z',

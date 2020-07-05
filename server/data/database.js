@@ -56,12 +56,12 @@ const PartSchema = new Schema({
     supplier: { type: Schema.Types.ObjectId, ref: 'Supplier', required: true, index: true },
     partNumber: { type: String, required: true, index: true}, // TODO: Add index for this?
     priceHistory: [PriceHistorySchema], // TODO: Check if this defaults to an empty array
-    description: { type: String },
+    description: { type: String, default: '' },
     status: { type: String, 
               enum: ['ARCHIVED', 'ACTIVE'], 
               default: 'ACTIVE', 
               required: true },
-    additionalInfo: { type: String }
+    additionalInfo: { type: String, default: '' }
 })
 
 const PartModel = mongoose.model('Part', PartSchema);

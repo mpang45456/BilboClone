@@ -34,4 +34,8 @@ CONFIG.ERROR_500_URL = '/error500'; // Internal Server Error
 // Sub-Menu Keys
 CONFIG.DATA_SUB_MENU_KEY = 'dataSM';
 
+// Tag Colours
+CONFIG.ACTIVE_TAG_COLOR = 'green';
+CONFIG.ARCHIVED_TAG_COLOR = 'gold';
+
 export default CONFIG;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { PageHeader, Row, Dropdown, Button, Spin, Descriptions, Divider, Input } from 'antd';
+import { PageHeader, Row, Dropdown, Button, Spin, Descriptions, Divider, Input, message } from 'antd';
 import { EllipsisOutlined, SearchOutlined, CloseCircleOutlined, CheckCircleOutlined, EditOutlined } from "@ant-design/icons";
 import Highlighter from 'react-highlight-words';
 import PropTypes from 'prop-types';
@@ -227,7 +227,9 @@ export function EditableItem(props) {
     const onSave = () => {
         props.update(editItemValue)
              .then(res => setIsEditing(false))
-             .catch(err => redirectToErrorPage(err)) // TODO: Update with proper UI error handling (wrt <Input />)
+             .catch(err => {
+                 redirectToErrorPage(err) // TODO: Update with proper UI error handling (wrt <Input />)
+             })
     }
     
     const textAreaAutoSizeConfig = { minRows: 3, maxRows: 10 };
