@@ -11,6 +11,7 @@ import { BilboDescriptions,
          BilboDivider, 
          EditableItem, 
          ShowMoreButton } from '../../UtilComponents';
+import PriceHistoryTabContent from './PriceHistoryTabContent';
 import PropTypes from 'prop-types';
 import queryString from 'query-string';
 
@@ -46,6 +47,7 @@ export default function PartViewPage(props) {
         bax.get(`/api/v1/part/${props.match.params.partID}?${query}`)
             .then(res => {
                 if (res.status === 200) {
+                    console.log(res.data);
                     setPart(res.data);
                     setIsLoadingPartDetails(false);
                 }
@@ -136,7 +138,9 @@ export default function PartViewPage(props) {
 
             <Tabs defaultActiveKey='1'>
                 <TabPane tab='Price History' key='1'>
-                    Insert Price History Tab Pane
+                    <PriceHistoryTabContent priceHistory={part.priceHistory 
+                                                          ? part.priceHistory 
+                                                          : []}/>
                 </TabPane>
                 <TabPane tab='Inventory' key='2'>
                     Insert Inventory Tab Pane

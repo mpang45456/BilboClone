@@ -450,3 +450,22 @@ const EditableItemStyledIconButton = styled(Button)`
 EditableItemStyledIconButton.propTypes = {
     transformcolor: PropTypes.string.isRequired
 }
+
+// Styled Timeline
+export const BilboTimeline = styled(Timeline)`
+    & .ant-timeline-item-tail {
+        border-left: 2px solid gainsboro;
+    }
+`;
+
+// Styled Paragraph (Used for title for each <Timeline.Item />)
+export const BilboTimelineParagraph = styled.p`
+    margin-bottom: 0px;
+`;
+
+// Styled Paragraph (Used for description for each <Timeline.Item />)
+export const BilboTimelineParagraphDescription = styled.p`
+    margin-top: 0px;
+    font-size: 80%;
+    max-width: 250px;
+`;
