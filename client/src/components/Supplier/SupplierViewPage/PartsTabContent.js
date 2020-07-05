@@ -91,7 +91,6 @@ function SupplierSpecificPartsList(props) {
     }
     
     // Configuration of Columns
-    // TODO: Add latest price as a column
     const columns = [
         {
             title: 'Part Number',
@@ -103,7 +102,7 @@ function SupplierSpecificPartsList(props) {
         {
             title: 'Latest Unit Price ($)',
             key: 'priceHistory',
-            width: '15%',
+            width: '20%',
             render: (text, record) => {
                 if (record.priceHistory[record.priceHistory.length - 1]) {
                     return record.priceHistory[record.priceHistory.length - 1].unitPrice;
@@ -116,7 +115,7 @@ function SupplierSpecificPartsList(props) {
             title: 'Description',
             dataIndex: 'description',
             key: 'description',
-            width: '25%',
+            width: '20%',
             ...BilboSearchTable.getColumnSearchProps('description', descriptionFilterQuery, setDescriptionFilterQuery)
         },
         {

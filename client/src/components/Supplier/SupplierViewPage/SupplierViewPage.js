@@ -18,7 +18,7 @@ import PropTypes from 'prop-types';
  * Composed of 3 main parts:
  * 1. Header
  *    - Title
- *    - ShowMoreButton (Delete User)
+ *    - ShowMoreButton (Delete Supplier)
  * 2. Supplier Descriptions
  *    - Contains <EditableItem />s
  * 3. Tabs
