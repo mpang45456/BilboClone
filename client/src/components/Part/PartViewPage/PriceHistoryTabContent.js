@@ -22,10 +22,11 @@ export default function PriceHistoryTabContent(props) {
             ? <span>No price history information available</span>
             : (<BilboTimeline mode='left'>
                 {
-                    props.priceHistory.map(price => {
+                    props.priceHistory.map((price, index) => {
                         let createdAtTime = moment(price.createdAt).format('Do MMM YY, h:mm:ss');
                         return (
-                            <BilboTimeline.Item label={createdAtTime}>
+                            <BilboTimeline.Item label={createdAtTime} 
+                                                 key={index}>
                                 <BilboTimelineParagraph>
                                     {price.unitPrice}
                                 </BilboTimelineParagraph>
