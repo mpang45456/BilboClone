@@ -128,6 +128,10 @@ export default function SupplierViewPage(props) {
         </div>
     );
 }
+SupplierViewPage.propTypes = {
+    match: PropTypes.object.isRequired,
+    location: PropTypes.object.isRequired,
+}
 
 /**
  * Customised `showMoreButton` in `SupplierViewPage` header

@@ -60,7 +60,7 @@ function SupplierSpecificPartsList(props) {
         setIsLoading(true);
         // Send filter in query string
         let filter = JSON.stringify({
-            "supplier": props.supplierid, // TODO: Add this to PropTypes
+            "supplier": props.supplierid,
             "partNumber": { "$regex": partNumberFilterQuery, "$options": "i"},
             "description": { "$regex": descriptionFilterQuery, "$options": "i"},
             "status": { "$regex": statusFilterQuery, "$options": "i"},
