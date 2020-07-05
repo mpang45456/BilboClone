@@ -413,7 +413,7 @@ EditableItem.propTypes = {
     // Whether editing should be enabled in `EditableItem` (based on permissions check)
     isEditingEnabled: PropTypes.bool.isRequired,
     // Type of Component Rendered
-    itemType: PropTypes.string.isRequired,
+    itemType: PropTypes.oneOf(['input', 'textArea', 'selectWithTags']).isRequired,
     /*
     Value and Color of the various options of each <Tag /> in <Select />
     Takes the form: 
