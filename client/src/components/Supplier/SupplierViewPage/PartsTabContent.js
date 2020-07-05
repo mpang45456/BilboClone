@@ -97,21 +97,33 @@ function SupplierSpecificPartsList(props) {
             title: 'Part Number',
             dataIndex: 'partNumber',
             key: 'partNumber',
-            width: '20%',
+            width: '15%',
             ...BilboSearchTable.getColumnSearchProps('partNumber', partNumberFilterQuery, setPartNumberFilterQuery)
+        },
+        {
+            title: 'Latest Unit Price ($)',
+            key: 'priceHistory',
+            width: '15%',
+            render: (text, record) => {
+                if (record.priceHistory[record.priceHistory.length - 1]) {
+                    return record.priceHistory[record.priceHistory.length - 1].unitPrice;
+                } else {
+                    return undefined;
+                }
+            }
         },
         {
             title: 'Description',
             dataIndex: 'description',
             key: 'description',
-            width: '20%',
+            width: '25%',
             ...BilboSearchTable.getColumnSearchProps('description', descriptionFilterQuery, setDescriptionFilterQuery)
         },
         {
             title: 'Additional Information',
             dataIndex: 'additionalInfo',
             key: 'additionalInfo',
-            width: '30%',
+            width: '25%',
             ...BilboSearchTable.getColumnSearchProps('additionalInfo', additionalInfoFilterQuery, setAdditionalInfoFilterQuery)
         },
         {
