@@ -9,6 +9,7 @@ import CONFIG from '../config';
 import { BilboDescriptions, BilboPageHeader, BilboDivider, EditableItem, ShowMoreButton, BilboSearchTable, BilboNavLink } from './UtilComponents';
 import queryString from 'query-string';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 
 /**
  * React Component for the View Page
@@ -67,34 +68,33 @@ export default function SupplierViewPage(props) {
         </div>
     )
 
-    // TODO: Should be able to set style for Descriptions.Item once (using styled components?)
     return (
         <div>
             <Spin spinning={isLoadingSupplierDetails}>
                 <BilboDescriptions title={title}
                                    bordered
                                    column={1}>
-                    <Descriptions.Item label="Supplier Name" style={{padding: '5px 16px', lineHeight: 2}}>
+                    <Descriptions.Item label="Supplier Name">
                         <EditableItem value={supplier.name} 
                                       update={(newName) => updateField('name', newName)}
                                       isEditingEnabled={isEditingEnabled} />
                     </Descriptions.Item>
-                    <Descriptions.Item label="Address" style={{padding: '5px 16px', lineHeight: 2}}>
+                    <Descriptions.Item label="Address" >
                         <EditableItem value={supplier.address} 
                                       update={(newAddress) => updateField('address', newAddress)}
                                       isEditingEnabled={isEditingEnabled} />
                     </Descriptions.Item>
-                    <Descriptions.Item label="Telephone" style={{padding: '5px 16px', lineHeight: 2}}>
+                    <Descriptions.Item label="Telephone" >
                         <EditableItem value={supplier.telephone} 
                                       update={(newTelephone) => updateField('telephone', newTelephone)}
                                       isEditingEnabled={isEditingEnabled} />
                     </Descriptions.Item>
-                    <Descriptions.Item label="Fax" style={{padding: '5px 16px', lineHeight: 2}}>
+                    <Descriptions.Item label="Fax" >
                         <EditableItem value={supplier.fax} 
                                       update={(newFax) => updateField('fax', newFax)}
                                       isEditingEnabled={isEditingEnabled} />
                     </Descriptions.Item>
-                    <Descriptions.Item label="Additional Information" style={{padding: '5px 16px', lineHeight: 2}}>
+                    <Descriptions.Item label="Additional Information" >
                         <EditableItem value={supplier.additionalInfo} 
                                       update={(newAdditionalInfo) => updateField('additionalInfo', newAdditionalInfo)}
                                       isTextArea={true}

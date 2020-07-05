@@ -85,6 +85,13 @@ export const BilboDescriptions = styled(Descriptions)`
     & .ant-descriptions-item-label {
         width: 150px;
         border-right: 2px solid ${props => props.theme.colors.deepRed };
+        padding: 5px 16px;
+        lineHeight: 2.0;
+    }
+
+    & .ant-descriptions-item-content {
+        padding: 5px 16px;
+        lineHeight: 2.0;
     }
 `;
 
