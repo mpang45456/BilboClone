@@ -155,7 +155,6 @@ function PartList(props) {
     const columns = [
         {
             title: 'Supplier Name',
-            dataIndex: 'name',
             key: 'name',
             width: '15%',
             render: (text, record) => {
@@ -166,14 +165,26 @@ function PartList(props) {
             title: 'Part Number',
             dataIndex: 'partNumber',
             key: 'partNumber',
-            width: '10%',
+            width: '15%',
             ...BilboSearchTable.getColumnSearchProps('partNumber', partNumberFilterQuery, setPartNumberFilterQuery)
+        },
+        {
+            title: 'Latest Unit Price ($)',
+            key: 'priceHistory',
+            width: '10%',
+            render: (text, record) => {
+                if (record.priceHistory[record.priceHistory.length - 1]) {
+                    return record.priceHistory[record.priceHistory.length - 1].unitPrice;
+                } else {
+                    return undefined;
+                }
+            }
         },
         {
             title: 'Description',
             dataIndex: 'description',
             key: 'description',
-            width: '30%',
+            width: '20%',
             ...BilboSearchTable.getColumnSearchProps('description', descriptionFilterQuery, setDescriptionFilterQuery)
         },
         {
@@ -192,7 +203,7 @@ function PartList(props) {
             title: 'Additional Information',
             dataIndex: 'additionalInfo',
             key: 'additionalInfo',
-            width: '25%',
+            width: '20%',
             ...BilboSearchTable.getColumnSearchProps('additionalInfo', additionalInfoFilterQuery, setAdditionalInfoFilterQuery)
         },
         {

@@ -64,18 +64,14 @@ const suppliers = [
         additionalInfo: 'A well-regarded business partner since the 1970s'
     },
     {
-        // Optional Supplier paths are absent, but with parts and price history
+        // Optional Supplier paths are absent, but with parts and without price history
         // Same parts as `A Industries`
         name: 'B Industries',
         address: 'Blk 321B Lorong Chuan Industrial Drive',
         parts: [
             {
                 partNumber: 'PN121',
-                priceHistory: [{
-                    createdBy: 'brian',
-                    unitPrice: 0.0001,
-                    additionalInfo: 'Cheap Product'
-                }],
+                priceHistory: [],
                 description: 'A nail',
                 status: 'ACTIVE',
                 additionalInfo: 'Supplier will stop manufacturing this part on 30/8/2020'
