@@ -91,6 +91,7 @@ function SupplierSpecificPartsList(props) {
     }
     
     // Configuration of Columns
+    // TODO: Add latest price as a column
     const columns = [
         {
             title: 'Part Number',
