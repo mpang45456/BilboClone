@@ -459,6 +459,13 @@ export const BilboTimeline = styled(Timeline)`
     }
 `;
 
+// Styled Timeline with a dashed trailing end
+export const BilboTimelineWithTrailingEnd = styled(BilboTimeline)`
+    & .ant-timeline-item:nth-last-of-type(2) .ant-timeline-item-tail {
+        border-left: 2px dashed gainsboro;
+    }
+`;
+
 // Styled Paragraph (Used for title for each <Timeline.Item />)
 export const BilboTimelineParagraph = styled.p`
     margin-bottom: 0px;
