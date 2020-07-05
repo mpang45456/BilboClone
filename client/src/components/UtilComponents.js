@@ -467,6 +467,7 @@ export const BilboTimelineParagraph = styled.p`
 // Styled Paragraph (Used for description for each <Timeline.Item />)
 export const BilboTimelineParagraphDescription = styled.p`
     margin-top: 0px;
+    margin-bottom: 0px;
     font-size: 80%;
     max-width: 250px;
 `;

@@ -33,6 +33,9 @@ export default function PriceHistoryTabContent(props) {
                                 <BilboTimelineParagraphDescription>
                                     {price.additionalInfo}
                                 </BilboTimelineParagraphDescription>
+                                <BilboTimelineParagraphDescription>
+                                    <strong>- {price.createdBy}</strong>
+                                </BilboTimelineParagraphDescription>
                             </BilboTimeline.Item>
                         )
                     })
