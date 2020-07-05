@@ -262,6 +262,61 @@ describe('Testing /api/v1/part endpoint', () => {
         done();
     })
 
+    it(`GET /: User with PART_READ perm should be able
+        to access the part endpoint, but part data should
+        not have supplier auto-populated with default 
+        query`, async (done) => {
+        await authenticatedAdminAgent
+                .get(partEndpoint)
+                .expect(200)
+                .expect(res => {
+                    for (let part of res.body.parts) {
+                        expect(typeof part.supplier === 'string');
+                    }
+                })
+        
+        done();
+    })
+
+    it(`GET /: User with PART_READ perm should be able
+        to access the part endpoint and specify which
+        fields of the supply path to populate`, async (done) => {
+        let query = queryString.stringify({supplierPopulate: ['name', 'telephone']});
+        await authenticatedAdminAgent
+                .get(`${partEndpoint}?${query}`)
+                .expect(200)
+                .expect(res => {
+                    for (let part of res.body.parts) {
+                        expect(typeof part.supplier === 'object');
+                        expect(part.supplier.name).not.toBeUndefined();
+                        expect(part.supplier.telephone).not.toBeUndefined();
+                    }
+                })
+        
+        done();
+    })
+
+    it(`GET /: User with PART_READ perm should be able
+        to access the part endpoint and specify which
+        fields of the supply path to populate. When a 
+        field that does not exist is specified, the 
+        request should still succeed and the returned 
+        data should not contain the invalid field`, async (done) => {
+        let query = queryString.stringify({supplierPopulate: ['name', 'fieldThatDoesNotExist']});
+        await authenticatedAdminAgent
+                .get(`${partEndpoint}?${query}`)
+                .expect(200)
+                .expect(res => {
+                    for (let part of res.body.parts) {
+                        expect(typeof part.supplier === 'object');
+                        expect(part.supplier.name).not.toBeUndefined();
+                        expect(part.supplier.fieldThatDoesNotExist).toBeUndefined();
+                    }
+                })
+        
+        done();
+    })
+
     it(`GET /: User without PART_READ perm should not be
         able to access the endpoint and retrieve parts
         data`, async (done) => {
@@ -335,6 +390,55 @@ describe('Testing /api/v1/part endpoint', () => {
                 .get(`${partEndpoint}/${supplierObjID}`)
                 .expect(400)
 
+        done();
+    })
+
+    it(`GET /:partObjID: User with PART_READ perm should be able
+        to access the part endpoint, but part data should
+        not have supplier field auto-populated with default 
+        query`, async (done) => {
+        await authenticatedAdminAgent
+                .get(`${partEndpoint}/${partObjID}`)
+                .expect(200)
+                .expect(res => {
+                    expect(typeof res.body.supplier === 'string');
+                })
+        
+        done();
+    })
+
+    it(`GET /:partObjID: User with PART_READ perm should be able
+        to access the part endpoint and specify which
+        fields of the supply path to populate`, async (done) => {
+        let query = queryString.stringify({supplierPopulate: ['name', 'telephone']});
+        await authenticatedAdminAgent
+                .get(`${partEndpoint}/${partObjID}?${query}`)
+                .expect(200)
+                .expect(res => {
+                    expect(typeof res.body.supplier === 'object');
+                    expect(res.body.supplier.name).not.toBeUndefined();
+                    expect(res.body.supplier.telephone).not.toBeUndefined();
+                })
+        
+        done();
+    })
+
+    it(`GET /:partObjID: User with PART_READ perm should be able
+        to access the part endpoint and specify which
+        fields of the supply path to populate. When a 
+        field that does not exist is specified, the 
+        request should still succeed and the returned 
+        data should not contain the invalid field`, async (done) => {
+        let query = queryString.stringify({supplierPopulate: ['name', 'fieldThatDoesNotExist']});
+        await authenticatedAdminAgent
+                .get(`${partEndpoint}/${partObjID}?${query}`)
+                .expect(200)
+                .expect(res => {
+                    expect(typeof res.body.supplier === 'object');
+                    expect(res.body.supplier.name).not.toBeUndefined();
+                    expect(res.body.supplier.fieldThatDoesNotExist).toBeUndefined();
+                })
+        
         done();
     })
 

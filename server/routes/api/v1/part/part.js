@@ -35,10 +35,15 @@ router.use(isAuthenticated);
  *      If multiple filters are required, simply construct
  *      a single filter that can account for all the
  *      required filters (must be valid Mongoose syntax)
- * 
- * Note: The `supplier` path will not be populated.
- * Only the ObjectID in the `supplier` path will be
- * returned in the response (if included).
+ * 5. Which `supplier` fields to populate (`supplierPopulate`)
+ *    - e.g. ?supplierPopulate=name
+ *    - e.g. ?supplierPopulate=name&supplierPopulate=telephone
+ *    - invalid supplier field names will not be included in
+ *      the response
+ *    - if `supplierPopulate` is not specified, then the
+ *      `supplier` path will not be populated. Only the 
+ *      ObjectID in the `supplier` path will be
+ *      returned in the response (if included).
  * 
  * Note: response includes `parts`, `totalPages` and
  * `currentPage`.
@@ -51,12 +56,14 @@ router.get('/',
         limit = CONFIG.DEFAULT_PAGE_LIMIT,
         inc = ['supplier', 'partNumber', 'priceHistory', 'description', 'status', 'additionalInfo'],
         sort = ['status'],
-        filter = {} // FIXME: Using the req params directly as the filter to the Mongoose query might pose a significant security risk
+        filter = {}, // FIXME: Using the req params directly as the filter to the Mongoose query might pose a significant security risk
+        supplierPopulate = [],
     } = req.query;
 
-    // Convert `inc`/`sort` to array if only a single field is specified
+    // Convert `inc`/`sort`/`supplierPopulate` to array if only a single field is specified
     if (!Array.isArray(inc)) { inc = [inc]; }
     if (!Array.isArray(sort)) { sort = [sort]; }
+    if (!Array.isArray(supplierPopulate)) { supplierPopulate = [supplierPopulate]; }
 
     // Convert filter to object
     if (typeof filter === 'string') {
@@ -73,7 +80,16 @@ router.get('/',
             skip: (page - 1) * limit,
             sort: sort.join(' '),
         }
-        let parts = await PartModel.find(filter, inc.join(' '), options);
+
+        let parts = null;
+        if (supplierPopulate.length === 0) {
+            // `supplier` is not populated
+            parts = await PartModel.find(filter, inc.join(' '), options);
+        } else {
+            // `supplier` is populated with fields in `supplierPopulate`
+            parts = await PartModel.find(filter, inc.join(' '), options)
+                                   .populate('supplier', supplierPopulate.join(' ')).exec();
+        }
 
         const totalNumParts = await PartModel.countDocuments(filter);
         return res.status(200).json({
@@ -95,10 +111,15 @@ router.get('/',
  * 
  * Request query string can specify:
  * 1. Fields to include (`inc`)
- * 
- * Note: The `supplier` path will not be populated,
- * even if `supplier` is included. Only the ObjectID
- * will be returned in the response (if included)
+ * 2. Which `supplier` fields to populate (`supplierPopulate`)
+ *    - e.g. ?supplierPopulate=name
+ *    - e.g. ?supplierPopulate=name&supplierPopulate=telephone
+ *    - invalid supplier field names will not be included in
+ *      the response
+ *    - if `supplierPopulate` is not specified, then the
+ *      `supplier` path will not be populated. Only the 
+ *      ObjectID in the `supplier` path will be
+ *      returned in the response (if included).
  * 
  * Note: Will return 400 status code is the 
  * `partObjID` is invalid
@@ -108,13 +129,24 @@ router.get('/:partObjID',
            async function(req, res) {
     let {
         inc = ['supplier', 'partNumber', 'priceHistory', 'description', 'status', 'additionalInfo'],
+        supplierPopulate = [],
     } = req.query;
 
-    // Convert `inc`/`sort` to array if only a single field is specified
+    // Convert `inc`/`supplierPopulate` to array if only a single field is specified
     if (!Array.isArray(inc)) { inc = [inc]; }
+    if (!Array.isArray(supplierPopulate)) { supplierPopulate = [supplierPopulate]; }
 
     try {
-        let part = await PartModel.findOne({ _id: req.params.partObjID}, inc.join(' '));
+        let part = null;
+        if (supplierPopulate.length === 0) {
+            // `supplier` is not populated
+            part = await PartModel.findOne({ _id: req.params.partObjID}, inc.join(' '));
+        } else {
+            // `supplier` is populated with fields in `supplierPopulate`
+            part = await PartModel.findOne({ _id: req.params.partObjID}, inc.join(' '))
+                                  .populate('supplier', supplierPopulate.join(' ')).exec();
+        }
+
         if (!part) {
             return res.status(400).send('Invalid part ID');
         }
