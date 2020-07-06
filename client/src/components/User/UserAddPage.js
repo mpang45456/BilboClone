@@ -107,7 +107,7 @@ export default function UserAddPage(props) {
     
     // Layout of <Form> 
     const formItemLayout = {
-        labelCol: { span: 3 },
+        labelCol: { span: 2 },
     };
 
     return (
@@ -120,7 +120,6 @@ export default function UserAddPage(props) {
 
             <Spin spinning={isLoading}>
                 <Form name='createNewUserForm' 
-                      labelAlign='left'
                       onFinish={tryCreateNewUser}
                       {...formItemLayout} >
                     <Form.Item name='name' 

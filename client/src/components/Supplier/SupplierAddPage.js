@@ -84,7 +84,6 @@ export default function SupplierAddPage(props) {
 
             <Spin spinning={isSubmitting}>
                 <Form name='createNewSupplierForm' 
-                      labelAlign='left'
                       onFinish={tryCreateNewSupplier}
                       {...formItemLayout} >
                     <Form.Item name='name' 
@@ -112,7 +111,7 @@ export default function SupplierAddPage(props) {
                     </Form.Item>
 
                     <Form.Item name='additionalInfo' 
-                               label='Additional Information' >
+                               label='Additional Info' >
                         <Input.TextArea />
                     </Form.Item>
 
