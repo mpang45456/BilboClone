@@ -118,7 +118,7 @@ function isAuthenticated(req, res, next) {
     let { error, user } = tm.isValidAccessToken(accessToken);
     
     if (error) {
-        return res.sendStatus(401); // FIXME: Initially 403
+        return res.sendStatus(401);
     }
 
     req.user = user;
