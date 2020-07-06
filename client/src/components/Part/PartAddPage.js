@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Spin, Input, Button, Row, Form, Select, Tag, message } from 'antd';
 const { Option } = Select;
 import { Redirect, useHistory } from 'react-router-dom';
-import PropTypes from 'prop-types';
 import debounce from 'lodash/debounce';
 import queryString from 'query-string';
 
@@ -68,6 +67,10 @@ export default function PartAddPage(props) {
                 redirectToErrorPage(err, history);
             })
     }, debounceLimit);
+
+    useEffect(() => {
+        console.log(props.location.search);
+    }, [props.location]);
 
     // Handler when submit button is clicked on
     const tryCreateNewPart = (values) => {

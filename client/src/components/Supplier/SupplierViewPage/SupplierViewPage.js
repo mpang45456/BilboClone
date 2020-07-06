@@ -23,7 +23,7 @@ import PropTypes from 'prop-types';
  *    - ShowMoreButton (Delete Supplier)
  * 2. Supplier Descriptions
  *    - Contains <EditableItem />s
- * 3. Tabs
+ * 3. Tabs (<SupplierViewPageTabs />)
  *    - Parts Tab Pane (all parts associated
  *      with this particular supplier)
  *    - Purchase Orders Pane (all purchase

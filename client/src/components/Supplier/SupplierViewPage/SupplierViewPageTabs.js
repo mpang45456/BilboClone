@@ -26,12 +26,14 @@ export default function SupplierViewPageTabs(props) {
         <Tabs defaultActiveKey={activeTab}
               onChange={(activeKey) => setActiveTab(activeKey)}
               tabBarExtraContent={<TabsShowMoreButton 
-                                    activeTab={activeTab}/>}>
+                                    activeTab={activeTab}
+                                    supplierID={props.supplierID}
+                                    />}>
             <TabPane tab='All Parts' key='1'>
-                <PartsTabContent supplierid={props.supplierID}/>
+                <PartsTabContent supplierID={props.supplierID}/>
             </TabPane>
             <TabPane tab='Purchase Orders' key='2'>
-                <PurchaseOrdersTabContent supplierid={props.supplierID}/>
+                <PurchaseOrdersTabContent supplierID={props.supplierID}/>
             </TabPane>
         </Tabs>
     )
@@ -57,7 +59,7 @@ function TabsShowMoreButton(props) {
 
     const buttonClicked = ({item, key, keyPath, domEvent}) => {
         if (key === 'addPart') {
-            history.push(`${CONFIG.PARTS_URL}add`);
+            history.push(`${CONFIG.PARTS_URL}add?supplier=${props.supplierID}`);
         } else if (key === 'addPurchaseOrder') {
             // TODO: Add implementation for Purchase Orders
             console.log('TO BE IMPLEMENTED');
@@ -93,4 +95,5 @@ function TabsShowMoreButton(props) {
 }
 TabsShowMoreButton.propTypes = {
     activeTab: PropTypes.string.isRequired,
+    supplierID: PropTypes.string.isRequired,
 }

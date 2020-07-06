@@ -14,19 +14,19 @@ import PropTypes from 'prop-types';
 export default function PartsTabContent(props) {
     return (
         <>
-            <SupplierSpecificPartsList supplierid={props.supplierid}/>
+            <SupplierSpecificPartsList supplierID={props.supplierID}/>
         </>
     )
 }
 PartsTabContent.propTypes = {
     // For <SupplierSpecificPartsList />
-    supplierid: PropTypes.string.isRequired
+    supplierID: PropTypes.string.isRequired
 }
 
 /**
  * Component displaying a table of parts
  * information associated with a particular
- * supplier (as specified by `props.supplierid`)
+ * supplier (as specified by `props.supplierID`)
  */
 function SupplierSpecificPartsList(props) {
     const [dataSource, setDataSource] = useState([]);
@@ -60,7 +60,7 @@ function SupplierSpecificPartsList(props) {
         setIsLoading(true);
         // Send filter in query string
         let filter = JSON.stringify({
-            "supplier": props.supplierid,
+            "supplier": props.supplierID,
             "partNumber": { "$regex": partNumberFilterQuery, "$options": "i"},
             "description": { "$regex": descriptionFilterQuery, "$options": "i"},
             "status": { "$regex": statusFilterQuery, "$options": "i"},
@@ -161,5 +161,5 @@ function SupplierSpecificPartsList(props) {
     )
 }
 SupplierSpecificPartsList.propTypes = {
-    supplierid: PropTypes.string.isRequired
+    supplierID: PropTypes.string.isRequired
 }
