@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Spin, Descriptions, Modal, Menu, message } from 'antd';
 const { confirm } = Modal;
-import { ExclamationCircleOutlined } from "@ant-design/icons";
+import { DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import { bax, useAuth, redirectToErrorPage, PERMS } from '../../../context/AuthContext';
 import CONFIG from '../../../config';
 import { BilboDescriptions, 
@@ -163,6 +163,11 @@ function DeleteSupplierShowMoreButton(props) {
 
     const menu = (
         <Menu onClick={buttonClicked}>
+            <Menu.Item 
+                key='deleteSupplier'
+                icon={<DeleteOutlined/>}>
+                Delete Supplier
+            </Menu.Item>
         </Menu>
     )
     return (
