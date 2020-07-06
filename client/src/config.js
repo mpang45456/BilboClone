@@ -32,6 +32,10 @@ CONFIG.ERROR_500_URL = '/error500'; // Internal Server Error
 --- Specific Supplier (View + Edit): CONFIG.SUPPLIER_URL + '/:supplierObjID'
 --- Add Supplier: CONFIG.SUPPLIER_URL + 'add' (Note: the add has no / prefix, so it is concatenated to /suppliers)
 
+-- Parts
+--- Specific Part (View + Edit): CONFIG.PARTS_URL + '/:partObjID'
+--- Add Part: CONFIG.PARTS_URL + 'add' (Note: the add has no / prefix, so it is concatenated to /parts)
+
 
 */
 

@@ -52,8 +52,7 @@ function AllPartsShowMoreButton(props) {
 
     const buttonClicked = ({item, key, keyPath, domEvent}) => {
         if (key === 'addPartItem') {
-            console.log("TO BE IMPLEMENTED");
-            // history.push(`${CONFIG.PART_URL}add`);
+            history.push(`${CONFIG.PARTS_URL}add`);
         }
     }
     const menu = (
