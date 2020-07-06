@@ -50,7 +50,7 @@ const PriceHistorySchema = new Schema({
     createdBy: { type: String, required: true }, // User.username
     unitPrice: { type: Number, required: true },
     additionalInfo: { type: String }
-}, { timestamps: true}) // Has createdAt and updatedAt fields
+}, { timestamps: true}) // Has `createdAt` and `updatedAt` fields
 
 const PartSchema = new Schema({
     supplier: { type: Schema.Types.ObjectId, ref: 'Supplier', required: true, index: true },

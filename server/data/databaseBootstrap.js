@@ -2,6 +2,7 @@ const { PERMS } = require('../routes/api/v1/auth/permissions');
 
 const users = [
     {
+        // All Permissions User
         "username": "admin",
         "password": "123",
         "permissions": Object.keys(PERMS), // All permissions enabled
@@ -26,13 +27,23 @@ const users = [
         "reportsTo": "admin"
     },
     {
+        // Read Permissions User
         "username": "user3",
         "password": "asd",
-        "permissions": [PERMS.SUPPLIER_READ, PERMS.PART_READ],
+        "permissions": [PERMS.USER_READ, PERMS.SUPPLIER_READ, PERMS.PART_READ],
         "name": "Gandalf",
         "position": "Sales Intern",
         "reportsTo": "user1"
-    }
+    },
+    {
+        // Full Supplier and Part API Access
+        "username": "user4",
+        "password": "asd",
+        "permissions": [PERMS.PART_READ, PERMS.PART_WRITE, PERMS.SUPPLIER_READ, PERMS.SUPPLIER_WRITE],
+        "name": "Gandalf",
+        "position": "Sales Intern",
+        "reportsTo": "user1"
+    },
 ]
 
 // 12 suppliers (4 + 8 Data Fillers)

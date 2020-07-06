@@ -41,13 +41,16 @@ export default function PartViewPage(props) {
     const [isLoadingPartDetails, setIsLoadingPartDetails] = useState(true);
     const [part, setPart] = useState({});
 
-    useEffect(() => {
+    const getPartData = () => {
         // Populate the `supplier`'s `name` field
         let query = queryString.stringify({supplierPopulate: 'name'});
-        bax.get(`/api/v1/part/${props.match.params.partID}?${query}`)
+        return bax.get(`/api/v1/part/${props.match.params.partID}?${query}`)
+    }
+
+    useEffect(() => {
+        getPartData()
             .then(res => {
                 if (res.status === 200) {
-                    console.log(res.data);
                     setPart(res.data);
                     setIsLoadingPartDetails(false);
                 }
@@ -60,18 +63,30 @@ export default function PartViewPage(props) {
     // General function to make API PATCH call when a field is edited and saved
     // Returns a promise (child component is supposed to implement `catch` handler)
     const updateField = (fieldName, newFieldValue) => {
-        // Populate the `supplier`'s `name` field
-        let query = queryString.stringify({supplierPopulate: 'name'});
         // Populate body of PATCH API call
         let patchBody = {};
         patchBody[fieldName] = newFieldValue;
         return bax.patch(`/api/v1/part/${props.match.params.partID}`, patchBody)
                   .then(res => {
                         // Obtain updated part information (to update UI)
-                        return bax.get(`/api/v1/part/${props.match.params.partID}?${query}`);
+                        return getPartData();
                   }).then(res => {
                     setPart(res.data);
                     message.success('Part Information successfully changed!');
+                  })
+    }
+
+    // Function to update price history via API PATCH call. 
+    // Passed to <PriceHistoryTabContent />
+    // Returns a promise (child component is supposed to implement `catch` handler)
+    const updatePriceHistory = (newPriceInfo) => {
+        return bax.patch(`/api/v1/part/${props.match.params.partID}`, newPriceInfo)
+                  .then(res => {
+                      // Obtain updated part information (to update UI)
+                      return getPartData();
+                  }).then(res => {
+                      setPart(res.data)
+                      message.success('New Price Information added!');
                   })
     }
     
@@ -140,7 +155,8 @@ export default function PartViewPage(props) {
                 <TabPane tab='Price History' key='1'>
                     <PriceHistoryTabContent priceHistory={part.priceHistory 
                                                           ? part.priceHistory 
-                                                          : []}/>
+                                                          : []}
+                                            updatePriceHistory={updatePriceHistory}/>
                 </TabPane>
                 <TabPane tab='Inventory' key='2'>
                     Insert Inventory Tab Pane
