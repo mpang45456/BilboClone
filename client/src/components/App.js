@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute';
 import { AuthContext } from '../context/AuthContext';
 
-import ThemeWrapper from './Theme';
+import { ThemeWrapper } from './Theme';
 import "../styles/styles.less";
 /**
  * Root React Component Class for Bilbo App

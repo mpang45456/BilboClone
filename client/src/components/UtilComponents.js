@@ -14,6 +14,7 @@ import { redirectToErrorPage } from '../context/AuthContext';
 import Highlighter from 'react-highlight-words';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { theme } from './Theme';
 
 /**
  * Customises the regular <button> HTML element, 
@@ -193,7 +194,7 @@ export const BilboSearchTable = {
             filterIcon: (filtered) => {
                 isBeingFilered = filtered;
                 return (
-                    <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+                    <SearchOutlined style={{ color: filtered ? theme.colors.defaultBlue : undefined }} />
                 )
             },
             // When the filter dropdown appears, focus on the `inputNode`
@@ -209,7 +210,7 @@ export const BilboSearchTable = {
             render: (text) => {
                 if (isBeingFilered) {
                     return (
-                        <Highlighter highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+                        <Highlighter highlightStyle={{ backgroundColor: theme.colors.highlighterYellow, padding: 0 }}
                                      searchWords={[APIFilterQuery]}
                                      autoEscape
                                      textToHighlight={text.toString()}/>
@@ -332,19 +333,19 @@ export function EditableItem(props) {
     const isEditingItem = (
         <div style={{display: 'inline'}}>
             { isEditingItemEditComponent }
-            <EditableItemStyledIconButton onClick={() => {
+            <BilboHoverableIconButton onClick={() => {
                         setEditItemValue(props.value);
                         setIsEditing(false);
                     }}
-                    transformcolor='#c93623'
+                    shape='circle'
+                    transformcolor={theme.colors.brightRed}
                     icon={<CloseCircleOutlined />}
-            >
-            </EditableItemStyledIconButton>
-            <EditableItemStyledIconButton onClick={onSave}
-                    transformcolor='#52c41a'
+            />
+            <BilboHoverableIconButton onClick={onSave}
+                    shape='circle'
+                    transformcolor={theme.colors.green}
                     icon={<CheckCircleOutlined />}
-            >
-            </EditableItemStyledIconButton>
+            />
         </div>
     )
 
@@ -436,20 +437,34 @@ EditableItem.propTypes = {
 }
 
 // For `Cancel`/`Save` Icon Button when Editing
+// `initialcolor` is the default color of the icon (i.e. when
+// there is no user interaction). This is an optional prop.
 // `transformColor` is the color of the icon upon mouse hover
-const EditableItemStyledIconButton = styled(Button)`
+export const BilboHoverableIconButton = styled(Button)`
     background: none;
     border: none; 
     box-shadow: none;
+    ${props => props.initialcolor && `
+        color: ${props.initialcolor};
+    `}
 
     &:hover {
         transform: scale(1.2);
         background: none;
         color: ${props => props.transformcolor}
     }
+
+    &:active {
+        background: none;
+    }
+
+    &:focus {
+        background: none;
+    }
 `
-EditableItemStyledIconButton.propTypes = {
-    transformcolor: PropTypes.string.isRequired
+BilboHoverableIconButton.propTypes = {
+    transformcolor: PropTypes.string.isRequired,
+    initialcolor: PropTypes.string
 }
 
 // Styled Timeline
@@ -461,6 +476,12 @@ export const BilboTimeline = styled(Timeline)`
 
 // Styled Timeline with a dashed trailing end
 export const BilboTimelineWithTrailingEnd = styled(BilboTimeline)`
+    ${'' /* Ensures `add more` icon's background is tranparent  */}
+    & .ant-timeline-item:nth-last-of-type(1) .ant-timeline-item-head {
+        background: none;
+    }
+
+    ${'' /* Ensures trailing line to `add more` icon is dashed and lighter in color */}
     & .ant-timeline-item:nth-last-of-type(2) .ant-timeline-item-tail {
         border-left: 2px dashed gainsboro;
     }

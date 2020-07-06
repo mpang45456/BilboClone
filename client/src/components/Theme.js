@@ -16,7 +16,7 @@ import { ThemeProvider } from 'styled-components';
  * location for the themes (in addition to 
  * `webpack.config.js`). 
  */
-const theme = {
+export const theme = {
     colors: {
         // Main Colour Scheme
         powderPink: "#D6AFA6",
@@ -31,6 +31,9 @@ const theme = {
         darkestRed: '#450401',
         brightRed: '#C93835',
         lightGrey: '#dbd2d0',
+        defaultBlue: '#1890ff',
+        highlighterYellow: '#ffc069',
+        green: '#52c41a',
     },
     settings: {
         layoutHeaderHeight: '45px',
@@ -38,12 +41,10 @@ const theme = {
     }
 }
 
-const ThemeWrapper = ({ children }) => {
+export const ThemeWrapper = ({ children }) => {
     return (
         <ThemeProvider theme={theme}>
             {children}
         </ThemeProvider>
     )
 }
-
-export default ThemeWrapper;

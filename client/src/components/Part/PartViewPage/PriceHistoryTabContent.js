@@ -7,10 +7,11 @@ import CONFIG from '../../../config';
 import { BilboTimeline, 
          BilboTimelineWithTrailingEnd,
          BilboTimelineParagraph, 
-         BilboTimelineParagraphDescription } from '../../UtilComponents';
+         BilboTimelineParagraphDescription,
+         BilboHoverableIconButton } from '../../UtilComponents';
 import PropTypes from 'prop-types';
 import moment from 'moment';
-import styled from 'styled-components';
+import styled, { withTheme } from 'styled-components';
 
 /**
  * Timeline component displaying the price 
@@ -42,7 +43,7 @@ export default function PriceHistoryTabContent(props) {
                         )
                     })
                 }
-                <Timeline.Item dot={< BilboAddPriceInfoButton />} />
+                <Timeline.Item dot={< BilboAddPriceInfoButton />} style={{background: 'none'}}/>
             </BilboTimelineWithTrailingEnd>)
         }
         </>
@@ -57,14 +58,17 @@ function AddPriceInfoButton(props) {
         console.log('TO BE IMPLEMENTED'); // TODO: Implement
     }
 
+
     return (
-        <div onClick={onClickHandler} style={props.style}>
-            <PlusCircleOutlined />
-        </div>
+        <BilboHoverableIconButton 
+            shape='circle'
+            initialcolor={props.theme.colors.lightGrey}
+            transformcolor={props.theme.colors.darkRed}
+            icon={<PlusCircleOutlined />}>
+            
+        </BilboHoverableIconButton>
     )
 }
-const BilboAddPriceInfoButton = styled(AddPriceInfoButton)`
-    background: none;
-`;
+const BilboAddPriceInfoButton = withTheme(AddPriceInfoButton);
 
 
