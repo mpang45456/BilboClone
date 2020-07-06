@@ -9,7 +9,6 @@ import { bax, useAuth, PERMS, redirectToErrorPage } from '../../context/AuthCont
 import { BilboPageHeader, BilboDivider } from '../UtilComponents';
 import CONFIG from '../../config';
 
-// TODO: Can specify supplierID in props.
 /**
  * Component for adding a part. 
  * 
@@ -67,10 +66,6 @@ export default function PartAddPage(props) {
                 redirectToErrorPage(err, history);
             })
     }, debounceLimit);
-
-    useEffect(() => {
-        console.log(props.location.search);
-    }, [props.location]);
 
     // Handler when submit button is clicked on
     const tryCreateNewPart = (values) => {
