@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Spin, Input, Button, Row, Form, Select, message } from 'antd';
+import React, { useState } from 'react';
+import { Spin, Input, Button, Row, Form, Select, Tag, message } from 'antd';
 const { Option } = Select;
 import { Redirect, useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -10,22 +10,21 @@ import { bax, useAuth, PERMS, redirectToErrorPage } from '../../context/AuthCont
 import { BilboPageHeader, BilboDivider } from '../UtilComponents';
 import CONFIG from '../../config';
 
-// TODO: Update docs
-// /**
-//  * Component for adding a supplier.
-//  * 
-//  * No client-side validation is performed 
-//  * (except for checking for presence of the 
-//  * `name` field, because it is a required field.
-//  * All other fields are optional).
-//  * 
-//  * Note: Because the `name` field must be unique, 
-//  * the error message from the API call is checked
-//  * for any indication of a duplicate supplier error,
-//  * in which case, a help/error message is indicated
-//  * in the supplier name's <Input />.
-//  */
 // TODO: Can specify supplierID in props.
+/**
+ * Component for adding a part. 
+ * 
+ * No client-side validation is performed 
+ * (apart from checking for presence of the 
+ * supplier name, part number and status fields).
+ * Although `status` is not a required field for
+ * the API, it is made compulsory for the client
+ * UI for the sake of completeness. 
+ * 
+ * Note: Although the supplier's name is displayed
+ * for the Supplier Name field, the actual value
+ * submitted is the `supplierObjID`.
+ */
 export default function PartAddPage(props) {
     // Check for authorization, otherwise redirect
     const { permissionsList } = useAuth();
@@ -37,21 +36,14 @@ export default function PartAddPage(props) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const history = useHistory();
 
-    // Resets name error message and validation status
-    // everytime the user types in the name <Input />
-    // Ensures that error message is only displayed when
-    // duplicate supplier name error is first detected.
-    const nameOnChange = (e) => {
-        setNameValidationStatus('');
-        setNameErrorMsg(undefined);
-    }
-
+    // For populating supplierObjIDs and supplier's names in 
+    // search box
     const [isGettingSupplierData, setIsGettingSupplierData] = useState(false);
     const [supplierData, setSupplierData] = useState([]);
-    const [selectedSupplierID, setSelectedSupplierID] = useState('');
+    const debounceLimit = 300; //in ms
     let lastFetchID = 0;
     const getSupplierData = debounce((searchValue) => {
-        lastFetchID = (lastFetchID + 1) % 1000; // TODO: Abstract out the magic number
+        lastFetchID = (lastFetchID + 1) % 1000;
         const thisFetchID = lastFetchID;
         setSupplierData([]);
         setIsGettingSupplierData(true);
@@ -63,22 +55,19 @@ export default function PartAddPage(props) {
         bax.get(`/api/v1/supplier?${query}`, { withCredentials: true })
             .then(res => {
                 // Ensure correct order of callback
-                // Obsolete (slow) responses are discarded
+                // Obsolete (slow) responses would have 
+                // a smaller `thisFetchID` and are discarded
+                // Note: `thisFetchID` is a local block variable,
+                // but `lastFetchID` is a variable local to
+                // the entire React component (it keeps incrementing)
                 if (thisFetchID === lastFetchID) {
                     setSupplierData(res.data.suppliers);
                     setIsGettingSupplierData(false);
                 }
             }).catch(err => {
-                console.log(err);
-                // TODO: Handle errors
+                redirectToErrorPage(err, history);
             })
-    }, 300) // TODO: Abstract out the magic number
-
-    // // Populates the list of suppliers upon `props.location` change
-    // // Note: Not the whole list of suppliers (subject to pagination)
-    // useEffect(() => {
-    //     getSupplierData('');
-    // }, [props.location])
+    }, debounceLimit);
 
     // Handler when submit button is clicked on
     const tryCreateNewPart = (values) => {
@@ -90,18 +79,8 @@ export default function PartAddPage(props) {
                 history.push(CONFIG.PARTS_URL);
             }).catch(err => {
                 setIsSubmitting(false);
-                // TODO: Update
-                // if (err.response.data === 'Duplicate Supplier Name') {
-                //     setNameValidationStatus('error');
-                //     setNameErrorMsg('A supplier of the same name already exists');
-                // } else {
-                //     redirectToErrorPage(err, history);
-                // }
+                redirectToErrorPage(err, history);
             })
-    }
-
-    const onSelectSupplier = (value, option) => {
-        setSelectedSupplierID(option.value);
     }
 
     // Handler when cancel button is clicked
@@ -114,6 +93,8 @@ export default function PartAddPage(props) {
         labelCol: { span: 3 },
     };
 
+    // Note: Search box for Supplier Name has value of
+    // supplier's ObjID, but displays supplier's name.
     return (
         <div>
             <BilboPageHeader 
@@ -127,16 +108,16 @@ export default function PartAddPage(props) {
                       onFinish={tryCreateNewPart}
                       {...formItemLayout} >
 
-                    <Form.Item>
+                    <Form.Item name='supplierObjID'
+                               label='Supplier Name'
+                               rules={[{ required: true, message: "Please input supplier's name!" }]}>
                         <Select placeholder='Select Supplier'
                                 notFoundContent={isGettingSupplierData ? <Spin size='small'/> : null}
                                 filterOption={false}
                                 showSearch={true}
-                                onSearch={getSupplierData}
-                                onChange={onSelectSupplier}>
+                                onSearch={getSupplierData}>
                             {
                                 supplierData.map(supplier => {
-                                    console.log(supplier);
                                     return (
                                         <Option key={supplier._id}
                                                 value={supplier._id}>
@@ -146,6 +127,31 @@ export default function PartAddPage(props) {
                                 })
                             }
                         </Select>
+                    </Form.Item>
+                    <Form.Item name='partNumber' 
+                               label='Part Number'
+                               rules={[{ required: true, message: "Please input part number!" }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item name='description' 
+                               label='Description'>
+                        <Input.TextArea />
+                    </Form.Item>
+                    <Form.Item name='status' 
+                               label='Status'
+                               rules={[{ required: true, message: "Please select part status!" }]}>
+                        <Select>
+                            <Option value='ACTIVE'>
+                                <Tag color={CONFIG.ACTIVE_TAG_COLOR}>ACTIVE</Tag>
+                            </Option>
+                            <Option value='ARCHIVED'>
+                                <Tag color={CONFIG.ARCHIVED_TAG_COLOR}>ARCHIVED</Tag>
+                            </Option>
+                        </Select>
+                    </Form.Item>
+                    <Form.Item name='additionalInfo' 
+                               label='Additional Info'>
+                        <Input.TextArea />
                     </Form.Item>
 
                     <Form.Item>
@@ -163,8 +169,4 @@ export default function PartAddPage(props) {
 
         </div>
     )
-}
-PartAddPage.propTypes = {
-    match: PropTypes.object.isRequired,
-    location: PropTypes.object.isRequired
 }
