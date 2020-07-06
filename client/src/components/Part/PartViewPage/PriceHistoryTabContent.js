@@ -31,12 +31,10 @@ import { withTheme } from 'styled-components';
 export default function PriceHistoryTabContent(props) {
     return (
         <>
-        {
-            props.priceHistory.length === 0
-            ? <span>No price history information available</span>
-            : (<BilboTimelineWithTrailingEnd mode='left'>
-                {
-                    props.priceHistory.map((price, index) => {
+            <BilboTimelineWithTrailingEnd mode='left'>
+                {   props.priceHistory.length === 0
+                    ? <span>No price history information available</span>
+                    : props.priceHistory.map((price, index) => {
                         let createdAtTime = moment(price.createdAt).format('Do MMM YY, h:mm:ss');
                         return (
                             <BilboTimelineWithTrailingEnd.Item label={createdAtTime} 
@@ -55,9 +53,10 @@ export default function PriceHistoryTabContent(props) {
                     })
                 }
                 <Timeline.Item dot={< BilboAddPriceInfoButton updatePriceHistory={props.updatePriceHistory}/>} 
-                               style={{background: 'none'}}/>
-            </BilboTimelineWithTrailingEnd>)
-        }
+                               style={props.priceHistory.length === 0
+                                      ? {display: 'inline', marginLeft: 20}
+                                      : {}} />
+            </BilboTimelineWithTrailingEnd>
         </>
     )
 }
