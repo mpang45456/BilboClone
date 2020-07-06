@@ -59,7 +59,7 @@ function TabsShowMoreButton(props) {
 
     const buttonClicked = ({item, key, keyPath, domEvent}) => {
         if (key === 'addPart') {
-            history.push(`${CONFIG.PARTS_URL}add?supplier=${props.supplierID}`);
+            history.push(`${CONFIG.PARTS_URL}add`);
         } else if (key === 'addPurchaseOrder') {
             // TODO: Add implementation for Purchase Orders
             console.log('TO BE IMPLEMENTED');
