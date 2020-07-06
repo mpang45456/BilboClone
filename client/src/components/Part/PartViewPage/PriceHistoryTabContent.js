@@ -27,6 +27,10 @@ import { withTheme } from 'styled-components';
  * Hence, adding new price information through the modal
  * form in <BilboAddPriceInfoButton /> will cause the
  * UI to update, displaying the new price information.
+ * 
+ * Note: The <BilboAddPriceInfoButton/> will be displayed
+ * inline with the <span /> element if no price history
+ * information is available.
  */
 export default function PriceHistoryTabContent(props) {
     return (
