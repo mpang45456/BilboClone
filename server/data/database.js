@@ -54,8 +54,8 @@ const PriceHistorySchema = new Schema({
 
 const PartSchema = new Schema({
     supplier: { type: Schema.Types.ObjectId, ref: 'Supplier', required: true, index: true },
-    partNumber: { type: String, required: true, index: true}, // TODO: Add index for this?
-    priceHistory: [PriceHistorySchema], // TODO: Check if this defaults to an empty array
+    partNumber: { type: String, required: true, index: true},
+    priceHistory: [PriceHistorySchema],
     description: { type: String, default: '' },
     status: { type: String, 
               enum: ['ARCHIVED', 'ACTIVE'], 

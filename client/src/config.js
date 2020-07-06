@@ -46,4 +46,7 @@ CONFIG.DATA_SUB_MENU_KEY = 'dataSM';
 CONFIG.ACTIVE_TAG_COLOR = 'green';
 CONFIG.ARCHIVED_TAG_COLOR = 'gold';
 
+// Miscellaneous
+CONFIG.DEFAULT_PAGE_SIZE = 10;
+
 export default CONFIG;

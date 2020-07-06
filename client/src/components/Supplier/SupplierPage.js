@@ -79,7 +79,8 @@ AllSuppliersShowMoreButton.propTypes = {
 function SupplierList(props) {
     const [dataSource, setDataSource] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [pagination, setPagination] = useState({current: 1, pageSize: 10}) // TODO: Abstract this into CONFIG after completion
+    const [pagination, setPagination] = useState({current: 1, 
+                                                  pageSize: CONFIG.DEFAULT_PAGE_SIZE})
 
     // State for Filter Queries
     const [nameFilterQuery, setNameFilterQuery] = useState('');
