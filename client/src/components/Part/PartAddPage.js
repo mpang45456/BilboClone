@@ -3,6 +3,8 @@ import { Spin, Input, Button, Row, Form, Select, message } from 'antd';
 const { Option } = Select;
 import { Redirect, useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import debounce from 'lodash/debounce';
+import queryString from 'query-string';
 
 import { bax, useAuth, PERMS, redirectToErrorPage } from '../../context/AuthContext';
 import { BilboPageHeader, BilboDivider } from '../UtilComponents';
@@ -44,6 +46,40 @@ export default function PartAddPage(props) {
         setNameErrorMsg(undefined);
     }
 
+    const [isGettingSupplierData, setIsGettingSupplierData] = useState(false);
+    const [supplierData, setSupplierData] = useState([]);
+    const [selectedSupplierID, setSelectedSupplierID] = useState('');
+    let lastFetchID = 0;
+    const getSupplierData = debounce((searchValue) => {
+        lastFetchID = (lastFetchID + 1) % 1000; // TODO: Abstract out the magic number
+        const thisFetchID = lastFetchID;
+        setSupplierData([]);
+        setIsGettingSupplierData(true);
+
+        let filter = JSON.stringify({
+            "name": { "$regex": searchValue, "$options": "i"},
+        })
+        let query = queryString.stringify({inc: 'name', filter})
+        bax.get(`/api/v1/supplier?${query}`, { withCredentials: true })
+            .then(res => {
+                // Ensure correct order of callback
+                // Obsolete (slow) responses are discarded
+                if (thisFetchID === lastFetchID) {
+                    setSupplierData(res.data.suppliers);
+                    setIsGettingSupplierData(false);
+                }
+            }).catch(err => {
+                console.log(err);
+                // TODO: Handle errors
+            })
+    }, 300) // TODO: Abstract out the magic number
+
+    // // Populates the list of suppliers upon `props.location` change
+    // // Note: Not the whole list of suppliers (subject to pagination)
+    // useEffect(() => {
+    //     getSupplierData('');
+    // }, [props.location])
+
     // Handler when submit button is clicked on
     const tryCreateNewPart = (values) => {
         setIsSubmitting(true);
@@ -62,6 +98,10 @@ export default function PartAddPage(props) {
                 //     redirectToErrorPage(err, history);
                 // }
             })
+    }
+
+    const onSelectSupplier = (value, option) => {
+        setSelectedSupplierID(option.value);
     }
 
     // Handler when cancel button is clicked
@@ -86,6 +126,27 @@ export default function PartAddPage(props) {
                 <Form name='createNewPartForm' 
                       onFinish={tryCreateNewPart}
                       {...formItemLayout} >
+
+                    <Form.Item>
+                        <Select placeholder='Select Supplier'
+                                notFoundContent={isGettingSupplierData ? <Spin size='small'/> : null}
+                                filterOption={false}
+                                showSearch={true}
+                                onSearch={getSupplierData}
+                                onChange={onSelectSupplier}>
+                            {
+                                supplierData.map(supplier => {
+                                    console.log(supplier);
+                                    return (
+                                        <Option key={supplier._id}
+                                                value={supplier._id}>
+                                                {supplier.name}
+                                        </Option>
+                                    )
+                                })
+                            }
+                        </Select>
+                    </Form.Item>
 
                     <Form.Item>
                         <Row justify='end'>
