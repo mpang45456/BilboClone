@@ -1,11 +1,16 @@
 {
-  "name": "xyrix",
+  "name": "Bilbo",
   "version": "1.0.0",
   "description": "Business Management Platform for Industrial SMEs",
   "main": "server/server.js",
   "scripts": {
-    "start": "node server/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "NODE_ENV=prod echo \"Meant for prod\"",
+    "start-dev": "NODE_ENV=dev LOG_LEVEL=debug node server/server.js | ./node_modules/.bin/pino-pretty",
+    "mongod": "mongod --dbpath ./server/data/db",
+    "test-server": "PORT=8002 NODE_ENV=test LOG_LEVEL=silent jest --detectOpenHandles --testTimeout=10000 --forceExit",
+    "cypress:open": "cypress open",
+    "cypress:start-test-server": "PORT=8001 RESET_DB=true NODE_ENV=test node server/server.js | ./node_modules/.bin/pino-pretty",
+    "cypress:reset_db": "NODE_ENV=test node cypress/utils/resetAndSeedDatabase.js",
     "react-start": "webpack-dev-server --mode development --open --hot",
     "react-build": "webpack --mode production"
   },
@@ -21,22 +26,60 @@
   "homepage": "https://github.com/brianyenna/xyrix#readme",
   "dependencies": {
     "antd": "^4.3.4",
+    "axios": "^0.19.2",
+    "body-parser": "^1.19.0",
+    "connect-ensure-login": "^0.1.1",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
+    "express-pino-logger": "^5.0.0",
+    "express-session": "^1.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "moment": "^2.27.0",
+    "mongodb": "^3.5.9",
+    "mongoose": "^5.9.19",
+    "passport": "^0.4.1",
+    "passport-local": "^1.0.0",
+    "pino": "^6.3.2",
     "prop-types": "^15.7.2",
+    "query-string": "^6.13.1",
     "react": "^16.13.1",
-    "react-dom": "^16.13.1"
+    "react-dom": "^16.13.1",
+    "react-highlight-words": "^0.16.0",
+    "react-router": "^5.2.0",
+    "react-router-dom": "^5.2.0",
+    "styled-components": "^5.1.1"
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",
+    "@babel/plugin-transform-runtime": "^7.10.1",
     "@babel/preset-env": "^7.10.2",
     "@babel/preset-react": "^7.10.1",
     "babel-loader": "^8.1.0",
     "babel-plugin-import": "^1.13.0",
+    "babel-plugin-styled-components": "^1.10.7",
+    "chai": "^4.2.0",
+    "cookie": "^0.4.1",
+    "cookiejar": "^2.1.2",
     "css-loader": "^3.6.0",
+    "cypress": "^4.8.0",
     "html-webpack-plugin": "^4.3.0",
+    "jest": "^26.0.1",
+    "less-loader": "^6.1.1",
+    "pino-pretty": "^4.0.0",
     "style-loader": "^1.2.1",
+    "supertest": "^4.0.2",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.11.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ],
+    "testPathIgnorePatterns": [
+      "/cypress/integration"
+    ]
   }
 }

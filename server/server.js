@@ -1,10 +1,7 @@
-const express = require('express');
-
+const app = require('./app');
 const CONFIG = require('./config');
+const logger = require('./utils');
 
-const app = express();
-app.use(express.static(__dirname + '/../client/dist'));
-
-app.listen(CONFIG.PORT_NUMBER, function() {
-    console.log("Server listening on port " + CONFIG.PORT_NUMBER);
+app.listen(CONFIG.PORT_NUMBER, () => {
+    logger.info("Server listening on Port " + CONFIG.PORT_NUMBER);
 })

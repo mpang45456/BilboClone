@@ -102,3 +102,14 @@ dist
 
 # TernJS port file
 .tern-port
+
+
+##### Added by Self #####
+# MongoDB
+/server/data/db
+
+# Cypress
+/cypress/videos
+
+# General
+.vscode/
