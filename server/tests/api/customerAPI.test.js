@@ -18,6 +18,15 @@ describe('Testing /api/v1/customer endpoint', () => {
     let authenticatedUnauthorizedAgent = null;  // No access to CUSTOMER API
 
     let customerObjID = null;
+    let newCustomer = {
+        name: "New Customer Company",
+        address: "Blk 123 Woodlands Industrial Boulevard",
+        telephone: "+65 68210213",
+        fax: "+65 62410382",
+        email: "newCustomerInfo@newCustomerCompany.com",
+        pointOfContact: "Mr. Terry Jeffords",
+        additionalInfo: "Some Additional Information Here!"
+    }
 
     beforeAll(async (done) => {
         dbi = new DatabaseInteractor();
@@ -332,6 +341,87 @@ describe('Testing /api/v1/customer endpoint', () => {
                 .get(`${customerEndpoint}/${customerObjID}`)
                 .expect(403)
         
+        done();
+    })
+
+    /**
+     * ----------------------------
+     * POST (Create a New Customer)
+     * ----------------------------
+     */
+    it(`POST /: User with CUSTOMER_WRITE perm should be able to
+        access the endpoint and create a new customer`, async (done) => {
+        let newCustomerObjID = null;
+        await authenticatedAdminAgent
+                .post(customerEndpoint)
+                .send(newCustomer)
+                .expect(200)
+                .then(res => {
+                    newCustomerObjID = res.body._id;
+                })
+
+        // Should be able to view new customer (individually)
+        await authenticatedAdminAgent
+                .get(`${customerEndpoint}/${newCustomerObjID}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.name).toBe(newCustomer.name);
+                    expect(res.body.address).toBe(newCustomer.address);
+                    expect(res.body.telephone).toBe(newCustomer.telephone);
+                    expect(res.body.fax).toBe(newCustomer.fax);
+                    expect(res.body.email).toBe(newCustomer.email);
+                    expect(res.body.pointOfContact).toBe(newCustomer.pointOfContact);
+                    expect(res.body.additionalInfo).toBe(newCustomer.additionalInfo);
+                })
+
+        // Should be able to view new customer (in collection) 
+        await authenticatedAdminAgent
+                .get(customerEndpoint)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.customers.length).toBe(testCustomers.length + 1);
+                })
+        
+        done();
+    })
+
+    it(`POST /: User with CUSTOMER_WRITE perm should not be 
+        able to create a new customer if the required fields are
+        missing`, async (done) => {
+        // `name` missing
+        let newCustomerWithoutName = JSON.parse(JSON.stringify(newCustomer));
+        delete newCustomerWithoutName.name;
+        await authenticatedAdminAgent
+                .post(customerEndpoint)
+                .send(newCustomerWithoutName)
+                .expect(400)
+
+        // `pointOfContact` missing
+        let newCustomerWithoutPointOfContact = JSON.parse(JSON.stringify(newCustomer));
+        delete newCustomerWithoutPointOfContact.pointOfContact;
+        await authenticatedAdminAgent
+                .post(customerEndpoint)
+                .send(newCustomerWithoutPointOfContact)
+                .expect(400)
+
+        done();
+    })
+
+    it(`POST /: User without CUSTOMER_WRITE perm should not
+        be able to access the endpoint and create a new
+        customer`, async (done) => {
+        // With CUSTOMER_READ perm
+        await authenticatedReadAgent
+                .post(customerEndpoint)
+                .send(newCustomer)
+                .expect(403);
+
+        // With neither CUSTOMER_READ nor CUSTOMER_WRITE perm
+        await authenticatedUnauthorizedAgent
+                .post(customerEndpoint)
+                .send(newCustomer)
+                .expect(403);
+
         done();
     })
 })
