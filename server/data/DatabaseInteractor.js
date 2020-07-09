@@ -2,8 +2,11 @@ const mongoose = require('mongoose');
 const CONFIG = require('../config');
 const logger = require('../utils');
 
-const { UserModel, PartModel, SupplierModel } = require('./database');
-const { users, suppliers } = require('./databaseBootstrap');
+const { UserModel, 
+        PartModel, 
+        SupplierModel, 
+        CustomerModel } = require('./database');
+const { users, suppliers, customers } = require('./databaseBootstrap');
 
 /**
  * Wrapper class that encapsulates the logic
@@ -27,6 +30,7 @@ class DatabaseInteractor {
     constructor() {
         this.seedUsers = users;
         this.seedSuppliersWithParts = suppliers;
+        this.seedCustomers = customers;
     }
 
     /**
@@ -68,10 +72,12 @@ class DatabaseInteractor {
         await this.clearModelData(UserModel);
         await this.clearModelData(SupplierModel);
         await this.clearModelData(PartModel);
+        await this.clearModelData(CustomerModel);
 
         // Add Model Data
         await this.addUsers(...this.seedUsers);
         await this.addSuppliersAndParts(...this.seedSuppliersWithParts);
+        await this.addCustomers(...this.seedCustomers);
     }
 
     /**
@@ -143,6 +149,28 @@ class DatabaseInteractor {
 
             // Save Supplier Document after obtaining Parts reference
             await supplierDoc.save();
+        }
+    }
+
+    /**
+     * Add customers to the database
+     * 
+     * Note: Remember to spread the list of
+     * customers when calling this function
+     * @param  {...object} customers 
+     */
+    async addCustomers(...customers) {
+        for (let customer of this.seedCustomers) {
+            let customerDoc = CustomerModel({
+                name: customer.name, 
+                address: customer.address, 
+                telephone: customer.telephone, 
+                fax: customer.fax,
+                email: customer.email, 
+                pointOfContact: customer.pointOfContact,
+                additionalInfo: customer.additionalInfo
+            })
+            await customerDoc.save();
         }
     }
 }

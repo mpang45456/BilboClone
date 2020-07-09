@@ -187,7 +187,50 @@ for (let i = 0; i < numSupplierDataFillers; i++) {
     suppliers.push(supplier);
 }
 
+const customers = [
+    {
+        name: 'Flip-Flop Industries',
+        address: 'Blk 281 9th Precinct Road',
+        telephone: '+65 60752132',
+        fax: '+65 65210213',
+        email: 'flipflopswitches@gmail.com',
+        pointOfContact: 'Jake Peralta',
+        additionalInfo: 'Specialises in making flip-flop switches'
+    },
+    {
+        name: 'Great Transistors Industries',
+        address: 'Blk 786 Newtown Road',
+        telephone: '+65 68261422',
+        fax: '+65 65022112',
+        email: 'greattransistors@gmail.com',
+        pointOfContact: 'Amy Santiago',
+        additionalInfo: 'Transistor quality approved using standard SME-201221'
+    },
+    {
+        name: 'Arduino-Pi Inc.',
+        address: 'Blk 809 Oldtown Avenue',
+        telephone: '+65 67520921',
+        fax: '+65 69021392',
+        email: 'arduinoraspberry@gmail.com',
+        pointOfContact: 'Charles Boyle',
+    },
+];
+const numCustomerDataFillers = 10;
+for (let i = 0; i < numCustomerDataFillers; i++) {
+    let customer = {
+        name: `No. ${i + 1} Customer`,
+        address: `Blk 10${i} Customer Lane`,
+        telephone: `+65 6892000${i}`,
+        fax: `+65 6201089${i}`,
+        email: `info@customer${i+1}.com`,
+        pointOfContact: `Point of Contact ${i+1}`,
+        additionalInfo: 'This was an auto-generated customer'
+    }
+    customers.push(customer);
+}
+
 module.exports = {
     users,
-    suppliers
+    suppliers,
+    customers,
 }

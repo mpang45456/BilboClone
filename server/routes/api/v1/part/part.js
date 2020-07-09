@@ -262,8 +262,12 @@ router.patch('/:partObjID',
     }
 })
 
-// have to update supplier as well
-// does not do idempotent delete ??
+/**
+ * Mounted on /api/v1/part/:partObjID
+ * 
+ * Performs an idempotent delete on the 
+ * part identified by `partObjID`
+ */
 router.delete('/:partObjID',
               isAuthorized(PERMS.PART_WRITE),
               async function(req, res) {
