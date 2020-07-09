@@ -268,8 +268,14 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
 
     it(`GET /:supplierObjID: User with SUPPLIER_READ perm
         should not be able to access an invalid supplierObjID`, async (done) => {
+        // Invalid ObjID (valid for another collection)
         await authenticatedReadAgent
                 .get(`${supplierEndpoint}/${partObjID}`)
+                .expect(400);
+
+        // Invalid ObjID (wrong format)
+        await authenticatedReadAgent
+                .get(`${supplierEndpoint}/123`)
                 .expect(400);
         done();
     })

@@ -1,6 +1,6 @@
 const request = require('supertest');
 const app = require('../../app');
-const { CustomerModel } = require('../../data/database');
+const { CustomerModel, SupplierModel } = require('../../data/database');
 const queryString = require('query-string');
 
 let testCustomers = require('../../data/databaseBootstrap').customers;
@@ -16,6 +16,8 @@ describe('Testing /api/v1/customer endpoint', () => {
     let authenticatedAdminAgent = null;         // CUSTOMER_READ, CUSTOMER_WRITE
     let authenticatedReadAgent = null;          // CUSTOMER_READ
     let authenticatedUnauthorizedAgent = null;  // No access to CUSTOMER API
+
+    let customerObjID = null;
 
     beforeAll(async (done) => {
         dbi = new DatabaseInteractor();
@@ -38,6 +40,10 @@ describe('Testing /api/v1/customer endpoint', () => {
 
         // Seed Database
         await dbi.addCustomers(...testCustomers);
+
+        // Obtain customerObjID
+        let customerObj = await CustomerModel.findOne({});
+        customerObjID = customerObj.id;
 
         // Login
         const admin = testUsers[0];
@@ -237,6 +243,93 @@ describe('Testing /api/v1/customer endpoint', () => {
         data`, async (done) => {
         await authenticatedUnauthorizedAgent
                 .get(customerEndpoint)
+                .expect(403)
+        
+        done();
+    })
+
+    /**
+     * -------------------------------------
+     * GET /:customerObjID (Individual Resource)
+     * -------------------------------------
+     */
+    it(`GET /:customerObjID: User with CUSTOMER_READ perm should
+        be able to access the endpoint and retrieve customer
+        data with default query fields`, async (done) => {
+        await authenticatedAdminAgent
+                .get(`${customerEndpoint}/${customerObjID}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.name).toBeTruthy();
+                    expect(res.body.address).toBeTruthy();
+                    expect(res.body.telephone).toBeTruthy();
+                    expect(res.body.fax).toBeTruthy();
+                    expect(res.body.email).toBeTruthy();
+                    expect(res.body.pointOfContact).toBeTruthy();
+                    expect(res.body.additionalInfo).toBeTruthy();
+                })
+
+        done();
+    })
+
+    it(`GET /:customerObjID: User with CUSTOMER_READ perm should
+        be able to access the endpoint and retrieve customer
+        data with custom query fields`, async (done) => {
+        // Include `name` and `address` fields
+        let query = queryString.stringify({ inc: ['name', 'address']});
+        await authenticatedAdminAgent
+                .get(`${customerEndpoint}/${customerObjID}?${query}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.name).toBeTruthy();
+                    expect(res.body.address).toBeTruthy();
+                    expect(res.body.telephone).not.toBeTruthy();
+                    expect(res.body.fax).not.toBeTruthy();
+                    expect(res.body.email).not.toBeTruthy();
+                    expect(res.body.pointOfContact).not.toBeTruthy();
+                    expect(res.body.additionalInfo).not.toBeTruthy();
+                })
+
+        // Include `pointOfContact` field only
+        query = queryString.stringify({ inc: 'pointOfContact'})
+        await authenticatedAdminAgent
+                .get(`${customerEndpoint}/${customerObjID}?${query}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.name).not.toBeTruthy();
+                    expect(res.body.address).not.toBeTruthy();
+                    expect(res.body.telephone).not.toBeTruthy();
+                    expect(res.body.fax).not.toBeTruthy();
+                    expect(res.body.email).not.toBeTruthy();
+                    expect(res.body.pointOfContact).toBeTruthy();
+                    expect(res.body.additionalInfo).not.toBeTruthy();
+                })
+
+        done();
+    })
+
+    it(`GET /:customerObjID: User with CUSTOMER_READ perm should
+        not be able to access an invalid customerObjID`, async (done) => {
+        // Invalid ObjID (valid for another collection)
+        const supplierDoc = await SupplierModel.findOne({});
+        const supplierObjID = supplierDoc.id;
+        await authenticatedAdminAgent
+                .get(`${customerEndpoint}/${supplierObjID}`)
+                .expect(400)
+
+        // Invalid ObjID (wrong format)
+        await authenticatedAdminAgent
+                .get(`${customerEndpoint}/${12312313123}`)
+                .expect(400)
+
+        done();
+    })
+
+    it(`GET /:customerObjID: User without CUSTOMER_READ perm should
+        not be able to access the endpoint and retrieve
+        customer data`, async (done) => {
+        await authenticatedUnauthorizedAgent
+                .get(`${customerEndpoint}/${customerObjID}`)
                 .expect(403)
         
         done();

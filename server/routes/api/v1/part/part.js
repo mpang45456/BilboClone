@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 
 const logger = require('../../../../utils');
 const { SupplierModel, PartModel } = require('../../../../data/database');
@@ -153,6 +154,9 @@ router.get('/:partObjID',
         return res.status(200).json(part);
     } catch(err) {
         logger.error(`GET /part/:partObjID: Could not get part: ${err}`);
+        if (err instanceof mongoose.Error.CastError) {
+            return res.status(400).send('Invalid part ID');
+        }
         return res.sendStatus(500);
     }
 })

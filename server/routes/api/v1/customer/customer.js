@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 
 const logger = require('../../../../utils');
 const { CustomerModel } = require('../../../../data/database');
@@ -119,6 +120,9 @@ router.get('/:customerObjID',
         return res.status(200).json(customer);
     } catch(err) {
         logger.error(`GET /customer/:customerObjID: Could not get customer: ${err}`);
+        if (err instanceof mongoose.Error.CastError) {
+            return res.status(400).send('Invalid customer ID');
+        }
         return res.sendStatus(500);
     }
 })
