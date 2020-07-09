@@ -86,6 +86,43 @@ router.get('/',
     }
 });
 
+/**
+ * Mounted on /api/v1/customer/:customerObjID
+ * 
+ * Gets customer information on the customer identified
+ * by `:customerObjID`
+ * 
+ * Request query string can specify:
+ * 1. Fields to include (`inc`)
+ * 
+ * Note: Will return 400 status code is the 
+ * `customertObjID` is invalid
+ */
+router.get('/:customerObjID',
+           isAuthorized(PERMS.PART_READ),
+           async function(req, res) {
+    let {
+        inc = ['name', 'address', 'telephone', 
+               'fax', 'email', 'pointOfContact', 
+               'additionalInfo'],
+    } = req.query;
+
+    // Convert `inc` to array if only a single field is specified
+    if (!Array.isArray(inc)) { inc = [inc]; }
+
+    try {
+        const customer = await CustomerModel.findOne({ _id: req.params.customerObjID}, inc.join(' '));
+
+        if (!customer) {
+            return res.status(400).send('Invalid customer ID');
+        }
+        return res.status(200).json(customer);
+    } catch(err) {
+        logger.error(`GET /customer/:customerObjID: Could not get customer: ${err}`);
+        return res.sendStatus(500);
+    }
+})
+
 module.exports = {
     customerRouter: router
 }
