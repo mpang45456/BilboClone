@@ -127,6 +127,43 @@ router.get('/:customerObjID',
     }
 })
 
+/**
+ * Mounted at /api/v1/customer
+ * 
+ * Create a new customer. 
+ * 
+ * Note: If the request is successful, the response will
+ * send the newly-created customer back as JSON in the body.
+ */
+router.post('/', 
+            isAuthorized(PERMS.CUSTOMER_WRITE),
+            async function(req, res) {
+    const { name, 
+            address,
+            telephone, 
+            fax, 
+            email, 
+            pointOfContact,
+            additionalInfo 
+    } = req.body;
+    
+    try {
+        // Create New Customer
+        const newCustomer = new CustomerModel({ name, 
+                                                address, 
+                                                telephone,
+                                                fax, 
+                                                email,
+                                                pointOfContact,
+                                                additionalInfo });
+        await newCustomer.save();
+        return res.status(200).json(newCustomer);
+    } catch(err) {
+        logger.error(`POST /customer: Could not create new customer: ${err}`);
+        return res.status(400).send('Unable to create new customer');
+    }
+})
+
 module.exports = {
     customerRouter: router
 }
