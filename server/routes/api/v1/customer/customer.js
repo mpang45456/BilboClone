@@ -160,7 +160,11 @@ router.post('/',
         return res.status(200).json(newCustomer);
     } catch(err) {
         logger.error(`POST /customer: Could not create new customer: ${err}`);
-        return res.status(400).send('Unable to create new customer');
+        if (err.toString().toLowerCase().includes('duplicate key error')) {
+            return res.status(400).send('Duplicate Customer Name');
+        } else {
+            return res.status(400).send('Unable to create new customer');
+        }
     }
 })
 
