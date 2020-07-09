@@ -329,6 +329,27 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
     })
 
     it(`POST /: User with SUPPLIER_WRITE perm should
+        not be able to create a new supplier if the supplier
+        has the same name as an existing supplier`, async (done) => {
+        // Create new supplier
+        await authenticatedAdminAgent
+            .post(supplierEndpoint)
+            .send(newSupplier)
+            .expect(200)
+
+        // Attempt to create the same supplier (same `name`)
+        await authenticatedAdminAgent
+            .post(supplierEndpoint)
+            .send(newSupplier)
+            .expect(400)
+            .expect(res => {
+                expect(res.text).toMatch(/Duplicate Supplier Name/i);
+            })
+        
+        done();
+    })
+
+    it(`POST /: User with SUPPLIER_WRITE perm should
         not be able to create a new supplier with parts
         even if parts are provided in the request`, async (done) => {
         let newSupplierWithParts = JSON.parse(JSON.stringify(newSupplier));

@@ -386,6 +386,27 @@ describe('Testing /api/v1/customer endpoint', () => {
     })
 
     it(`POST /: User with CUSTOMER_WRITE perm should not be 
+        able to create a new customer that has the same name
+        as an existing customer`, async (done) => {
+        // Create new customer
+        await authenticatedAdminAgent
+            .post(customerEndpoint)
+            .send(newCustomer)
+            .expect(200)
+
+        // Attempt to create the same customer (same `name`)
+        await authenticatedAdminAgent
+            .post(customerEndpoint)
+            .send(newCustomer)
+            .expect(400)
+            .expect(res => {
+                expect(res.text).toMatch(/Duplicate Customer Name/i);
+            })
+        
+        done();
+    })
+
+    it(`POST /: User with CUSTOMER_WRITE perm should not be 
         able to create a new customer if the required fields are
         missing`, async (done) => {
         // `name` missing
