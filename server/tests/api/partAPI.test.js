@@ -814,13 +814,11 @@ describe('Testing /api/v1/part endpoint', () => {
         // With PART_READ perm
         await authenticatedReadAgent
                 .delete(`${partEndpoint}/${partObjID}`)
-                .send(newPartWithPrice)
                 .expect(403);
 
         // With neither PART_READ nor PART_WRITE perm
         await authenticatedUnauthorizedAgent
                 .delete(`${partEndpoint}/${partObjID}`)
-                .send(newPartWithPrice)
                 .expect(403);
 
         done();

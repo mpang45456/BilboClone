@@ -201,6 +201,23 @@ router.patch('/:customerObjID',
     }
 })
 
+/**
+ * Mounted on /api/v1/customer/:customerObjID
+ * 
+ * Performs an idempotent delete on the 
+ * customer identified by `customerObjID`
+ */
+router.delete('/:customerObjID',
+              isAuthorized(PERMS.CUSTOMER_WRITE),
+              async function(req, res) {
+    try {
+        await CustomerModel.deleteOne({ _id: req.params.customerObjID });
+        return res.status(200).send('Deleted customer');
+    } catch(err) {
+        return res.status(400).send('Unable to delete customer');
+    }
+})
+
 module.exports = {
     customerRouter: router
 }

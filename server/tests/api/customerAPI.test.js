@@ -454,7 +454,7 @@ describe('Testing /api/v1/customer endpoint', () => {
     it(`PATCH /:customerObjID: User with CUSTOMER_WRITE perm 
         should be able to access the endpoint but should not
         be able to update customer details with fields that
-        are not part of the CustomerSchema`, async (done) => {
+        are not customer of the CustomerSchema`, async (done) => {
         await authenticatedAdminAgent
             .patch(`${customerEndpoint}/${customerObjID}`)
             .send({
@@ -491,6 +491,102 @@ describe('Testing /api/v1/customer endpoint', () => {
                 .send({
                     name: newCustomer.name
                 })
+                .expect(403);
+
+        done();
+    })
+
+    /**
+     * -------------------------------
+     * DELETE (An Individual Customer)
+     * -------------------------------
+     */
+    it(`DELETE /:customerObjID: User with CUSTOMER_WRITE perm
+        should be able to access the endpoint and delete
+        a customer. Customer should not longer be accessible via
+        the PART API`, async (done) => {
+        await authenticatedAdminAgent
+                .delete(`${customerEndpoint}/${customerObjID}`)
+                .expect(200)
+
+        // Unable to retrieve individual customer details
+        await authenticatedAdminAgent
+                .get(`${customerEndpoint}/${customerObjID}`)
+                .expect(400)
+
+        // Unable to retrieve deleted customer's details in collection
+        await authenticatedAdminAgent
+                .get(customerEndpoint)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.customers.length).toBe(testCustomers.length - 1);
+                })
+
+        done();
+    })
+
+    it(`DELETE /:customerObjID: User with CUSTOMER_WRITE perm
+        deleting a non-existent customer should still result
+        in a 200 status code response`, async (done) => {
+        const supplierDoc = await SupplierModel.findOne({});
+        const supplierObjID = supplierDoc.id;
+        await authenticatedAdminAgent
+            .delete(`${customerEndpoint}/${supplierObjID}`)
+            .expect(200)
+
+        // Nothing should have been deleted
+        await authenticatedAdminAgent
+            .get(customerEndpoint)
+            .expect(200)
+            .expect(res => {
+                expect(res.body.customers.length).toBe(testCustomers.length);
+            })
+        done();
+    })
+
+    it(`DELETE /:customerObjID: User with CUSTOMER_WRITE perm
+        deleting an already-deleted customer should still result
+        in a 200 status code response`, async (done) => {
+        // Delete existing customer
+        await authenticatedAdminAgent
+            .delete(`${customerEndpoint}/${customerObjID}`)
+            .expect(200)
+
+        // Customer should have been deleted
+        await authenticatedAdminAgent
+            .get(customerEndpoint)
+            .expect(200)
+            .expect(res => {
+                expect(res.body.customers.length).toBe(testCustomers.length - 1);
+            })
+        
+        // Delete already-deleted customer
+        await authenticatedAdminAgent
+            .delete(`${customerEndpoint}/${customerObjID}`)
+            .expect(200)
+        
+        // No other customers should have been deleted
+        await authenticatedAdminAgent
+            .get(customerEndpoint)
+            .expect(200)
+            .expect(res => {
+                expect(res.body.customers.length).toBe(testCustomers.length - 1);
+            })
+        
+        done();
+    })
+
+    it(`DELETE /:customerObjID: User without CUSTOMER_WRITE perm
+        should not be able to access the endpoint and delete
+        a customer`, async (done) => {
+        // With CUSTOMER_READ perm
+        await authenticatedReadAgent
+                .delete(`${customerEndpoint}/${customerObjID}`)
+                .expect(403);
+
+        // With neither CUSTOMER_READ nor CUSTOMER_WRITE perm
+        await authenticatedUnauthorizedAgent
+                .delete(`${customerEndpoint}/${customerObjID}`)
                 .expect(403);
 
         done();
