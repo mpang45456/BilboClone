@@ -89,7 +89,7 @@ const SupplierModel = mongoose.model('Supplier', SupplierSchema);
  * ---------------
  */
 const CustomerSchema = new Schema({
-    name: { type: String, required: true },
+    name: { type: String, required: true, index: true },
     address: { type: String, default: ''},
     telephone: { type: String, default: ''},
     fax: { type: String, default: '' },

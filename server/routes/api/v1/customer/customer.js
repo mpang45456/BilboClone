@@ -164,6 +164,43 @@ router.post('/',
     }
 })
 
+/**
+ * Mounted on /api/v1/customer/:customerObjID
+ * 
+ * Updates the details of the customer identified
+ * by `:customerObjID`
+ */
+router.patch('/:customerObjID',
+             isAuthorized(PERMS.CUSTOMER_WRITE),
+             async function(req, res) {
+    const { name, 
+            address,
+            telephone, 
+            fax, 
+            email, 
+            pointOfContact,
+            additionalInfo 
+    } = req.body;
+
+    try {
+        const customer = await CustomerModel.findOne({ _id: req.params.customerObjID });
+        // For fields where an empty string is a valid value, must explicitly check for undefined
+        if (name) { customer.name = name; }
+        if (address !== undefined) { customer.address = address; }
+        if (telephone !== undefined) { customer.telephone = telephone; }
+        if (fax !== undefined) { customer.fax = fax; }
+        if (email !== undefined) { customer.email = email; }
+        if (pointOfContact !== undefined) { customer.pointOfContact = pointOfContact; }
+        if (additionalInfo !== undefined) { customer.additionalInfo = additionalInfo; }
+        
+        await customer.save();
+        return res.status(200).send('Successfully updated customer');
+    } catch(err) {
+        logger.error(`PATCH /customer: Could not update customer: ${err}`);
+        return res.status(400).send('Unable to update customer');
+    }
+})
+
 module.exports = {
     customerRouter: router
 }

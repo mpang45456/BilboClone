@@ -424,4 +424,76 @@ describe('Testing /api/v1/customer endpoint', () => {
 
         done();
     })
+
+    /**
+     * -------------------------
+     * PATCH (Update a Customer)
+     * -------------------------
+     */
+    it(`PATCH /:customerObjID: User with CUSTOMER_WRITE perm 
+        should be able to access the endpoint and update 
+        customer details`, async (done) => {
+        await authenticatedAdminAgent
+                .patch(`${customerEndpoint}/${customerObjID}`)
+                .send({
+                    name: newCustomer.name
+                })
+                .expect(200)
+
+        await authenticatedAdminAgent
+                .get(`${customerEndpoint}/${customerObjID}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body).toBeTruthy();
+                    expect(res.body.name).toBe(newCustomer.name);
+                })
+
+        done();
+    })
+
+    it(`PATCH /:customerObjID: User with CUSTOMER_WRITE perm 
+        should be able to access the endpoint but should not
+        be able to update customer details with fields that
+        are not part of the CustomerSchema`, async (done) => {
+        await authenticatedAdminAgent
+            .patch(`${customerEndpoint}/${customerObjID}`)
+            .send({
+                name: newCustomer.name,
+                nonExistentField: 'nonExistentFieldValue'
+            })
+            .expect(200)
+        
+        await authenticatedAdminAgent
+                .get(`${customerEndpoint}/${customerObjID}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.name).toBe(newCustomer.name);
+                    expect(res.body.nonExistentField).not.toBeTruthy();
+                })
+
+        done();
+    })
+
+    it(`PATCH /:customerObjID: User without CUSTOMER_WRITE perm
+        should not be able to access the endpoint and update
+        customer details`, async (done) => {
+        // With CUSTOMER_READ perm
+        await authenticatedReadAgent
+                .patch(`${customerEndpoint}/${customerObjID}`)
+                .send({
+                    name: newCustomer.name
+                })
+                .expect(403);
+
+        // With neither CUSTOMER_READ nor CUSTOMER_WRITE perm
+        await authenticatedUnauthorizedAgent
+                .patch(`${customerEndpoint}/${customerObjID}`)
+                .send({
+                    name: newCustomer.name
+                })
+                .expect(403);
+
+        done();
+    })
+
 })
