@@ -30,7 +30,7 @@ const users = [
         // Read Permissions User
         "username": "user3",
         "password": "asd",
-        "permissions": [PERMS.USER_READ, PERMS.SUPPLIER_READ, PERMS.PART_READ],
+        "permissions": [PERMS.USER_READ, PERMS.SUPPLIER_READ, PERMS.PART_READ, PERMS.CUSTOMER_READ],
         "name": "Gandalf",
         "position": "Sales Intern",
         "reportsTo": "user1"
@@ -207,7 +207,7 @@ const customers = [
         additionalInfo: 'Transistor quality approved using standard SME-201221'
     },
     {
-        name: 'Arduino-Pi Inc.',
+        name: 'Harduino-Pi Inc.',
         address: 'Blk 809 Oldtown Avenue',
         telephone: '+65 67520921',
         fax: '+65 69021392',
