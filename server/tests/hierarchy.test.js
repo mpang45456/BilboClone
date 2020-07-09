@@ -73,7 +73,7 @@ describe('Testing UserHierarchy', () => {
     it('Testing getAllDescendents: Existing user with descendents', async (done) => {
         let allDescendents = await UserHierarchy.getAllDescendents(testUsers[0].username);
         expect(Array.isArray(allDescendents)).toBeTruthy();
-        expect(allDescendents.length).toBe(3);
+        expect(allDescendents.length).toBe(4);
         expect(allDescendents).toContain(testUsers[1].username);
         expect(allDescendents).toContain(testUsers[2].username);
         expect(allDescendents).toContain(testUsers[3].username);
