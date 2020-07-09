@@ -16,7 +16,7 @@ import SupplierPage from '../Supplier/SupplierPage';
 import SupplierViewPage from '../Supplier/SupplierViewPage/SupplierViewPage';
 import SupplierAddPage from '../Supplier/SupplierAddPage';
 import SettingsPage from '../SettingsPage';
-import CustomerPage from '../CustomerPage';
+import CustomerPage from '../Customer/CustomerPage';
 import UserPage from '../User/UserPage';
 import UserViewPage from '../User/UserViewPage';
 import UserEditPage from '../User/UserEditPage';
