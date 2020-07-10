@@ -1,4 +1,4 @@
-const { users, customers, suppliers } = require('../../server/data/databaseBootstrap');
+const { users, suppliers } = require('../../server/data/databaseBootstrap');
 import CONFIG from '../../client/src/config';
 
 describe('Supplier Flow', () => {
@@ -82,6 +82,20 @@ describe('Supplier Flow', () => {
         // Edit Buttons should be disabled
         cy.contains('Edit')
           .should('be', 'disabled');
+    })
+
+    it(`User with SUPPLIER_READ and PART_READ perms but not PART_WRITE
+        and SUPPLIER_WRITE perms should be able to access the supplier 
+        details page and perform read-only actions in the parts table`, () => {
+        loginAsUserRead();
+
+        // Navigate to Supplier Detail Page
+        cy.visit(CONFIG.SUPPLIER_URL);
+        cy.contains('view').click();
+
+        // Show More Button in `All Parts` Tab should be disabled
+        cy.get('.ant-tabs-extra-content > .ant-btn')
+        .should('be', 'disabled');
     })
 
     it(`User with SUPPLIER_READ and SUPPLIER_WRITE perm should
@@ -240,6 +254,98 @@ describe('Supplier Flow', () => {
     })
 
     /**
+     * --------------------------------------
+     * Viewing Parts in Supplier Details Page
+     * --------------------------------------
+     */
+    it(`User with SUPPLIER_READ and PART_READ perms should
+        be able to view parts details and perform a search
+        on its columns`, () => {
+        loginAsUserRead();
+
+        // Navigate to All Suppliers Page
+        cy.visit(CONFIG.SUPPLIER_URL)
+
+        // Navigate to Supplier Details Page
+        cy.contains(suppliers[3].name)
+          .siblings()
+          .contains('view')
+          .click();
+        
+        // Perform a search on 'Part Number' column
+        cy.contains('Part Number')
+          .siblings()
+          .eq(0)
+          .click();
+        cy.get(`[placeholder="Search part number"]`)
+          .clear()
+          .type(`${suppliers[3].parts[0].partNumber}{enter}`);
+        cy.wrap([suppliers[3].parts[1].partNumber, 
+                 suppliers[3].parts[2].partNumber])
+          .each(partNumber => {
+              cy.contains(partNumber)
+                .should('not.exist');
+          })
+
+        // Clear the search filter
+        cy.contains('Part Number')
+          .siblings()
+          .eq(0)
+          .click();
+        cy.contains('Clear')
+          .click();
+        
+        // All original table rows should now be present again
+        cy.wrap(suppliers[3].parts)
+          .each(part => {
+              cy.contains(part.partNumber);
+          })
+    })
+
+    it(`User with SUPPLIER_READ and PART_READ perms should
+        be able to navigate to part details page from the parts
+        table in the supplier details page`, () => {
+        loginAsUserRead();
+
+        // Navigate to All Suppliers Page
+        cy.visit(CONFIG.SUPPLIER_URL)
+
+        // Navigate to Supplier Details Page
+        cy.contains(suppliers[3].name)
+          .siblings()
+          .contains('view')
+          .click();
+
+        // Click on `view` button in parts table
+        cy.contains('view').click();
+
+        // Should have navigated to Part Details Page
+        cy.location('pathname').should('match', /parts\/[a-z0-9]*$/);
+    })
+
+    it(`User with SUPPLIER_READ and PART_WRITE perms should
+        be able to navigate to add a part page from the parts
+        table in the supplier details page`, () => {
+        loginAsUserReadWrite();
+
+        // Navigate to All Suppliers Page
+        cy.visit(CONFIG.SUPPLIER_URL)
+
+        // Navigate to Supplier Details Page
+        cy.contains(suppliers[3].name)
+          .siblings()
+          .contains('view')
+          .click();
+
+        // Click on Show More Button in `All Parts` tab
+        cy.get('.ant-tabs-extra-content > .ant-btn').click()
+        cy.contains('Add a Part').click();
+
+        // Should have navigated to Add Part Page
+        cy.location('pathname').should('eq', `${CONFIG.PARTS_URL}add`);
+    })
+
+    /**
      * --------------
      * Add a Supplier
      * --------------
@@ -250,24 +356,16 @@ describe('Supplier Flow', () => {
 
         // Navigate to Supplier Add Page
         cy.visit(`${CONFIG.SUPPLIER_URL}add`);
+        cy.location('pathname').should('eq', `${CONFIG.SUPPLIER_URL}add`);
 
         // Fill in Supplier Name
         const newSupplierName = 'Cypress Test: New Supplier';
-        cy.location('pathname').should('eq', `${CONFIG.SUPPLIER_URL}add`);
         cy.contains('Supplier Name')
           .parent()
           .siblings()
           .find('input')
           .clear()
           .type(newSupplierName);
-        // Fill in Point Of Contact
-        const newPointOfContact = 'Cypress Test: Point of Contact';
-        cy.contains('Point Of Contact')
-          .parent()
-          .siblings()
-          .find('input')
-          .clear()
-          .type(newPointOfContact);
 
         // Click on Submit button
         cy.contains('Submit').click();
@@ -309,14 +407,6 @@ describe('Supplier Flow', () => {
           .find('input')
           .clear()
           .type(newSupplierName);
-        // Fill in Point Of Contact
-        const newPointOfContact = 'Cypress Test: Point of Contact';
-        cy.contains('Point Of Contact')
-          .parent()
-          .siblings()
-          .find('input')
-          .clear()
-          .type(newPointOfContact);
 
         // Click on Submit button
         cy.contains('Submit').click();
@@ -332,43 +422,11 @@ describe('Supplier Flow', () => {
         // Navigate to Supplier Add Page
         cy.visit(`${CONFIG.SUPPLIER_URL}add`);
         
-        // Fill in Point Of Contact
-        const newPointOfContact = 'Cypress Test: Point of Contact';
-        cy.contains('Point Of Contact')
-          .parent()
-          .siblings()
-          .find('input')
-          .clear()
-          .type(newPointOfContact);
-
         // Click on Submit button
         cy.contains('Submit').click();
 
         // Error message (validation) should appear
         cy.contains("Please input supplier's name!");
-    })
-
-    it(`User with SUPPLIER_READ and SUPPLIER_WRITE perms should
-        not be able to create a new supplier without a point of contact`, () => {
-        loginAsUserReadWrite();
-
-        // Navigate to Supplier Add Page
-        cy.visit(`${CONFIG.SUPPLIER_URL}add`);
-        
-        // Fill in Supplier Name
-        const newSupplierName = suppliers[0].name;
-        cy.contains('Supplier Name')
-          .parent()
-          .siblings()
-          .find('input')
-          .clear()
-          .type(newSupplierName);
-
-        // Click on Submit button
-        cy.contains('Submit').click();
-
-        // Error message (validation) should appear
-        cy.contains("Please input name of point of contact with supplier!");
     })
 
     /**
