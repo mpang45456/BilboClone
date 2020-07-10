@@ -1,7 +1,7 @@
-const { users, customers } = require('../../server/data/databaseBootstrap');
+const { users, customers, suppliers } = require('../../server/data/databaseBootstrap');
 import CONFIG from '../../client/src/config';
 
-describe('Customer Flow', () => {
+describe('Supplier Flow', () => {
     const userReadWrite = users[0];
     const userRead = users[3];
     const userNoPerms = users[1];
@@ -19,8 +19,8 @@ describe('Customer Flow', () => {
     }
 
     beforeEach(() => {
-        // Reset and Seed Customers Collection in Database
-        cy.exec('RESET_DB_CUSTOMERS=true npm run cypress:reset_db');
+        // Reset and Seed Suppliers Collection in Database
+        cy.exec('RESET_DB_SUPPLIERS_AND_PARTS=true npm run cypress:reset_db');
     })
 
     /**
@@ -28,51 +28,51 @@ describe('Customer Flow', () => {
      * Authorization Checks (Page Access)
      * ----------------------------------
      */
-    it(`User without any of the CUSTOMER permissions should not
-        be able to access any of the customer-related URLs and
+    it(`User without any of the SUPPLIER permissions should not
+        be able to access any of the supplier-related URLs and
         should be redirected to the Error 403 page`, () => {
         loginAsUserNoPerms();
 
-        // All Customers Page
-        cy.visit(CONFIG.CUSTOMER_URL);
-        cy.location('pathname').should('not.eq', CONFIG.CUSTOMER_URL);
+        // All Suppliers Page
+        cy.visit(CONFIG.SUPPLIER_URL);
+        cy.location('pathname').should('not.eq', CONFIG.SUPPLIER_URL);
         cy.location('pathname').should('eq', CONFIG.ERROR_403_URL);
 
-        // Customer Details Page
-        cy.visit(`${CONFIG.CUSTOMER_URL}/123`);
+        // Supplier Details Page
+        cy.visit(`${CONFIG.SUPPLIER_URL}/123`);
         cy.location('pathname').should('eq', CONFIG.ERROR_403_URL);
 
-        // Add Customer Page
-        cy.visit(`${CONFIG.CUSTOMER_URL}add`);
-        cy.location('pathname').should('not.eq', `${CONFIG.CUSTOMER_URL}add`);
+        // Add Supplier Page
+        cy.visit(`${CONFIG.SUPPLIER_URL}add`);
+        cy.location('pathname').should('not.eq', `${CONFIG.SUPPLIER_URL}add`);
         cy.location('pathname').should('eq', CONFIG.ERROR_403_URL);
     })
 
-    it(`User with CUSTOMER_READ perm but not CUSTOMER_WRITE perm
-        should be able to access the all customers page and perform
+    it(`User with SUPPLIER_READ perm but not SUPPLIER_WRITE perm
+        should be able to access the all suppliers page and perform
         only read actions`, () => {
         loginAsUserRead();
 
-        // All Customers Page
-        cy.visit(CONFIG.CUSTOMER_URL);
-        cy.location('pathname').should('eq', CONFIG.CUSTOMER_URL);
+        // All Suppliers Page
+        cy.visit(CONFIG.SUPPLIER_URL);
+        cy.location('pathname').should('eq', CONFIG.SUPPLIER_URL);
 
         // Show More Button should be disabled
         cy.get('.ant-btn')
           .should('be', 'disabled');
 
-        // Should be able to access Customer Detail Page
+        // Should be able to access Supplier Detail Page
         cy.contains('view').click();
-        cy.location('pathname').should('match', /customers\/[a-z0-9]*$/);
+        cy.location('pathname').should('match', /suppliers\/[a-z0-9]*$/);
     })
 
-    it(`User with CUSTOMER_READ perm but not CUSTOMER_WRITE perm
-        should be able to access the customer details page and perform
+    it(`User with SUPPLIER_READ perm but not SUPPLIER_WRITE perm
+        should be able to access the supplier details page and perform
         only read actions`, () => {
         loginAsUserRead();
 
-        // Navigate to Customer Detail Page
-        cy.visit(CONFIG.CUSTOMER_URL);
+        // Navigate to Supplier Detail Page
+        cy.visit(CONFIG.SUPPLIER_URL);
         cy.contains('view').click();
 
         // Show More Button should be disabled
@@ -84,14 +84,14 @@ describe('Customer Flow', () => {
           .should('be', 'disabled');
     })
 
-    it(`User with CUSTOMER_READ and CUSTOMER_WRITE perm should
-        be able to access the all customers page and access page 
-        to add a customer`, () => {
+    it(`User with SUPPLIER_READ and SUPPLIER_WRITE perm should
+        be able to access the all suppliers page and access page 
+        to add a supplier`, () => {
         loginAsUserReadWrite();
 
-        // Navigate to All Customers Page
-        cy.visit(CONFIG.CUSTOMER_URL);
-        cy.location('pathname').should('eq', CONFIG.CUSTOMER_URL);
+        // Navigate to All Suppliers Page
+        cy.visit(CONFIG.SUPPLIER_URL);
+        cy.location('pathname').should('eq', CONFIG.SUPPLIER_URL);
 
         // Show More Button should be enabled
         cy.get('.ant-page-header-heading-extra > .ant-btn')
@@ -102,29 +102,29 @@ describe('Customer Flow', () => {
         cy.get('.ant-page-header-heading-extra > .ant-btn')
           .click();
         
-        // Click on Add a Customer Dropdown Menu Item
-        cy.contains('Add a Customer')
+        // Click on Add a Supplier Dropdown Menu Item
+        cy.contains('Add a Supplier')
           .click();
         
-        // Customer Add Page
-        cy.location('pathname').should('eq', `${CONFIG.CUSTOMER_URL}add`);
+        // Supplier Add Page
+        cy.location('pathname').should('eq', `${CONFIG.SUPPLIER_URL}add`);
     })
 
     /**
      * -----------------
-     * Delete a Customer
+     * Delete a Supplier
      * -----------------
      */
-    it(`User with CUSTOMER_READ and CUSTOMER_WRITE perms should
-        be able to access customer details page and delete the
-        customer`, () => {
+    it(`User with SUPPLIER_READ and SUPPLIER_WRITE perms should
+        be able to access supplier details page and delete the
+        supplier`, () => {
         loginAsUserReadWrite();
 
-        // Navigate to Customer Details Page by clicking on 
-        // the `view` button corresponding to `customers[0]`
-        cy.visit(CONFIG.CUSTOMER_URL);
+        // Navigate to Supplier Details Page by clicking on 
+        // the `view` button corresponding to `suppliers[0]`
+        cy.visit(CONFIG.SUPPLIER_URL);
         cy.get('table')
-          .contains(customers[0].name) 
+          .contains(suppliers[0].name) 
           .siblings()
           .contains('view')
           .click();
@@ -133,8 +133,8 @@ describe('Customer Flow', () => {
         cy.get('.ant-page-header-heading-extra > .ant-btn')
           .click();
         
-        // Click on Delete Customer Dropdown Menu Item
-        cy.contains('Delete Customer').click();
+        // Click on Delete Supplier Dropdown Menu Item
+        cy.contains('Delete Supplier').click();
 
         // Modal should appear asking for confirmation
         cy.contains('Confirm').should('be.visible');
@@ -145,29 +145,29 @@ describe('Customer Flow', () => {
           .as('confirmationMessage')
           .should('be.visible');
         cy.get('@confirmationMessage')
-          .should('have.text', 'Successfully deleted customer!');
+          .should('have.text', 'Successfully deleted supplier!');
 
-        // Customer should be deleted from table
-        cy.contains(customers[0].name)
+        // Supplier should be deleted from table
+        cy.contains(suppliers[0].name)
           .should('not.exist');
     })
 
     /**
      * ---------------------
-     * Edit Customer Details
+     * Edit Supplier Details
      * ---------------------
      */
-    it(`User with CUSTOMER_READ and CUSTOMER_WRITE perms
-        should be able to access customer details page and
-        edit all fields (except customer name)`, () => {
+    it(`User with SUPPLIER_READ and SUPPLIER_WRITE perms
+        should be able to access supplier details page and
+        edit all fields (except supplier name)`, () => {
         loginAsUserReadWrite();
 
-        // Navigate to Customer Details Page
-        cy.visit(CONFIG.CUSTOMER_URL);
+        // Navigate to Supplier Details Page
+        cy.visit(CONFIG.SUPPLIER_URL);
         cy.contains('view').click();
 
-        // Customer Name should not be editable
-        cy.contains('Customer Name')
+        // Supplier Name should not be editable
+        cy.contains('Supplier Name')
           .contains('Edit')
           .should('not.exist');
 
@@ -196,21 +196,21 @@ describe('Customer Flow', () => {
           .as('confirmationMessage')
           .should('be.visible');
         cy.get('@confirmationMessage')
-          .should('have.text', 'Customer Information successfully changed!');
+          .should('have.text', 'Supplier Information successfully changed!');
 
         // Edited User Details should be persisted
-        cy.visit(CONFIG.CUSTOMER_URL);
+        cy.visit(CONFIG.SUPPLIER_URL);
         cy.contains(newAddress);
     })
 
-    it(`User with CUSTOMER_READ and CUSTOMER_WRITE perms
-        should be able to edit customer details on customer
+    it(`User with SUPPLIER_READ and SUPPLIER_WRITE perms
+        should be able to edit supplier details on supplier
         details page and then choose to cancel the changes without
         persisting them`, () => {
         loginAsUserReadWrite();
 
-        // Navigate to Customer Details Page
-        cy.visit(CONFIG.CUSTOMER_URL);
+        // Navigate to Supplier Details Page
+        cy.visit(CONFIG.SUPPLIER_URL);
         cy.contains('view').click();
 
         // Edit Address Field
@@ -234,32 +234,32 @@ describe('Customer Flow', () => {
             .click();
         
         // Edited User Details should NOT be persisted
-        cy.visit(CONFIG.CUSTOMER_URL);
+        cy.visit(CONFIG.SUPPLIER_URL);
         cy.contains(newAddress)
           .should('not.exist');
     })
 
     /**
      * --------------
-     * Add a Customer
+     * Add a Supplier
      * --------------
      */
-    it(`User with CUSTOMER_READ and CUSTOMER_WRITE perms should
-        be able to create a new customer`, () => {
+    it(`User with SUPPLIER_READ and SUPPLIER_WRITE perms should
+        be able to create a new supplier`, () => {
         loginAsUserReadWrite();
 
-        // Navigate to Customer Add Page
-        cy.visit(`${CONFIG.CUSTOMER_URL}add`);
+        // Navigate to Supplier Add Page
+        cy.visit(`${CONFIG.SUPPLIER_URL}add`);
 
-        // Fill in Customer Name
-        const newCustomerName = 'Cypress Test: New Customer';
-        cy.location('pathname').should('eq', `${CONFIG.CUSTOMER_URL}add`);
-        cy.contains('Customer Name')
+        // Fill in Supplier Name
+        const newSupplierName = 'Cypress Test: New Supplier';
+        cy.location('pathname').should('eq', `${CONFIG.SUPPLIER_URL}add`);
+        cy.contains('Supplier Name')
           .parent()
           .siblings()
           .find('input')
           .clear()
-          .type(newCustomerName);
+          .type(newSupplierName);
         // Fill in Point Of Contact
         const newPointOfContact = 'Cypress Test: Point of Contact';
         cy.contains('Point Of Contact')
@@ -277,38 +277,38 @@ describe('Customer Flow', () => {
           .as('confirmationMessage')
           .should('be.visible');
         cy.get('@confirmationMessage')
-          .should('have.text', 'Successfully created new customer!');
+          .should('have.text', 'Successfully created new supplier!');
         
-        // Navigate to All Customers Page
-        cy.visit(CONFIG.CUSTOMER_URL);
+        // Navigate to All Suppliers Page
+        cy.visit(CONFIG.SUPPLIER_URL);
 
-        // Search for new customer name in table
-        cy.contains('Customer Name')
+        // Search for new supplier name in table
+        cy.contains('Supplier Name')
           .siblings()
           .eq(0)
           .click();
         cy.get('.ant-input')
           .clear()
-          .type(`${newCustomerName}{enter}`);
-        cy.contains(newCustomerName);
+          .type(`${newSupplierName}{enter}`);
+        cy.contains(newSupplierName);
     })
 
-    it(`User with CUSTOMER_READ and CUSTOMER_WRITE perms should
-        not be able to create a new customer that has the same name
-        as an existing customer`, () => {
+    it(`User with SUPPLIER_READ and SUPPLIER_WRITE perms should
+        not be able to create a new supplier that has the same name
+        as an existing supplier`, () => {
         loginAsUserReadWrite();
 
-        // Navigate to Customer Add Page
-        cy.visit(`${CONFIG.CUSTOMER_URL}add`);
+        // Navigate to Supplier Add Page
+        cy.visit(`${CONFIG.SUPPLIER_URL}add`);
 
-        // Fill in Customer Name
-        const newCustomerName = customers[0].name;
-        cy.contains('Customer Name')
+        // Fill in Supplier Name
+        const newSupplierName = suppliers[0].name;
+        cy.contains('Supplier Name')
           .parent()
           .siblings()
           .find('input')
           .clear()
-          .type(newCustomerName);
+          .type(newSupplierName);
         // Fill in Point Of Contact
         const newPointOfContact = 'Cypress Test: Point of Contact';
         cy.contains('Point Of Contact')
@@ -322,15 +322,15 @@ describe('Customer Flow', () => {
         cy.contains('Submit').click();
 
         // Error message (validation) should appear
-        cy.contains('A customer of the same name already exists');
+        cy.contains('A supplier of the same name already exists');
     })
 
-    it(`User with CUSTOMER_READ and CUSTOMER_WRITE perms should
-        not be able to create a new customer without a customer name`, () => {
+    it(`User with SUPPLIER_READ and SUPPLIER_WRITE perms should
+        not be able to create a new supplier without a supplier name`, () => {
         loginAsUserReadWrite();
 
-        // Navigate to Customer Add Page
-        cy.visit(`${CONFIG.CUSTOMER_URL}add`);
+        // Navigate to Supplier Add Page
+        cy.visit(`${CONFIG.SUPPLIER_URL}add`);
         
         // Fill in Point Of Contact
         const newPointOfContact = 'Cypress Test: Point of Contact';
@@ -345,30 +345,30 @@ describe('Customer Flow', () => {
         cy.contains('Submit').click();
 
         // Error message (validation) should appear
-        cy.contains("Please input customer's name!");
+        cy.contains("Please input supplier's name!");
     })
 
-    it(`User with CUSTOMER_READ and CUSTOMER_WRITE perms should
-        not be able to create a new customer without a point of contact`, () => {
+    it(`User with SUPPLIER_READ and SUPPLIER_WRITE perms should
+        not be able to create a new supplier without a point of contact`, () => {
         loginAsUserReadWrite();
 
-        // Navigate to Customer Add Page
-        cy.visit(`${CONFIG.CUSTOMER_URL}add`);
+        // Navigate to Supplier Add Page
+        cy.visit(`${CONFIG.SUPPLIER_URL}add`);
         
-        // Fill in Customer Name
-        const newCustomerName = customers[0].name;
-        cy.contains('Customer Name')
+        // Fill in Supplier Name
+        const newSupplierName = suppliers[0].name;
+        cy.contains('Supplier Name')
           .parent()
           .siblings()
           .find('input')
           .clear()
-          .type(newCustomerName);
+          .type(newSupplierName);
 
         // Click on Submit button
         cy.contains('Submit').click();
 
         // Error message (validation) should appear
-        cy.contains("Please input name of point of contact with customer!");
+        cy.contains("Please input name of point of contact with supplier!");
     })
 
     /**
@@ -376,19 +376,19 @@ describe('Customer Flow', () => {
      * Search Table
      * ------------
      */
-    it(`For user with CUSTOMER_READ perms, when searching through 
+    it(`For user with SUPPLIER_READ perms, when searching through 
         the filterable columns, a filter of the table's data should 
         be performed`, () => {
         loginAsUserRead();
 
         // Array format: [[column title, row value, input placeholder]]
-        cy.wrap([['Customer Name', customers[0].name, 'name'], 
-                 ['Address', customers[0].address, 'address'], 
-                 ['Telephone', customers[0].telephone, 'telephone'], 
-                 ['Additional Information', customers[0].additionalInfo, 'info']])
+        cy.wrap([['Supplier Name', suppliers[0].name, 'name'], 
+                 ['Address', suppliers[0].address, 'address'], 
+                 ['Telephone', suppliers[0].telephone, 'telephone'], 
+                 ['Additional Information', suppliers[0].additionalInfo, 'info']])
           .each(columnDetails => {
-            // Navigate to All Customers Page
-            cy.visit(CONFIG.CUSTOMER_URL);
+            // Navigate to All Suppliers Page
+            cy.visit(CONFIG.SUPPLIER_URL);
 
             // Click on search icon for column
             cy.contains(columnDetails[0])
@@ -406,56 +406,56 @@ describe('Customer Flow', () => {
           })
     })
 
-    it(`For user with CUSTOMER_READ perms, when searching through 
+    it(`For user with SUPPLIER_READ perms, when searching through 
         the filterable columns, the table should switch back to the
         first page automatically`, () => {
         loginAsUserRead();
 
-        // Navigate to All Customers Page
-        cy.visit(CONFIG.CUSTOMER_URL);
+        // Navigate to All Suppliers Page
+        cy.visit(CONFIG.SUPPLIER_URL);
 
         // Select last page of table
         cy.get('.ant-pagination-item-2 > a').click();
 
-        // Perform a search on 'Customer Name' column
-        cy.contains('Customer Name')
+        // Perform a search on 'Supplier Name' column
+        cy.contains('Supplier Name')
           .siblings()
           .eq(0)
           .click();
         cy.get('.ant-input')
           .clear()
-          .type(`${customers[0].name}{enter}`);
+          .type(`${suppliers[0].name}{enter}`);
         
         // Table should be at first page
         cy.get('.ant-pagination-item-active')
           .should('have.text', '1');
     })
 
-    it(`For user with CUSTOMER_READ perms, when clearing the
+    it(`For user with SUPPLIER_READ perms, when clearing the
         search filters, the table should switch back to the first
         page automatically and the table's rows should no longer
         have the search filter applied`, () => {
         loginAsUserRead();
 
-        // Navigate to All Customers Page
-        cy.visit(CONFIG.CUSTOMER_URL);
+        // Navigate to All Suppliers Page
+        cy.visit(CONFIG.SUPPLIER_URL);
 
         // Select last page of table
         cy.get('.ant-pagination-item-2 > a').click();
 
-        // Perform a search on 'Customer Name' column
-        cy.contains('Customer Name')
+        // Perform a search on 'Supplier Name' column
+        cy.contains('Supplier Name')
           .siblings()
           .eq(0)
           .click();
         cy.get('.ant-input')
           .clear()
-          .type(`${customers[0].name}{enter}`);
-        cy.contains(customers[1].name)
+          .type(`${suppliers[0].name}{enter}`);
+        cy.contains(suppliers[1].name)
           .should('not.exist');
 
         // Clear the search filter
-        cy.contains('Customer Name')
+        cy.contains('Supplier Name')
           .siblings()
           .eq(0)
           .click();
@@ -463,7 +463,7 @@ describe('Customer Flow', () => {
           .click();
 
         // Table should have search filter cleared
-        cy.contains(customers[1].name);
+        cy.contains(suppliers[1].name);
 
         // Table should be at first page
         cy.get('.ant-pagination-item-active')
@@ -476,33 +476,33 @@ describe('Customer Flow', () => {
      * Navigation
      * ----------
      */
-    it(`For user with CUSTOMER_READ perms, clicking on page 
-        header back button in customer details page should bring 
-        user back to the all customers page`, () => {
+    it(`For user with SUPPLIER_READ perms, clicking on page 
+        header back button in supplier details page should bring 
+        user back to the all suppliers page`, () => {
         loginAsUserRead();
 
-        // Navigate to All Customers Page
-        cy.visit(CONFIG.CUSTOMER_URL);
+        // Navigate to All Suppliers Page
+        cy.visit(CONFIG.SUPPLIER_URL);
 
-        // Navigate to Customer Details Page
+        // Navigate to Supplier Details Page
         cy.contains('view').click();
 
         // Click on Page Header back button
         cy.get('.ant-page-header-back-button').click();
-        cy.location('pathname').should('eq', CONFIG.CUSTOMER_URL);
+        cy.location('pathname').should('eq', CONFIG.SUPPLIER_URL);
     })
 
-    it(`For user with CUSTOMER_WRITE perms, clicking on cancel 
-        button in add customer page should bring user back to
-        the all customers page`, () => {
+    it(`For user with SUPPLIER_WRITE perms, clicking on cancel 
+        button in add supplier page should bring user back to
+        the all suppliers page`, () => {
         loginAsUserReadWrite();
 
-        // Navigate to Add Customer Page
-        cy.visit(`${CONFIG.CUSTOMER_URL}add`);
+        // Navigate to Add Supplier Page
+        cy.visit(`${CONFIG.SUPPLIER_URL}add`);
 
         // Click on Cancel Button
         cy.contains('Cancel').click();
-        cy.location('pathname').should('eq', CONFIG.CUSTOMER_URL);
+        cy.location('pathname').should('eq', CONFIG.SUPPLIER_URL);
     })
 
 })

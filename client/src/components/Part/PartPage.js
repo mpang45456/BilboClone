@@ -216,7 +216,8 @@ function PartList(props) {
             key: 'additionalInfo',
             width: '20%',
             ...BilboSearchTable.getColumnSearchProps('additionalInfo', 
-                                                     APIFilterQuery, setAPIFilterQuery)
+                                                     APIFilterQuery, setAPIFilterQuery,
+                                                     'info')
         },
         {
             title: 'Action',
