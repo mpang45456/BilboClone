@@ -5,6 +5,7 @@ import { bax, redirectToErrorPage } from '../../../context/AuthContext';
 import CONFIG from '../../../config';
 import { BilboSearchTable, BilboNavLink } from '../../UtilComponents';
 import queryString from 'query-string';
+import { escapeRegex } from '../../../utils';
 import PropTypes from 'prop-types';
 
 /**
@@ -35,15 +36,21 @@ function SupplierSpecificPartsList(props) {
                                                   pageSize: CONFIG.DEFAULT_PAGE_SIZE})
 
     // State for Filter Queries
-    const [partNumberFilterQuery, setPartNumberFilterQuery] = useState('');
-    const [descriptionFilterQuery, setDescriptionFilterQuery] = useState('');
-    const [statusFilterQuery, setStatusFilterQuery] = useState('');
-    const [additionalInfoFilterQuery, setAdditionalInfoFilterQuery] = useState('');
+    const [APIFilterQuery, setAPIFilterQuery] = useState({
+        partNumber: '',
+        description: '',
+        status: '',
+        additionalInfo: ''
+    })
     const history = useHistory();
 
     useEffect(() => {
-        getPartsData(pagination);
-    }, [partNumberFilterQuery, descriptionFilterQuery, statusFilterQuery, additionalInfoFilterQuery])
+        getPartsData({
+            // When a new search filter is used, go back to the first page
+            current: 1,
+            pageSize: pagination.pageSize,
+        });
+    }, [APIFilterQuery])
 
     // Only makes an API call when the table's pagination settings change
     const handleTableChange = (tablePagination, filters, sorter) => {
@@ -62,10 +69,10 @@ function SupplierSpecificPartsList(props) {
         // Send filter in query string
         let filter = JSON.stringify({
             "supplier": props.supplierID,
-            "partNumber": { "$regex": partNumberFilterQuery, "$options": "i"},
-            "description": { "$regex": descriptionFilterQuery, "$options": "i"},
-            "status": { "$regex": statusFilterQuery, "$options": "i"},
-            "additionalInfo": { "$regex": additionalInfoFilterQuery, "$options": "i"},
+            "partNumber": { "$regex": escapeRegex(APIFilterQuery.partNumber), "$options": "i"},
+            "description": { "$regex": escapeRegex(APIFilterQuery.description), "$options": "i"},
+            "status": { "$regex": escapeRegex(APIFilterQuery.status), "$options": "i"},
+            "additionalInfo": { "$regex": escapeRegex(APIFilterQuery.additionalInfo), "$options": "i"},
         });
         let query = queryString.stringify({page: pagination.current, 
                                            limit: pagination.pageSize, 
@@ -98,7 +105,9 @@ function SupplierSpecificPartsList(props) {
             dataIndex: 'partNumber',
             key: 'partNumber',
             width: '15%',
-            ...BilboSearchTable.getColumnSearchProps('partNumber', partNumberFilterQuery, setPartNumberFilterQuery)
+            ...BilboSearchTable.getColumnSearchProps('partNumber', 
+                                                     APIFilterQuery, setAPIFilterQuery,
+                                                     'part number')
         },
         {
             title: 'Latest Unit Price ($)',
@@ -117,21 +126,25 @@ function SupplierSpecificPartsList(props) {
             dataIndex: 'description',
             key: 'description',
             width: '20%',
-            ...BilboSearchTable.getColumnSearchProps('description', descriptionFilterQuery, setDescriptionFilterQuery)
+            ...BilboSearchTable.getColumnSearchProps('description', 
+                                                     APIFilterQuery, setAPIFilterQuery)
         },
         {
             title: 'Additional Information',
             dataIndex: 'additionalInfo',
             key: 'additionalInfo',
             width: '25%',
-            ...BilboSearchTable.getColumnSearchProps('additionalInfo', additionalInfoFilterQuery, setAdditionalInfoFilterQuery)
+            ...BilboSearchTable.getColumnSearchProps('additionalInfo',
+                                                     APIFilterQuery, setAPIFilterQuery,
+                                                     'info')
         },
         {
             title: 'Status',
             dataIndex: 'status',
             key: 'status',
             width: '10%',
-            ...BilboSearchTable.getColumnSearchProps('status', statusFilterQuery, setStatusFilterQuery),
+            ...BilboSearchTable.getColumnSearchProps('status', 
+                                                     APIFilterQuery, setAPIFilterQuery),
             render: status => (
                 <Tag color={status==='ACTIVE' ? CONFIG.ACTIVE_TAG_COLOR : CONFIG.ARCHIVED_TAG_COLOR} key={status}>
                     {status.toUpperCase()}
