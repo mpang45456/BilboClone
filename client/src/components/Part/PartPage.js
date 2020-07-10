@@ -175,7 +175,8 @@ function PartList(props) {
             key: 'partNumber',
             width: '15%',
             ...BilboSearchTable.getColumnSearchProps('partNumber', 
-                                                     APIFilterQuery, setAPIFilterQuery)
+                                                     APIFilterQuery, setAPIFilterQuery,
+                                                     'part number')
         },
         {
             title: 'Latest Unit Price ($)',
