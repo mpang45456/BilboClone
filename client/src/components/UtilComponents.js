@@ -114,12 +114,24 @@ export const BilboDivider = styled(Divider)`
 
 // Utilities associated with a Search Table
 export const BilboSearchTable = {
-    getColumnSearchProps: (dataIndex, APIFilterQuery, setAPIFilterQuery) => {
+    /**
+     * Populates the props required for search
+     * functionality in a column in a <Table />
+     */
+    getColumnSearchProps: (dataIndex, 
+                           APIFilterQuery, setAPIFilterQuery) => {
         // To obtain a reference to the <Input /> and `select` when the dropdown appears
         let inputNode = null;
 
         // Boolean to determine if the column is being filtered via search terms
         let isBeingFilered = false;
+
+        const updateAPIFilterQuery = (val) => {
+            setAPIFilterQuery({
+                ...APIFilterQuery,
+                [dataIndex]: val,
+            });
+        }
 
         return {
             /**
@@ -129,13 +141,17 @@ export const BilboSearchTable = {
              * 
              * Note: `selectedKeys` and setSelectedKeys` are only
              * used internally by the dropdown. To actually
-             * change the filer value, call `setAPIFilterQuery` 
-             * with the new filter value. 
+             * change the filer value, call `updateAPIFilterQuery` 
+             * with the new filter value, which sets the new
+             * value for the `dataIndex` key in `APIFilterQuery`.
+             * Remember that APIFilterQuery is an object, not 
+             * a string (as in previous iterations).
              * 
              * Note: The code in this function will only
-             * call `setAPIFilterQuery`, but it is up 
-             * to the parent component to decide what to
-             * do when the `APIFilterQuery` has been set.
+             * call `updateAPIFilterQuery`, which in turn
+             * calls `setAPIFilterQuery` to set the state, but 
+             * it is up to the parent component to decide what
+             * to do when the `APIFilterQuery` has been set.
              * Typically, `useEffect()` should be applied
              * whenever the `APIFilterQuery` changes value.
              * 
@@ -162,7 +178,7 @@ export const BilboSearchTable = {
                                 confirm();
                                 // ternary expression ensures that selected keys is always defined
                                 // regardless of when async call to `setSelectedKeys` completes
-                                setAPIFilterQuery(selectedKeys[0] ? selectedKeys[0]: '');
+                                updateAPIFilterQuery(selectedKeys[0] ? selectedKeys[0]: '');
                             }}
                             style={{width: 200, marginBottom: 5, display: 'block'}}
                         />
@@ -171,7 +187,7 @@ export const BilboSearchTable = {
                                     confirm();
                                     // ternary expression ensures that selected keys is always defined
                                     // regardless of when async call to `setSelectedKeys` completes
-                                    setAPIFilterQuery(selectedKeys[0] ? selectedKeys[0]: '');
+                                    updateAPIFilterQuery(selectedKeys[0] ? selectedKeys[0]: '');
                                 }}
                                 icon={<SearchOutlined />}
                                 style={{width: 100, marginRight: 5}}
@@ -181,7 +197,7 @@ export const BilboSearchTable = {
                         <Button onClick={() => {
                                     clearFilters();
                                     setSelectedKeys(['']);
-                                    setAPIFilterQuery('');
+                                    updateAPIFilterQuery('');
                                 }}
                                 style={{width: 95}}
                                 size='small'>
@@ -211,7 +227,7 @@ export const BilboSearchTable = {
                 if (isBeingFilered) {
                     return (
                         <Highlighter highlightStyle={{ backgroundColor: theme.colors.highlighterYellow, padding: 0 }}
-                                     searchWords={[APIFilterQuery]}
+                                     searchWords={[APIFilterQuery[dataIndex]]}
                                      autoEscape
                                      textToHighlight={text.toString()}/>
                     )

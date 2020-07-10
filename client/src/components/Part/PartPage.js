@@ -10,6 +10,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import PropTypes from 'prop-types';
 import { bax, useAuth, PERMS, redirectToErrorPage } from '../../context/AuthContext';
 import CONFIG from '../../config';
+import { escapeRegex } from '../../utils';
 import queryString from 'query-string';
 
 /**
@@ -95,19 +96,22 @@ function PartList(props) {
     const [pagination, setPagination] = useState({current: 1, 
                                                   pageSize: CONFIG.DEFAULT_PAGE_SIZE})
 
-    // State for Filter Queries
-    const [partNumberFilterQuery, setPartNumberFilterQuery] = useState('');
-    const [descriptionFilterQuery, setDescriptionFilterQuery] = useState('');
-    const [statusFilterQuery, setStatusFilterQuery] = useState('');
-    const [additionalInfoFilterQuery, setAdditionalInfoFilterQuery] = useState('');
+    // State for Filter Queries (Searchable in Table)
+    const [APIFilterQuery, setAPIFilterQuery] = useState({
+        partNumber: '',
+        description: '',
+        status: '',
+        additionalInfo: '',
+    });
     const history = useHistory();
 
     useEffect(() => {
-        getPartData(pagination);
-    }, [partNumberFilterQuery, 
-        descriptionFilterQuery, 
-        statusFilterQuery, 
-        additionalInfoFilterQuery]);
+        getPartData({
+            // When a new search filter is used, go back to the first page
+            current: 1,
+            pageSize: pagination.pageSize,
+        });
+    }, [APIFilterQuery]);
 
     // Only makes an API call when the table's pagination settings change
     const handleTableChange = (tablePagination, filters, sorter) => {
@@ -125,10 +129,10 @@ function PartList(props) {
         setIsLoading(true);
         // Send filter in query string
         let filter = JSON.stringify({
-            "partNumber": { "$regex": partNumberFilterQuery, "$options": "i"},
-            "description": { "$regex": descriptionFilterQuery, "$options": "i"},
-            "status": { "$regex": statusFilterQuery, "$options": "i"},
-            "additionalInfo": { "$regex": additionalInfoFilterQuery, "$options": "i"},
+            "partNumber": { "$regex": escapeRegex(APIFilterQuery.partNumber), "$options": "i"},
+            "description": { "$regex": escapeRegex(APIFilterQuery.description), "$options": "i"},
+            "status": { "$regex": escapeRegex(APIFilterQuery.status), "$options": "i"},
+            "additionalInfo": { "$regex": escapeRegex(APIFilterQuery.additionalInfo), "$options": "i"},
         });
         let query = queryString.stringify({page: pagination.current, 
                                            limit: pagination.pageSize,
@@ -170,7 +174,8 @@ function PartList(props) {
             dataIndex: 'partNumber',
             key: 'partNumber',
             width: '15%',
-            ...BilboSearchTable.getColumnSearchProps('partNumber', partNumberFilterQuery, setPartNumberFilterQuery)
+            ...BilboSearchTable.getColumnSearchProps('partNumber', 
+                                                     APIFilterQuery, setAPIFilterQuery)
         },
         {
             title: 'Latest Unit Price ($)',
@@ -189,14 +194,16 @@ function PartList(props) {
             dataIndex: 'description',
             key: 'description',
             width: '20%',
-            ...BilboSearchTable.getColumnSearchProps('description', descriptionFilterQuery, setDescriptionFilterQuery)
+            ...BilboSearchTable.getColumnSearchProps('description',
+                                                     APIFilterQuery, setAPIFilterQuery)
         },
         {
             title: 'Status',
             dataIndex: 'status',
             key: 'status',
             width: '10%',
-            ...BilboSearchTable.getColumnSearchProps('status', statusFilterQuery, setStatusFilterQuery),
+            ...BilboSearchTable.getColumnSearchProps('status',
+                                                     APIFilterQuery, setAPIFilterQuery),
             render: status => (
                 <Tag color={status==='ACTIVE' ? CONFIG.ACTIVE_TAG_COLOR : CONFIG.ARCHIVED_TAG_COLOR} key={status}>
                     {status.toUpperCase()}
@@ -208,7 +215,8 @@ function PartList(props) {
             dataIndex: 'additionalInfo',
             key: 'additionalInfo',
             width: '20%',
-            ...BilboSearchTable.getColumnSearchProps('additionalInfo', additionalInfoFilterQuery, setAdditionalInfoFilterQuery)
+            ...BilboSearchTable.getColumnSearchProps('additionalInfo', 
+                                                     APIFilterQuery, setAPIFilterQuery)
         },
         {
             title: 'Action',
