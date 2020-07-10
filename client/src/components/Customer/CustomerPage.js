@@ -177,7 +177,8 @@ function CustomerList(props) {
             key: 'additionalInfo',
             width: '30%',
             ...BilboSearchTable.getColumnSearchProps('additionalInfo', 
-                                                     APIFilterQuery, setAPIFilterQuery)
+                                                     APIFilterQuery, setAPIFilterQuery,
+                                                     'info')
         },
         {
             title: 'Action',

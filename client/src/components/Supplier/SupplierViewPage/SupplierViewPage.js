@@ -149,7 +149,7 @@ function DeleteSupplierShowMoreButton(props) {
                     bax.delete(`/api/v1/supplier/${props.supplierID}`)
                         .then(res => {
                             if (res.status === 200) {
-                                message.success('Successfully deleted supplier');
+                                message.success('Successfully deleted supplier!');
                                 history.push(CONFIG.SUPPLIER_URL);
                             }
                         }).catch(err => {

@@ -117,9 +117,17 @@ export const BilboSearchTable = {
     /**
      * Populates the props required for search
      * functionality in a column in a <Table />
+     * 
+     * @param {String} dataIndex: specifies the key in the `APIFilterQuery`
+     * @param {object} APIFilterQuery: React State (sent as filter query in API call)
+     * @param {function} setAPIFilterQuery: sets `APIFilterQuery`
+     * @param {String} inputPlaceholder: optional field. If specified, determines the 
+     *                                   placeholder in the <Input />, otherwise, placeholder
+     *                                   defaults to `dataIndex`
      */
     getColumnSearchProps: (dataIndex, 
-                           APIFilterQuery, setAPIFilterQuery) => {
+                           APIFilterQuery, setAPIFilterQuery,
+                           inputPlaceholder) => {
         // To obtain a reference to the <Input /> and `select` when the dropdown appears
         let inputNode = null;
 
@@ -166,7 +174,7 @@ export const BilboSearchTable = {
             filterDropdown: ({setSelectedKeys, selectedKeys, confirm, clearFilters}) => {
                 return (
                     <div style={{padding: 5}}>
-                        <Input placeholder={`Search ${dataIndex}`}
+                        <Input placeholder={`Search ${inputPlaceholder ? inputPlaceholder : dataIndex}`}
                             ref={node => { inputNode = node; }}
                             value={selectedKeys[0]}
                             onChange={e => {

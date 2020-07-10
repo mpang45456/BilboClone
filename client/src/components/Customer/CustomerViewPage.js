@@ -156,7 +156,7 @@ function DeleteCustomerShowMoreButton(props) {
                     bax.delete(`/api/v1/customer/${props.customerID}`)
                         .then(res => {
                             if (res.status === 200) {
-                                message.success('Successfully deleted customer');
+                                message.success('Successfully deleted customer!');
                                 history.push(CONFIG.CUSTOMER_URL);
                             }
                         }).catch(err => {

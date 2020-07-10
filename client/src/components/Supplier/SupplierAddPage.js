@@ -51,7 +51,7 @@ export default function SupplierAddPage(props) {
         bax.post('/api/v1/supplier', values)
             .then(res => {
                 setIsSubmitting(false);
-                message.success('Successfully created new supplier');
+                message.success('Successfully created new supplier!');
                 history.push(CONFIG.SUPPLIER_URL);
             }).catch(err => {
                 setIsSubmitting(false);

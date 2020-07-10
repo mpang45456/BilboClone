@@ -59,6 +59,7 @@ There are 3 main testing strategies used in Bilbo:
     clear the database's collections before/after each test.
     - Can run concurrently with dev server (because of different port
     number: 8002)
+    - To run a specific test file: `npm run test-server -- -i <file_name>`
 3. End-To-End Testing
     - This uses Cypress and is meant to test application flows
     - 3 commands must be run to get this started:
@@ -80,20 +81,19 @@ There are 3 main testing strategies used in Bilbo:
 
 Note:
 For both Server-Side Testing and End-To-End Testing, the PORT number and
-NODE_ENV and explicitly set in the npm script. 
+NODE_ENV are explicitly set in the npm script. 
 
 The PORT number is unique (different from the dev server's PORT number), 
 so tests and the dev server can run concurrently. The NODE_ENV is set to
 `test` to ensure that any database changes will not affect data for `dev`.
-An exception is made for End-To-End tests, since the React App contacts
-the server on port 3000 (so End-To-End tests cannot run concurrently
-with the dev server).
 
 # Development
 ## Client-Side Development
-1. Start Dev Server
+1. Start MongoDB
+    - `npm run mongod`
+2. Start Dev Server
     - `npm run start-dev`
-2. Start Webpack Dev Server (updates React SPA dynamically)
+3. Start Webpack Dev Server (updates React SPA dynamically)
     - `npm run react-start`. The `devServer` settings in
     `webpack.config.js` proxy any calls to `/api` to `localhost:3000`
 
@@ -124,6 +124,7 @@ to work
 `RESET_DB`: Specifies whether or not to reset the database
 `NODE_ENV`: Specifies the node environment, which in turn determines which database to connect to (i.e. the `dev`, `test` and eventually, `prod` databases
 are all siloed)
+`LOG_LEVEL`: Specifies the logging level for `pino` loggger. See `server/utils.js`
 
 ## Specific to `cypress:reset_db`
 `RESET_DB_ALL`: Resets all collections in the `test` database (because `NODE_ENV` is set to `test` in the npm script, see `package.json`)

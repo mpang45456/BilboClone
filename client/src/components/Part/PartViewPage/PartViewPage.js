@@ -187,7 +187,7 @@ function DeletePartShowMoreButton(props) {
                     bax.delete(`/api/v1/part/${props.partID}`)
                         .then(res => {
                             if (res.status === 200) {
-                                message.success('Successfully deleted part');
+                                message.success('Successfully deleted part!');
                                 history.push(CONFIG.PARTS_URL);
                             }
                         }).catch(err => {

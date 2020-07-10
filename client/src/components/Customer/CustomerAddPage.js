@@ -52,7 +52,7 @@ export default function CustomerAddPage(props) {
         bax.post('/api/v1/customer', values)
             .then(res => {
                 setIsSubmitting(false);
-                message.success('Successfully created new customer');
+                message.success('Successfully created new customer!');
                 history.push(CONFIG.CUSTOMER_URL);
             }).catch(err => {
                 setIsSubmitting(false);
