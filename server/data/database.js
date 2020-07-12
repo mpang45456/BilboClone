@@ -100,6 +100,80 @@ const CustomerSchema = new Schema({
 
 const CustomerModel = mongoose.model('Customer', CustomerSchema);
 
+/**
+ * ------------------
+ * SALES ORDER SCHEMA
+ * ------------------
+ * 
+ * // TODO: Update docs on how SalesOrderSchema uses populate,
+ * but the rest are just subdocuments
+ */
+const SalesOrderPartFulfillmentSchema = new Schema({
+    purchaseOrder: { type: Schema.Types.ObjectId, 
+                     ref: 'PurchaseOrder', 
+                     required: true }, //TODO: Make PurchaseOrder 
+    quantity: { type: Number, required: true }
+})
+const SalesOrderPartInfoSchema = new Schema({
+    part: { type: Schema.Types.ObjectId, 
+            ref: 'Part', 
+            required: true},
+    quantity: { type: Number, required: true },
+    additionalInfo: { type: String, default: true },
+    fulfilledBy: [SalesOrderPartFulfillmentSchema]
+})
+const SalesOrderStateSchema = new Schema({
+    status: { type: String, required: true }, // TODO: Make this an enum
+    additionalInfo: { type: String, default: '' },
+    parts: [SalesOrderPartInfoSchema]
+}, { timestamps: true })
+
+const SalesOrderSchema = new Schema({
+    createdBy: { type: String, required: true, index: true },
+    latestStatus: { type: String, required: true }, // TODO: Make this an enum
+    customer: { type: Schema.Types.ObjectId, ref: 'Customer', required: true },
+    additionalInfo: { type: String, default: '' },
+    orders: [{ type: Schema.Types.ObjectId, ref: 'SalesOrderState' }]
+}, { timestamps: true })
+
+const SalesOrderStateModel = mongoose.model('SalesOrderState', SalesOrderStateSchema);
+const SalesOrderModel = mongoose.model('SalesOrder', SalesOrderSchema);
+
+/**
+ * ---------------------
+ * PURCHASE ORDER SCHEMA
+ * ---------------------
+ */
+const PurchaseOrderPartFulfillmentSchema = new Schema({
+    salesOrder: { type: Schema.Types.ObjectId,
+                  ref: 'SalesOrder', 
+                  required: true },
+    quantity: { type: Number, required: true }
+})
+const PurchaseOrderPartInfoSchema = new Schema({
+    part: { type: Schema.Types.ObjectId,
+            ref: 'Part',
+            required: true },
+    quantity: { type: Number, required: true },
+    additionalInfo: { type: String, default: true },
+    fulfilledFor: [PurchaseOrderPartFulfillmentSchema]
+})
+const PurchaseOrderStateSchema = new Schema({
+    status: { type: String, required: true }, // TODO: Make this an enum
+    additionalInfo: { type: String, default: '' },
+    parts: [PurchaseOrderPartInfoSchema]
+}, { timestamps: true })
+const PurchaseOrderSchema = new Schema({
+    createdBy: { type: String, required: true, index: true },
+    latestStatus: { type: String, required: true }, // TODO: Make this an enum
+    supplier: { type: Schema.Types.ObjectId, ref: 'Supplier', required: true },
+    additionalInfo: { type: String, default: '' },
+    orders: [{ type: Schema.Types.ObjectId, ref: 'PurchaseOrderState' }]
+}, { timestamps: true })
+
+const PurchaseOrderStateModel = mongoose.model('PurchaseOrderState', PurchaseOrderStateSchema);
+const PurchaseOrderModel = mongoose.model('PurchaseOrder', PurchaseOrderSchema);
+
 /*
 This code uses the `export model pattern`, as per the Mongoose docs. 
 This is acceptable as long as the code uses one connection (in this
@@ -112,4 +186,8 @@ module.exports = {
     SupplierModel,
     PartModel,
     CustomerModel,
+    SalesOrderStateModel,
+    SalesOrderModel,
+    PurchaseOrderStateModel, 
+    PurchaseOrderModel,
 }
