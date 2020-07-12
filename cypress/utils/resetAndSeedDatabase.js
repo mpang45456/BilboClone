@@ -1,6 +1,9 @@
 const { DatabaseInteractor } = require('../../server/data/DatabaseInteractor');
-const { UserModel } = require('../../server/data/database');
-const { users } = require('../../server/data/databaseBootstrap');
+const { UserModel, 
+        PartModel, 
+        SupplierModel, 
+        CustomerModel } = require('../../server/data/database');
+const { users, suppliers, customers } = require('../../server/data/databaseBootstrap');
 
 /*
 The following code is required because Cypress does not support
@@ -16,6 +19,8 @@ npm scripts.
 For example: 
 RESET_DB_ALL=true npm run cypress:reset_db
 RESET_DB_USERS=true npm run cypress:reset_db
+RESET_DB_SUPPLIERS_AND_PARTS=true npm run cypress:reset_db
+RESET_DB_CUSTOMERS=true npm run cypress:reset_db
 
 Note: If RESET_DB_ALL is `true`, there is no need to specify
 the other environment variables
@@ -32,6 +37,19 @@ const dbi = new DatabaseInteractor();
             console.warn('Resetting users collection');
             await dbi.clearModelData(UserModel);
             await dbi.addUsers(...users);
+        }
+
+        if (process.env.RESET_DB_SUPPLIERS_AND_PARTS === 'true') {
+            console.warn('Resetting suppliers and parts collections');
+            await dbi.clearModelData(SupplierModel);
+            await dbi.clearModelData(PartModel);
+            await dbi.addSuppliersAndParts(...suppliers);
+        }
+
+        if (process.env.RESET_DB_CUSTOMERS === 'true') {
+            console.warn('Resetting customers collection');
+            await dbi.clearModelData(CustomerModel);
+            await dbi.addCustomers(...customers);
         }
 
         await dbi.closeConnection();

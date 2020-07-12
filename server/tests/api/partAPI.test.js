@@ -386,8 +386,14 @@ describe('Testing /api/v1/part endpoint', () => {
 
     it(`GET /:partObjID: User with PART_READ perm should
         not be able to access an invalid partObjID`, async (done) => {
+        // Invalid ObjID (valid for another collection)
         await authenticatedAdminAgent
                 .get(`${partEndpoint}/${supplierObjID}`)
+                .expect(400)
+
+        // Invalid ObjID (wrong format)
+        await authenticatedAdminAgent
+                .get(`${partEndpoint}/123`)
                 .expect(400)
 
         done();
@@ -446,7 +452,7 @@ describe('Testing /api/v1/part endpoint', () => {
         not be able to access the endpoint and retrieve
         part data`, async (done) => {
         await authenticatedUnauthorizedAgent
-                .get(`${partEndpoint}/partObjID`)
+                .get(`${partEndpoint}/${partObjID}`)
                 .expect(403)
         
         done();
@@ -808,13 +814,11 @@ describe('Testing /api/v1/part endpoint', () => {
         // With PART_READ perm
         await authenticatedReadAgent
                 .delete(`${partEndpoint}/${partObjID}`)
-                .send(newPartWithPrice)
                 .expect(403);
 
         // With neither PART_READ nor PART_WRITE perm
         await authenticatedUnauthorizedAgent
                 .delete(`${partEndpoint}/${partObjID}`)
-                .send(newPartWithPrice)
                 .expect(403);
 
         done();

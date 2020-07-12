@@ -9,23 +9,24 @@ import { BilboPageHeader, BilboDivider } from '../UtilComponents';
 import CONFIG from '../../config';
 
 /**
- * Component for adding a supplier.
+ * Component for adding a customer.
  * 
  * No client-side validation is performed 
  * (except for checking for presence of the 
- * `name` field, because it is a required field.
- * All other fields are optional).
+ * `name` and `pointOfContact` fields, because 
+ * they are required fields. All other fields 
+ * are optional).
  * 
  * Note: Because the `name` field must be unique, 
  * the error message from the API call is checked
- * for any indication of a duplicate supplier error,
+ * for any indication of a duplicate customer error,
  * in which case, a help/error message is indicated
- * in the supplier name's <Input />.
+ * in the customer name's <Input />.
  */
-export default function SupplierAddPage(props) {
+export default function CustomerAddPage(props) {
     // Check for authorization, otherwise redirect
     const { permissionsList } = useAuth();
-    if (!permissionsList.includes(PERMS.SUPPLIER_WRITE)) {
+    if (!permissionsList.includes(PERMS.CUSTOMER_WRITE)) {
         return <Redirect to={CONFIG.ERROR_403_URL}/>
     }
     
@@ -39,25 +40,25 @@ export default function SupplierAddPage(props) {
     // Resets name error message and validation status
     // everytime the user types in the name <Input />
     // Ensures that error message is only displayed when
-    // duplicate supplier name error is first detected.
+    // duplicate customer name error is first detected.
     const nameOnChange = (e) => {
         setNameValidationStatus('');
         setNameErrorMsg(undefined);
     }
 
     // Handler when submit button is clicked on
-    const tryCreateNewSupplier = (values) => {
+    const tryCreateNewCustomer = (values) => {
         setIsSubmitting(true);
-        bax.post('/api/v1/supplier', values)
+        bax.post('/api/v1/customer', values)
             .then(res => {
                 setIsSubmitting(false);
-                message.success('Successfully created new supplier!');
-                history.push(CONFIG.SUPPLIER_URL);
+                message.success('Successfully created new customer!');
+                history.push(CONFIG.CUSTOMER_URL);
             }).catch(err => {
                 setIsSubmitting(false);
-                if (err.response.data === 'Duplicate Supplier Name') {
+                if (err.response.data === 'Duplicate Customer Name') {
                     setNameValidationStatus('error');
-                    setNameErrorMsg('A supplier of the same name already exists');
+                    setNameErrorMsg('A customer of the same name already exists');
                 } else {
                     redirectToErrorPage(err, history);
                 }
@@ -66,7 +67,7 @@ export default function SupplierAddPage(props) {
 
     // Handler when cancel button is clicked
     const clickCancelButton = () => {
-        history.push(CONFIG.SUPPLIER_URL);
+        history.push(CONFIG.CUSTOMER_URL);
     }
     
     // Layout of <Form> 
@@ -77,18 +78,18 @@ export default function SupplierAddPage(props) {
     return (
         <div>
             <BilboPageHeader 
-                title='Add a New Supplier'
-                onBack={() => history.push(CONFIG.SUPPLIER_URL)}
+                title='Add a New Customer'
+                onBack={() => history.push(CONFIG.CUSTOMER_URL)}
             />
             <BilboDivider />
 
             <Spin spinning={isSubmitting}>
-                <Form name='createNewSupplierForm' 
-                      onFinish={tryCreateNewSupplier}
+                <Form name='createNewCustomerForm' 
+                      onFinish={tryCreateNewCustomer}
                       {...formItemLayout} >
                     <Form.Item name='name' 
-                               label='Supplier Name'
-                               rules={[{ required: true, message: "Please input supplier's name!" }]}
+                               label='Customer Name'
+                               rules={[{ required: true, message: "Please input customer's name!" }]}
                                hasFeedback
                                validateStatus={nameValidationStatus}
                                help={nameErrorMsg}>
@@ -107,6 +108,17 @@ export default function SupplierAddPage(props) {
 
                     <Form.Item name='fax' 
                                label='Fax' >
+                        <Input />
+                    </Form.Item>
+
+                    <Form.Item name='email' 
+                               label='Email' >
+                        <Input />
+                    </Form.Item>
+
+                    <Form.Item name='pointOfContact' 
+                               rules={[{ required: true, message: "Please input name of point of contact with customer!" }]}
+                               label='Point Of Contact' >
                         <Input />
                     </Form.Item>
 
@@ -131,7 +143,7 @@ export default function SupplierAddPage(props) {
         </div>
     )
 }
-SupplierAddPage.propTypes = {
+CustomerAddPage.propTypes = {
     match: PropTypes.object.isRequired,
     location: PropTypes.object.isRequired
 }

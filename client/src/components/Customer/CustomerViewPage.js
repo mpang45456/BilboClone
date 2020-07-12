@@ -3,48 +3,43 @@ import { useHistory } from 'react-router-dom';
 import { Spin, Descriptions, Modal, Menu, message } from 'antd';
 const { confirm } = Modal;
 import { DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
-import { bax, useAuth, redirectToErrorPage, PERMS } from '../../../context/AuthContext';
-import CONFIG from '../../../config';
+import { bax, useAuth, redirectToErrorPage, PERMS } from '../../context/AuthContext';
+import CONFIG from '../../config';
 import { BilboDescriptions, 
          BilboPageHeader, 
          BilboDivider, 
          EditableItem, 
-         ShowMoreButton } from '../../UtilComponents';
-import SupplierViewPageTabs from './SupplierViewPageTabs';
+         ShowMoreButton } from '../UtilComponents';
 import PropTypes from 'prop-types';
 
 /**
  * React Component for the View Page
- * of a single Supplier. 
+ * of a single Customer. 
  * 
  * Composed of 3 main parts:
  * 1. Header
  *    - Title
- *    - ShowMoreButton (Delete Supplier)
- * 2. Supplier Descriptions
+ *    - ShowMoreButton (Delete Customer)
+ * 2. Customer Descriptions
  *    - Contains <EditableItem />s
- * 3. Tabs (<SupplierViewPageTabs />)
- *    - Parts Tab Pane (all parts associated
- *      with this particular supplier)
- *    - Purchase Orders Pane (all purchase
- *      orders associated with this particular
- *      supplier)
+ * 3. Associated Sales Orders
+ *    - //TODO: To Be Implemented
  */
-export default function SupplierViewPage(props) {
+export default function CustomerViewPage(props) {
     const history = useHistory();
     const { permissionsList } = useAuth();
-    const [isLoadingSupplierDetails, setIsLoadingSupplierDetails] = useState(true);
-    const [supplier, setSupplier] = useState({});
+    const [isLoadingCustomerDetails, setIsLoadingCustomerDetails] = useState(true);
+    const [customer, setCustomer] = useState({});
 
     useEffect(() => {
-        bax.get(`/api/v1/supplier/${props.match.params.supplierID}`)
+        bax.get(`/api/v1/customer/${props.match.params.customerID}`)
             .then(res => {
                 if (res.status === 200) {
-                    setSupplier(res.data);
-                    setIsLoadingSupplierDetails(false);
+                    setCustomer(res.data);
+                    setIsLoadingCustomerDetails(false);
                 }
             }).catch(err => {
-                setIsLoadingSupplierDetails(false);
+                setIsLoadingCustomerDetails(false);
                 redirectToErrorPage(err, history);
             })
     }, [props.location])
@@ -54,27 +49,27 @@ export default function SupplierViewPage(props) {
     const updateField = (fieldName, newFieldValue) => {
         let patchBody = {};
         patchBody[fieldName] = newFieldValue;
-        return bax.patch(`/api/v1/supplier/${props.match.params.supplierID}`, patchBody)
+        return bax.patch(`/api/v1/customer/${props.match.params.customerID}`, patchBody)
                   .then(res => {
-                        return bax.get(`/api/v1/supplier/${props.match.params.supplierID}`);
+                        return bax.get(`/api/v1/customer/${props.match.params.customerID}`);
                   }).then(res => {
-                    setSupplier(res.data);
-                    message.success('Supplier Information successfully changed!');
+                    setCustomer(res.data);
+                    message.success('Customer Information successfully changed!');
                   })
     }
     
     // Editing Permission (for `showMoreButton` and the 
     // `EditableItem`s in `BilboDescriptions`)
-    const isEditingEnabled = permissionsList.includes(PERMS.SUPPLIER_WRITE);
+    const isEditingEnabled = permissionsList.includes(PERMS.CUSTOMER_WRITE);
     const title = (
         <div>
             <BilboPageHeader 
-                title='Supplier Details'
-                onBack={() => history.push(CONFIG.SUPPLIER_URL)}
+                title='Customer Details'
+                onBack={() => history.push(CONFIG.CUSTOMER_URL)}
                 extra={[
-                    <DeleteSupplierShowMoreButton 
-                        key='deleteSupplierShowMoreButton'
-                        supplierID={props.match.params.supplierID}
+                    <DeleteCustomerShowMoreButton 
+                        key='deleteCustomerShowMoreButton'
+                        customerID={props.match.params.customerID}
                         disabled={!isEditingEnabled}
                     />
                 ]}
@@ -84,36 +79,48 @@ export default function SupplierViewPage(props) {
     )
 
     // Note that all fields are editable except the 
-    // supplier's name
+    // customer's name
     return (
         <div>
-            <Spin spinning={isLoadingSupplierDetails}>
+            <Spin spinning={isLoadingCustomerDetails}>
                 <BilboDescriptions title={title}
                                    bordered
                                    column={1}>
-                    <Descriptions.Item label="Supplier Name">
-                        {supplier.name}
+                    <Descriptions.Item label="Customer Name">
+                        {customer.name}
                     </Descriptions.Item>
                     <Descriptions.Item label="Address" >
-                        <EditableItem value={supplier.address} 
+                        <EditableItem value={customer.address} 
                                       update={(newAddress) => updateField('address', newAddress)}
                                       itemType='input'
                                       isEditingEnabled={isEditingEnabled} />
                     </Descriptions.Item>
                     <Descriptions.Item label="Telephone" >
-                        <EditableItem value={supplier.telephone} 
+                        <EditableItem value={customer.telephone} 
                                       update={(newTelephone) => updateField('telephone', newTelephone)}
                                       itemType='input'
                                       isEditingEnabled={isEditingEnabled} />
                     </Descriptions.Item>
                     <Descriptions.Item label="Fax" >
-                        <EditableItem value={supplier.fax} 
+                        <EditableItem value={customer.fax} 
                                       update={(newFax) => updateField('fax', newFax)}
                                       itemType='input'
                                       isEditingEnabled={isEditingEnabled} />
                     </Descriptions.Item>
+                    <Descriptions.Item label="Email" >
+                        <EditableItem value={customer.email} 
+                                      update={(newEmail) => updateField('email', newEmail)}
+                                      itemType='input'
+                                      isEditingEnabled={isEditingEnabled} />
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Point Of Contact" >
+                        <EditableItem value={customer.pointOfContact} 
+                                      update={(newPointOfContact) => updateField('pointOfContact', newPointOfContact)}
+                                      itemType='input'
+                                      isEditingEnabled={isEditingEnabled} />
+                    </Descriptions.Item>
                     <Descriptions.Item label="Additional Information" >
-                        <EditableItem value={supplier.additionalInfo} 
+                        <EditableItem value={customer.additionalInfo} 
                                       update={(newAdditionalInfo) => updateField('additionalInfo', newAdditionalInfo)}
                                       itemType='textArea'
                                       isEditingEnabled={isEditingEnabled} />
@@ -123,34 +130,34 @@ export default function SupplierViewPage(props) {
 
             <BilboDivider />
 
-            <SupplierViewPageTabs supplierID={props.match.params.supplierID}/>
+            <SalesOrderSection />
         </div>
     );
 }
-SupplierViewPage.propTypes = {
+CustomerViewPage.propTypes = {
     match: PropTypes.object.isRequired,
     location: PropTypes.object.isRequired,
 }
 
 /**
- * Customised `showMoreButton` in `SupplierViewPage` header.
- * Dropdown has option to delete supplier.
+ * Customised `showMoreButton` in `CustomerViewPage` header.
+ * Dropdown has option to delete customer.
  */
-function DeleteSupplierShowMoreButton(props) {
+function DeleteCustomerShowMoreButton(props) {
     const history = useHistory();
 
     // Handler when Delete Button is clicked on (will display a modal)
     const buttonClicked = ({item, key, keyPath, domEvent}) => {
-        if (key === 'deleteSupplier') {
+        if (key === 'deleteCustomer') {
             confirm({
                 icon: <ExclamationCircleOutlined />,
-                content: 'Are you sure you wish to delete this supplier?',
+                content: 'Are you sure you wish to delete this customer?',
                 onOk: () => {
-                    bax.delete(`/api/v1/supplier/${props.supplierID}`)
+                    bax.delete(`/api/v1/customer/${props.customerID}`)
                         .then(res => {
                             if (res.status === 200) {
-                                message.success('Successfully deleted supplier!');
-                                history.push(CONFIG.SUPPLIER_URL);
+                                message.success('Successfully deleted customer!');
+                                history.push(CONFIG.CUSTOMER_URL);
                             }
                         }).catch(err => {
                             redirectToErrorPage(err, history);
@@ -164,22 +171,31 @@ function DeleteSupplierShowMoreButton(props) {
     const menu = (
         <Menu onClick={buttonClicked}>
             <Menu.Item 
-                key='deleteSupplier'
+                key='deleteCustomer'
                 icon={<DeleteOutlined/>}>
-                Delete Supplier
+                Delete Customer
             </Menu.Item>
         </Menu>
     )
     return (
         <ShowMoreButton 
-            dropdownKey='deleteSupplierShowMoreDropdown'
+            dropdownKey='deleteCustomerShowMoreDropdown'
             menu={menu}
             disabled={props.disabled}
         />
     )
 }
-DeleteSupplierShowMoreButton.propTypes = {
-    supplierID: PropTypes.string.isRequired,
+DeleteCustomerShowMoreButton.propTypes = {
+    customerID: PropTypes.string.isRequired,
     disabled: PropTypes.bool.isRequired
 }
 
+function SalesOrderSection(props) {
+    // TODO: To be Implemented
+    return (
+        <>
+            <h3>Sales Orders</h3>
+            <p>To Be Implemented</p>
+        </>
+    )
+}

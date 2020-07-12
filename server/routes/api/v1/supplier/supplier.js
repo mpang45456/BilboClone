@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 
 const logger = require('../../../../utils');
 const { SupplierModel, PartModel } = require('../../../../data/database');
@@ -122,6 +123,9 @@ router.get('/:supplierObjID',
         return res.status(200).json(supplier);
     } catch(err) {
         logger.error(`GET /supplier/:supplierObjID: Could not get supplier: ${err}`);
+        if (err instanceof mongoose.Error.CastError) {
+            return res.status(400).send('Invalid supplier ID');
+        }
         return res.sendStatus(500);
     }
 })

@@ -268,8 +268,14 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
 
     it(`GET /:supplierObjID: User with SUPPLIER_READ perm
         should not be able to access an invalid supplierObjID`, async (done) => {
+        // Invalid ObjID (valid for another collection)
         await authenticatedReadAgent
                 .get(`${supplierEndpoint}/${partObjID}`)
+                .expect(400);
+
+        // Invalid ObjID (wrong format)
+        await authenticatedReadAgent
+                .get(`${supplierEndpoint}/123`)
                 .expect(400);
         done();
     })
@@ -318,6 +324,27 @@ describe.only('Testing /api/v1/supplier endpoint', () => {
             .post(supplierEndpoint)
             .send(newSupplierWithoutName)
             .expect(400)
+        
+        done();
+    })
+
+    it(`POST /: User with SUPPLIER_WRITE perm should
+        not be able to create a new supplier if the supplier
+        has the same name as an existing supplier`, async (done) => {
+        // Create new supplier
+        await authenticatedAdminAgent
+            .post(supplierEndpoint)
+            .send(newSupplier)
+            .expect(200)
+
+        // Attempt to create the same supplier (same `name`)
+        await authenticatedAdminAgent
+            .post(supplierEndpoint)
+            .send(newSupplier)
+            .expect(400)
+            .expect(res => {
+                expect(res.text).toMatch(/Duplicate Supplier Name/i);
+            })
         
         done();
     })

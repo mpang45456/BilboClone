@@ -16,7 +16,9 @@ import SupplierPage from '../Supplier/SupplierPage';
 import SupplierViewPage from '../Supplier/SupplierViewPage/SupplierViewPage';
 import SupplierAddPage from '../Supplier/SupplierAddPage';
 import SettingsPage from '../SettingsPage';
-import CustomerPage from '../CustomerPage';
+import CustomerPage from '../Customer/CustomerPage';
+import CustomerViewPage from '../Customer/CustomerViewPage';
+import CustomerAddPage from '../Customer/CustomerAddPage';
 import UserPage from '../User/UserPage';
 import UserViewPage from '../User/UserViewPage';
 import UserEditPage from '../User/UserEditPage';
@@ -58,6 +60,8 @@ export default class AppScaffold extends React.Component {
               <Route path={`${CONFIG.SUPPLIER_URL}add`} component={SupplierAddPage} />
               <Route path={`${CONFIG.SUPPLIER_URL}/:supplierID`} component={SupplierViewPage} />
               <Route path={CONFIG.SUPPLIER_URL} component={SupplierPage} />
+              <Route path={`${CONFIG.CUSTOMER_URL}add`} component={CustomerAddPage} />
+              <Route path={`${CONFIG.CUSTOMER_URL}/:customerID`} component={CustomerViewPage} />
               <Route path={CONFIG.CUSTOMER_URL} component={CustomerPage} />
               <Route path={`${CONFIG.USER_URL}add`} component={UserAddPage} />
               <Route path={`${CONFIG.USER_URL}/:username/edit`} component={UserEditPage} />

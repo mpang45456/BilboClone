@@ -81,8 +81,24 @@ const SupplierSchema = new Schema({
 })
 
 const SupplierModel = mongoose.model('Supplier', SupplierSchema);
-// TODO: Update DatabaseInteractor and other db code with SupplierSchema
-// TODO: Trim the strings before saving
+
+// TODO: Update DatabaseInteractor and databaseBootstrap.js for CustomerSchema
+/**
+ * ---------------
+ * CUSTOMER SCHEMA
+ * ---------------
+ */
+const CustomerSchema = new Schema({
+    name: { type: String, required: true, unique: true, index: true },
+    address: { type: String, default: ''},
+    telephone: { type: String, default: ''},
+    fax: { type: String, default: '' },
+    email: { type: String, default: ''},
+    pointOfContact: { type: String, required: true },
+    additionalInfo: { type: String, default: ''}
+})
+
+const CustomerModel = mongoose.model('Customer', CustomerSchema);
 
 /*
 This code uses the `export model pattern`, as per the Mongoose docs. 
@@ -94,5 +110,6 @@ the schemas should be exported, not the models.
 module.exports = {
     UserModel,
     SupplierModel,
-    PartModel
+    PartModel,
+    CustomerModel,
 }

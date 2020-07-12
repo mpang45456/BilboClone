@@ -73,7 +73,7 @@ export default function PartAddPage(props) {
         bax.post('/api/v1/part', values)
             .then(res => {
                 setIsSubmitting(false);
-                message.success('Successfully created new part');
+                message.success('Successfully created new part!');
                 history.push(CONFIG.PARTS_URL);
             }).catch(err => {
                 setIsSubmitting(false);
