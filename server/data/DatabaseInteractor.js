@@ -5,9 +5,17 @@ const logger = require('../utils');
 const { UserModel, 
         PartModel, 
         SupplierModel, 
-        CustomerModel } = require('./database');
-const { users, suppliers, customers } = require('./databaseBootstrap');
+        CustomerModel,
+        SalesOrderStateModel,
+        SalesOrderModel,
+        PurchaseOrderStateModel,
+        PurchaseOrderModel } = require('./database');
+const { users, suppliers, customers, salesOrders } = require('./databaseBootstrap');
 
+// TODO: It is possible to get rid of import statements
+// in whatever class that uses `DatabaseInteractor` if 
+// the add methods use `this.seed<data>` instead
+// of relying on the function's input.
 /**
  * Wrapper class that encapsulates the logic
  * required to access and add new documents 
@@ -31,6 +39,7 @@ class DatabaseInteractor {
         this.seedUsers = users;
         this.seedSuppliersWithParts = suppliers;
         this.seedCustomers = customers;
+        this.seedSalesOrders = salesOrders;
     }
 
     /**
@@ -73,11 +82,16 @@ class DatabaseInteractor {
         await this.clearModelData(SupplierModel);
         await this.clearModelData(PartModel);
         await this.clearModelData(CustomerModel);
+        await this.clearModelData(SalesOrderStateModel);
+        await this.clearModelData(SalesOrderModel);
+        await this.clearModelData(PurchaseOrderStateModel);
+        await this.clearModelData(PurchaseOrderModel);
 
         // Add Model Data
         await this.addUsers(...this.seedUsers);
         await this.addSuppliersAndParts(...this.seedSuppliersWithParts);
         await this.addCustomers(...this.seedCustomers);
+        await this.addSalesOrders(...this.seedSalesOrders);
     }
 
     /**
@@ -160,7 +174,7 @@ class DatabaseInteractor {
      * @param  {...object} customers 
      */
     async addCustomers(...customers) {
-        for (let customer of this.seedCustomers) {
+        for (let customer of customers) {
             let customerDoc = CustomerModel({
                 name: customer.name, 
                 address: customer.address, 
@@ -171,6 +185,42 @@ class DatabaseInteractor {
                 additionalInfo: customer.additionalInfo
             })
             await customerDoc.save();
+        }
+    }
+
+    // TODO: Update docs
+    async addSalesOrders(...salesOrders) {
+        for (let salesOrder of salesOrders) {
+            const customerDoc = await CustomerModel.findOne({ name: salesOrder.customer });
+            const soDoc = SalesOrderModel({
+                createdBy: salesOrder.createdBy,
+                latestStatus: salesOrder.latestStatus,
+                customer: customerDoc.id,
+                additionalInfo: salesOrder.additionalInfo,
+            })
+
+            for (let soState of salesOrder.orders) {
+                const allParts = await Promise.all(
+                    soState.parts.map(async (part) => {
+                        const partDoc = await PartModel.findOne({ partNumber: part.partNumber });
+                        return {
+                            part: partDoc.id,
+                            quantity: part.quantity,
+                            additionalInfo: part.additionalInfo,
+                            fulfilledBy: part.fulfilledBy,
+                        }
+                    })
+                );
+                const soStateDoc = SalesOrderStateModel({
+                    status: soState.status,
+                    additionalInfo: soState.additionalInfo,
+                    parts: allParts,
+                })
+                
+                soDoc.orders.push(soStateDoc);
+                await soStateDoc.save();
+            }
+            await soDoc.save();
         }
     }
 }

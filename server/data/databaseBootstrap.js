@@ -1,4 +1,5 @@
 const { PERMS } = require('../routes/api/v1/auth/permissions');
+const { SO_STATES, PO_STATES } = require('./databaseEnum');
 
 const users = [
     {
@@ -229,8 +230,58 @@ for (let i = 0; i < numCustomerDataFillers; i++) {
     customers.push(customer);
 }
 
+const salesOrders = [
+    {
+        createdBy: users[0].username,
+        latestStatus: SO_STATES.CONFIRMED,
+        customer: customers[0].name,        // Must be translated into Customer ObjID
+        additionalInfo: 'First Ever Sales Order!',
+        orders: [
+            {
+                status: SO_STATES.QUOTATION,
+                additionalInfo: 'Made a draft first. Pending confirmation with customer.',
+                parts: [
+                    {
+                        partNumber: 'BA2132-21Z', // Must be translated into Part ObjID,
+                        quantity: 1000,
+                        additionalInfo: 'Urgent need for this part',
+                        fulfilledBy: []     // In draft phase, supposed to be empty
+                    },
+                    {
+                        partNumber: 'BA9871-21Z', // Must be translated into Part ObjID,
+                        quantity: 800,
+                        additionalInfo: 'Not so urgent need for this part',
+                        fulfilledBy: []     // In draft phase, supposed to be empty
+                    }
+                ]
+            },
+            {
+                status: SO_STATES.CONFIRMED,
+                additionalInfo: 'Customer has confirmed part requirements',
+                parts: [
+                    {
+                        partNumber: 'BA2132-21Z', // Must be translated into Part ObjID,
+                        quantity: 1000,
+                        additionalInfo: 'Urgent need for this part',
+                        fulfilledBy: []     // In draft phase, supposed to be empty
+                    },
+                    {
+                        partNumber: 'BA9871-21Z', // Must be translated into Part ObjID,
+                        quantity: 800,
+                        additionalInfo: 'Not so urgent need for this part',
+                        fulfilledBy: []     // In draft phase, supposed to be empty
+                    }
+                ]
+            }
+        ]
+    }
+]
+
+// TODO: Incorporate POs (into SOs)
+
 module.exports = {
     users,
     suppliers,
     customers,
+    salesOrders,
 }

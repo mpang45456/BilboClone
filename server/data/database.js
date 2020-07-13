@@ -3,6 +3,7 @@ const { Schema } = mongoose;
 
 const CONFIG = require('../config');
 const logger = require('../utils');
+const { SO_STATES, PO_STATES } = require('./databaseEnum');
 
 /**
  * -----------
@@ -111,7 +112,7 @@ const CustomerModel = mongoose.model('Customer', CustomerSchema);
 const SalesOrderPartFulfillmentSchema = new Schema({
     purchaseOrder: { type: Schema.Types.ObjectId, 
                      ref: 'PurchaseOrder', 
-                     required: true }, //TODO: Make PurchaseOrder 
+                     required: true },
     quantity: { type: Number, required: true }
 })
 const SalesOrderPartInfoSchema = new Schema({
@@ -123,14 +124,18 @@ const SalesOrderPartInfoSchema = new Schema({
     fulfilledBy: [SalesOrderPartFulfillmentSchema]
 })
 const SalesOrderStateSchema = new Schema({
-    status: { type: String, required: true }, // TODO: Make this an enum
+    status: { type: String, 
+              required: true,
+              enum: Object.keys(SO_STATES) },
     additionalInfo: { type: String, default: '' },
     parts: [SalesOrderPartInfoSchema]
 }, { timestamps: true })
 
 const SalesOrderSchema = new Schema({
-    createdBy: { type: String, required: true, index: true },
-    latestStatus: { type: String, required: true }, // TODO: Make this an enum
+    createdBy: { type: String, required: true, index: true }, // User.username
+    latestStatus: { type: String, 
+                    required: true,
+                    enum: Object.keys(SO_STATES) },
     customer: { type: Schema.Types.ObjectId, ref: 'Customer', required: true },
     additionalInfo: { type: String, default: '' },
     orders: [{ type: Schema.Types.ObjectId, ref: 'SalesOrderState' }]
@@ -159,17 +164,22 @@ const PurchaseOrderPartInfoSchema = new Schema({
     fulfilledFor: [PurchaseOrderPartFulfillmentSchema]
 })
 const PurchaseOrderStateSchema = new Schema({
-    status: { type: String, required: true }, // TODO: Make this an enum
+    status: { type: String, 
+              required: true,
+              enum: Object.keys(PO_STATES)},
     additionalInfo: { type: String, default: '' },
     parts: [PurchaseOrderPartInfoSchema]
 }, { timestamps: true })
 const PurchaseOrderSchema = new Schema({
-    createdBy: { type: String, required: true, index: true },
-    latestStatus: { type: String, required: true }, // TODO: Make this an enum
+    createdBy: { type: String, required: true, index: true }, // User.username
+    latestStatus: { type: String, 
+                    required: true,
+                    enum: Object.keys(PO_STATES) },
     supplier: { type: Schema.Types.ObjectId, ref: 'Supplier', required: true },
     additionalInfo: { type: String, default: '' },
     orders: [{ type: Schema.Types.ObjectId, ref: 'PurchaseOrderState' }]
 }, { timestamps: true })
+// TODO: Add an auto-generated SO/PO Number
 
 const PurchaseOrderStateModel = mongoose.model('PurchaseOrderState', PurchaseOrderStateSchema);
 const PurchaseOrderModel = mongoose.model('PurchaseOrder', PurchaseOrderSchema);

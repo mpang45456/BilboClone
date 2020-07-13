@@ -1,54 +1,133 @@
 const mongoose = require('mongoose');
-const { SupplierModel, PartModel } = require('./server/data/database');
-const { suppliers } = require('./server/data/databaseBootstrap');
+const { SupplierModel, 
+        PartModel, 
+        SalesOrderStateModel, 
+        SalesOrderModel, 
+        PurchaseOrderStateModel, 
+        PurchaseOrderModel } = require('./server/data/database');
+const { suppliers, salesOrders } = require('./server/data/databaseBootstrap');
 const { DatabaseInteractor } = require('./server/data/DatabaseInteractor');
 
 (async function() {
     let dbi = new DatabaseInteractor();
-    await dbi.initConnection();
+    await dbi.initConnection(true);
 
-    // Create New Supplier Document and Save
-    const supplier = suppliers[0];
-    let supplierObj = new SupplierModel({
-        name: supplier.name, 
-        address: supplier.address, 
-        telephone: supplier.telephone,
-        fax: supplier.fax,
-        additionalInfo: supplier.additionalInfo
-    })
+    // Populate Database with Sales Orders
+    // await dbi.addSuppliersAndParts(...suppliers);
+    // await dbi.addSalesOrders(...salesOrders);
+    
+    // // Create New Supplier Document and Save
+    // const supplier = suppliers[0];
+    // let supplierObj = new SupplierModel({
+    //     name: supplier.name, 
+    //     address: supplier.address, 
+    //     telephone: supplier.telephone,
+    //     fax: supplier.fax,
+    //     additionalInfo: supplier.additionalInfo
+    // })
 
-    await supplierObj.save();
-    console.log("Supplier Has Been Saved!");
+    // await supplierObj.save();
+    // console.log("Supplier Has Been Saved!");
 
-    // Create New Part Document and Save
-    const part = supplier.parts[0];
-    let partObj = PartModel({
-        supplier: supplier.name, 
-        partNumber: part.partNumber,
-        priceHistory: part.priceHistory,
-        description: part.description,
-        additionalInfo: part.additionalInfo
-    })
-    // Update Supplier with New Part
-    supplierObj = await SupplierModel.findOne({ name: supplier.name }).populate('parts');
-    supplierObj.parts.push(partObj);
+    // // Create New Part Document and Save
+    // const part = supplier.parts[0];
+    // let partObj = PartModel({
+    //     supplier: supplier.name, 
+    //     partNumber: part.partNumber,
+    //     priceHistory: part.priceHistory,
+    //     description: part.description,
+    //     additionalInfo: part.additionalInfo
+    // })
+    // // Update Supplier with New Part
+    // supplierObj = await SupplierModel.findOne({ name: supplier.name }).populate('parts');
+    // supplierObj.parts.push(partObj);
 
-    await partObj.save();
-    await supplierObj.save();
+    // await partObj.save();
+    // await supplierObj.save();
 
-    // Update Price of a Particular Part
-    let updatePartObj = await PartModel.findOne({ supplier: supplier.name, partNumber: part.partNumber});
-    updatePartObj.priceHistory.push({ createdBy: 'Brian', unitPrice: 0.0002, additionalInfo: 'Expensive Product'});
-    await updatePartObj.save();
+    // // Update Price of a Particular Part
+    // let updatePartObj = await PartModel.findOne({ supplier: supplier.name, partNumber: part.partNumber});
+    // updatePartObj.priceHistory.push({ createdBy: 'Brian', unitPrice: 0.0002, additionalInfo: 'Expensive Product'});
+    // await updatePartObj.save();
 
-    // Delete Part in Supplier
-    partObj = await PartModel.findOne({ supplier: supplier.name, partNumber: part.partNumber});
-    await SupplierModel.findOneAndUpdate({ name: supplier.name }, { $pull: {parts: partObj._id }});
+    // // Delete Part in Supplier
+    // partObj = await PartModel.findOne({ supplier: supplier.name, partNumber: part.partNumber});
+    // await SupplierModel.findOneAndUpdate({ name: supplier.name }, { $pull: {parts: partObj._id }});
 
 
 
     await dbi.closeConnection();
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// (async function() {
+//     let dbi = new DatabaseInteractor();
+//     await dbi.initConnection();
+
+//     // Create New Supplier Document and Save
+//     const supplier = suppliers[0];
+//     let supplierObj = new SupplierModel({
+//         name: supplier.name, 
+//         address: supplier.address, 
+//         telephone: supplier.telephone,
+//         fax: supplier.fax,
+//         additionalInfo: supplier.additionalInfo
+//     })
+
+//     await supplierObj.save();
+//     console.log("Supplier Has Been Saved!");
+
+//     // Create New Part Document and Save
+//     const part = supplier.parts[0];
+//     let partObj = PartModel({
+//         supplier: supplier.name, 
+//         partNumber: part.partNumber,
+//         priceHistory: part.priceHistory,
+//         description: part.description,
+//         additionalInfo: part.additionalInfo
+//     })
+//     // Update Supplier with New Part
+//     supplierObj = await SupplierModel.findOne({ name: supplier.name }).populate('parts');
+//     supplierObj.parts.push(partObj);
+
+//     await partObj.save();
+//     await supplierObj.save();
+
+//     // Update Price of a Particular Part
+//     let updatePartObj = await PartModel.findOne({ supplier: supplier.name, partNumber: part.partNumber});
+//     updatePartObj.priceHistory.push({ createdBy: 'Brian', unitPrice: 0.0002, additionalInfo: 'Expensive Product'});
+//     await updatePartObj.save();
+
+//     // Delete Part in Supplier
+//     partObj = await PartModel.findOne({ supplier: supplier.name, partNumber: part.partNumber});
+//     await SupplierModel.findOneAndUpdate({ name: supplier.name }, { $pull: {parts: partObj._id }});
+
+
+
+//     await dbi.closeConnection();
+// })();
 
 
 
