@@ -11,7 +11,11 @@ const { UserModel,
         PurchaseOrderStateModel,
         PurchaseOrderModel,
         CounterModel } = require('./database');
-const { users, suppliers, customers, salesOrders } = require('./databaseBootstrap');
+const { users, 
+        suppliers, 
+        customers, 
+        salesOrders, 
+        purchaseOrders } = require('./databaseBootstrap');
 
 // TODO: It is possible to get rid of import statements
 // in whatever class that uses `DatabaseInteractor` if 
@@ -41,6 +45,7 @@ class DatabaseInteractor {
         this.seedSuppliersWithParts = suppliers;
         this.seedCustomers = customers;
         this.seedSalesOrders = salesOrders;
+        this.seedPurchaseOrders = purchaseOrders;
     }
 
     /**
@@ -79,7 +84,7 @@ class DatabaseInteractor {
      * // TODO: This method must be updated to reflect new Schemas
      */
     async __resetAndSeedDatabase() {
-        // Initialise Counters
+        // Initialise Counters (For Sales and Purchase Orders)
         this.__initCounters();
 
         // Clear Model Data
@@ -97,8 +102,19 @@ class DatabaseInteractor {
         await this.addSuppliersAndParts(...this.seedSuppliersWithParts);
         await this.addCustomers(...this.seedCustomers);
         await this.addSalesOrders(...this.seedSalesOrders);
+        await this.addPurchaseOrders(...this.seedPurchaseOrders);
     }
 
+    /**
+     * Initialises a Counter collection that keeps
+     * track of the sequence number for Sales Orders
+     * and Purchase Orders. 
+     * 
+     * Within the Counter collection, 2 documents, one
+     * for POs and one for SOs are made. Each document
+     * is used to inform the respective SO/PO schema's
+     * `setOrderNumber` method about the next order number. 
+     */
     async __initCounters() {
         const salesOrderCounter = new CounterModel({ counterName: 'salesOrder',
                                                      sequenceValue: 0 });
@@ -202,7 +218,10 @@ class DatabaseInteractor {
         }
     }
 
-    // TODO: Update docs
+    /**
+     * Add sales orders to the database
+     * @param  {...object} salesOrders 
+     */
     async addSalesOrders(...salesOrders) {
         for (let salesOrder of salesOrders) {
             const customerDoc = await CustomerModel.findOne({ name: salesOrder.customer });
@@ -236,6 +255,46 @@ class DatabaseInteractor {
             }
             await soDoc.setOrderNumber();
             await soDoc.save();
+        }
+    }
+
+    /**
+     * Add purchase orders to the database.
+     * @param  {...object} purchaseOrders
+     */
+    async addPurchaseOrders(...purchaseOrders) {
+        for (let purchaseOrder of purchaseOrders) {
+            const supplierDoc = await SupplierModel.findOne({ name: purchaseOrder.supplier });
+            const poDoc = PurchaseOrderModel({
+                createdBy: purchaseOrder.createdBy,
+                latestStatus: purchaseOrder.latestStatus,
+                supplier: supplierDoc.id,
+                additionalInfo: purchaseOrder.additionalInfo,
+            })
+
+            for (let poState of purchaseOrder.orders) {
+                const allParts = await Promise.all(
+                    poState.parts.map(async (part) => {
+                        const partDoc = await PartModel.findOne({ partNumber: part.partNumber });
+                        return {
+                            part: partDoc.id,
+                            quantity: part.quantity,
+                            additionalInfo: part.additionalInfo,
+                            fufilledFor: part.fufilledFor,
+                        }
+                    })
+                );
+                const poStateDoc = PurchaseOrderStateModel({
+                    status: poState.status,
+                    additionalInfo: poState.additionalInfo,
+                    parts: allParts,
+                })
+                
+                poDoc.orders.push(poStateDoc);
+                await poStateDoc.save();
+            }
+            await poDoc.setOrderNumber();
+            await poDoc.save();
         }
     }
 }
