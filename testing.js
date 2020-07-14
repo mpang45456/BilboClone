@@ -12,6 +12,8 @@ const { DatabaseInteractor } = require('./server/data/DatabaseInteractor');
     let dbi = new DatabaseInteractor();
     await dbi.initConnection(true);
 
+    
+
     // Populate Database with Sales Orders
     // await dbi.addSuppliersAndParts(...suppliers);
     // await dbi.addSalesOrders(...salesOrders);

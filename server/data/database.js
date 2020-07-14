@@ -130,7 +130,6 @@ const SalesOrderStateSchema = new Schema({
     additionalInfo: { type: String, default: '' },
     parts: [SalesOrderPartInfoSchema]
 }, { timestamps: true })
-
 const SalesOrderSchema = new Schema({
     createdBy: { type: String, required: true, index: true }, // User.username
     latestStatus: { type: String, 
