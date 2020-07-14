@@ -5,13 +5,13 @@ describe('Testing PermissionsTransformer', () => {
     const pt = new PermissionsTransformer();
     
     it('Encoded permission string should have correct order', (done) => {
-        let permString = pt.encode([PERMS.SALES_READ, PERMS.SALES_WRITE]);
+        let permString = pt.encode([PERMS.USER_READ, PERMS.USER_WRITE]);
         expect(permString[0]).to.equal('1');
         expect(permString[1]).to.equal('1');
         expect(permString[2]).to.equal('0');
         expect(permString[3]).to.equal('0');
 
-        permString = pt.encode([PERMS.SALES_READ, PERMS.PURCHASES_WRITE]);
+        permString = pt.encode([PERMS.USER_READ, PERMS.SUPPLIER_WRITE]);
         expect(permString[0]).to.equal('1');
         expect(permString[1]).to.equal('0');
         expect(permString[2]).to.equal('0');
@@ -31,18 +31,18 @@ describe('Testing PermissionsTransformer', () => {
         let permString = '1100';
         let permList = pt.decode(permString);
         expect(permList).to.be.an('array');
-        expect(permList).to.include(PERMS.SALES_READ);
-        expect(permList).to.include(PERMS.SALES_WRITE);
-        expect(permList).to.not.include(PERMS.PURCHASES_READ);
-        expect(permList).to.not.include(PERMS.PURCHASES_WRITE);
+        expect(permList).to.include(PERMS.USER_READ);
+        expect(permList).to.include(PERMS.USER_WRITE);
+        expect(permList).to.not.include(PERMS.SUPPLIER_READ);
+        expect(permList).to.not.include(PERMS.SUPPLIER_WRITE);
 
         permString = '1001';
         permList = pt.decode(permString);
         expect(permList).to.be.an('array');
-        expect(permList).to.include(PERMS.SALES_READ);
-        expect(permList).to.not.include(PERMS.SALES_WRITE);
-        expect(permList).to.not.include(PERMS.PURCHASES_READ);
-        expect(permList).to.include(PERMS.PURCHASES_WRITE);
+        expect(permList).to.include(PERMS.USER_READ);
+        expect(permList).to.not.include(PERMS.USER_WRITE);
+        expect(permList).to.not.include(PERMS.SUPPLIER_READ);
+        expect(permList).to.include(PERMS.SUPPLIER_WRITE);
         
         done();
     })
