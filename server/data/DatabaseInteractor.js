@@ -9,7 +9,8 @@ const { UserModel,
         SalesOrderStateModel,
         SalesOrderModel,
         PurchaseOrderStateModel,
-        PurchaseOrderModel } = require('./database');
+        PurchaseOrderModel,
+        CounterModel } = require('./database');
 const { users, suppliers, customers, salesOrders } = require('./databaseBootstrap');
 
 // TODO: It is possible to get rid of import statements
@@ -48,6 +49,7 @@ class DatabaseInteractor {
      */
     async initConnection(resetAndSeedDatabase=false) {
         mongoose.set('useCreateIndex', true);
+        mongoose.set('useFindAndModify', false);
         try {
             await mongoose.connect(CONFIG.DATABASE_URL, 
                                    {useNewUrlParser: true, useUnifiedTopology: true});
@@ -77,6 +79,9 @@ class DatabaseInteractor {
      * // TODO: This method must be updated to reflect new Schemas
      */
     async __resetAndSeedDatabase() {
+        // Initialise Counters
+        this.__initCounters();
+
         // Clear Model Data
         await this.clearModelData(UserModel);
         await this.clearModelData(SupplierModel);
@@ -92,6 +97,15 @@ class DatabaseInteractor {
         await this.addSuppliersAndParts(...this.seedSuppliersWithParts);
         await this.addCustomers(...this.seedCustomers);
         await this.addSalesOrders(...this.seedSalesOrders);
+    }
+
+    async __initCounters() {
+        const salesOrderCounter = new CounterModel({ counterName: 'salesOrder',
+                                                     sequenceValue: 0 });
+        await salesOrderCounter.save();
+        const purchaseOrderCounter = new CounterModel({ counterName: 'purchaseOrder',
+                                                        sequenceValue: 0 });
+        await purchaseOrderCounter.save();
     }
 
     /**
@@ -220,6 +234,7 @@ class DatabaseInteractor {
                 soDoc.orders.push(soStateDoc);
                 await soStateDoc.save();
             }
+            await soDoc.setOrderNumber();
             await soDoc.save();
         }
     }

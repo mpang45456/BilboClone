@@ -6,6 +6,55 @@ const logger = require('../utils');
 const { SO_STATES, PO_STATES } = require('./databaseEnum');
 
 /**
+ * ----------------------
+ * ORDER NUMBER GENERATOR
+ * ----------------------
+ */
+const CounterSchema = new Schema({
+    counterName: { type: String, required: true },
+    sequenceValue: { type: Number, required: true }
+})
+const CounterModel = mongoose.model('Counter', CounterSchema);
+
+/**
+ * Generates and returns next order number.
+ * 
+ * 1. Obtains the sequence value for order number using 
+ * `Counter` collection, and updates the sequence value
+ * in-place. 
+ * 2. Adds prefix `SO-` (for sales orders) or 
+ * `PO-` (for purchase orders)
+ * 3. Pads with leading zeros (6 digits total)
+ * 
+ * Returns order number of this form: `SO-000123`
+ * 
+ * @param {String} counterName : one of ['salesOrder', 'purchaseOrder']
+ */
+async function getNextOrderNumber(counterName) {
+    const filter = { counterName };
+    const update = { $inc: { sequenceValue: 1 } };
+    const options = { new: true }; // returns doc AFTER `update` is applied
+    const counterDoc = await CounterModel.findOneAndUpdate(filter, update, options);
+    
+    let prefix = null;
+    switch (counterName) {
+        case 'salesOrder':
+            prefix = 'SO-';
+            break;
+        case 'purchaseOrder':
+            prefix = 'PO-';
+            break;
+        default:
+            throw new Error(`Invalid counterName: ${counterName}`);
+    }
+    
+    // Pad with leading zeros (6 digits in total)
+    // FIXME: This means that there is an upper-bound of 999999 number of orders
+    const suffix = ('000000' + counterDoc.sequenceValue).slice(-6);
+    return prefix + suffix;
+}
+
+/**
  * -----------
  * USER SCHEMA
  * -----------
@@ -132,6 +181,7 @@ const SalesOrderStateSchema = new Schema({
 }, { timestamps: true })
 const SalesOrderSchema = new Schema({
     createdBy: { type: String, required: true, index: true }, // User.username
+    orderNumber: { type: String, required: true, unique: true, index: true },
     latestStatus: { type: String, 
                     required: true,
                     enum: Object.keys(SO_STATES) },
@@ -139,6 +189,10 @@ const SalesOrderSchema = new Schema({
     additionalInfo: { type: String, default: '' },
     orders: [{ type: Schema.Types.ObjectId, ref: 'SalesOrderState' }]
 }, { timestamps: true })
+// Used in dev/prod env. Test env will set orderNumber manually.
+SalesOrderSchema.methods.setOrderNumber = async function() {
+    this.orderNumber = await getNextOrderNumber('salesOrder');
+}
 
 const SalesOrderStateModel = mongoose.model('SalesOrderState', SalesOrderStateSchema);
 const SalesOrderModel = mongoose.model('SalesOrder', SalesOrderSchema);
@@ -171,6 +225,7 @@ const PurchaseOrderStateSchema = new Schema({
 }, { timestamps: true })
 const PurchaseOrderSchema = new Schema({
     createdBy: { type: String, required: true, index: true }, // User.username
+    orderNumber: { type: String, required: true, unique: true, index: true },
     latestStatus: { type: String, 
                     required: true,
                     enum: Object.keys(PO_STATES) },
@@ -178,7 +233,10 @@ const PurchaseOrderSchema = new Schema({
     additionalInfo: { type: String, default: '' },
     orders: [{ type: Schema.Types.ObjectId, ref: 'PurchaseOrderState' }]
 }, { timestamps: true })
-// TODO: Add an auto-generated SO/PO Number
+// Used in dev/prod env. Test env will set orderNumber manually.
+PurchaseOrderSchema.methods.setOrderNumber = async function() {
+    this.orderNumber = await getNextOrderNumber('purchaseOrder');
+}
 
 const PurchaseOrderStateModel = mongoose.model('PurchaseOrderState', PurchaseOrderStateSchema);
 const PurchaseOrderModel = mongoose.model('PurchaseOrder', PurchaseOrderSchema);
@@ -199,4 +257,6 @@ module.exports = {
     SalesOrderModel,
     PurchaseOrderStateModel, 
     PurchaseOrderModel,
+    CounterModel,
+    getNextOrderNumber,
 }
