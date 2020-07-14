@@ -14,7 +14,7 @@ const users = [
     {
         "username": "user1",
         "password": "asd",
-        "permissions": [PERMS.SALES_READ, PERMS.SALES_WRITE],
+        "permissions": [PERMS.SALES_ORDER_READ, PERMS.SALES_ORDER_WRITE],
         "name": "Balin",
         "position": "Sales Representative",
         "reportsTo": "admin"
@@ -22,7 +22,7 @@ const users = [
     {
         "username": "user2",
         "password": "asd",
-        "permissions": [PERMS.USER_READ, PERMS.PURCHASES_READ, PERMS.PURCHASES_WRITE],
+        "permissions": [PERMS.USER_READ, PERMS.PURCHASE_ORDER_READ, PERMS.PURCHASE_ORDER_WRITE],
         "name": "Thorin",
         "position": "Customer Success Specialist",
         "reportsTo": "admin"
@@ -31,7 +31,7 @@ const users = [
         // Read Permissions User
         "username": "user3",
         "password": "asd",
-        "permissions": [PERMS.USER_READ, PERMS.SUPPLIER_READ, PERMS.PART_READ, PERMS.CUSTOMER_READ],
+        "permissions": [PERMS.USER_READ, PERMS.SUPPLIER_READ, PERMS.PART_READ, PERMS.CUSTOMER_READ, PERMS.SALES_ORDER_READ],
         "name": "Gandalf",
         "position": "Sales Intern",
         "reportsTo": "user1"

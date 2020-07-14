@@ -21,8 +21,8 @@ describe('Testing PermissionsTransformer', () => {
     })
 
     it('Encoding of permissions string should throw error for invalid permission', (done) => {
-        expect(() => pt.encode('SALES_RAED')).to.throw(Error);
-        expect(() => pt.encode(['SALES_RAED', PERMS.SALES_WRITE])).to.throw(Error);
+        expect(() => pt.encode('SALES_ORDER_RAED')).to.throw(Error);
+        expect(() => pt.encode(['SALES_ORDER_RAED', PERMS.SALES_ORDER_WRITE])).to.throw(Error);
 
         done();
     })
@@ -48,14 +48,14 @@ describe('Testing PermissionsTransformer', () => {
     })
 
     it('Check for valid permissions', (done) => {
-        let perms = [PERMS.SALES_WRITE, PERMS.PURCHASES_WRITE];
+        let perms = [PERMS.SALES_ORDER_WRITE, PERMS.PURCHASE_ORDER_WRITE];
         expect(pt.isValidPermissions(perms)).to.be.true;
 
         done();
     })
 
     it('Check for invalid permissions', (done) => {
-        let perms = ['SALES_RAED', PERMS.PURCHASES_WRITE];
+        let perms = ['SALES_ORDER_RAED', PERMS.PURCHASE_ORDER_WRITE];
         expect(pt.isValidPermissions(perms)).to.be.false;
 
         done();

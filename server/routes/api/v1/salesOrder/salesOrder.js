@@ -54,13 +54,13 @@ router.use(isAuthenticated);
  * `currentPage`.
  */
 router.get('/', 
-           isAuthorized(PERMS.SALES_READ),
+           isAuthorized(PERMS.SALES_ORDER_READ),
            async function(req, res) {
     let {
         page = 1, 
         limit = CONFIG.DEFAULT_PAGE_LIMIT, 
-        inc = ['createdBy', 'latestStatus', 'customer', 'additionalInfo', 'orders'],
-        sort = ['latestStatus'],
+        inc = ['createdBy', 'orderNumber', 'latestStatus', 'customer', 'additionalInfo', 'orders'],
+        sort = ['latestStatus', 'orderNumber'],
         filter = {} // FIXME: Using the req params directly as the filter to the Mongoose query might pose a significant security risk
     } = req.query;
 

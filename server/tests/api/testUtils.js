@@ -10,6 +10,8 @@ export const userEndpoint = '/api/v1/user';
 export const supplierEndpoint = '/api/v1/supplier';
 export const partEndpoint = '/api/v1/part';
 export const customerEndpoint = '/api/v1/customer';
+export const salesOrderEndpoint = '/api/v1/salesOrder';
+export const purchaseOrderEndpoint = '/api/v1/purchaseOrder';
 
 /**
  * Returns a supertest agent that has already sent a POST
