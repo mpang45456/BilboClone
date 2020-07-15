@@ -1,6 +1,14 @@
 const { PERMS } = require('../routes/api/v1/auth/permissions');
 const { SO_STATES, PO_STATES } = require('./databaseEnum');
 
+/**
+ * User Hierarchy: 
+ *              admin
+ *              /    \
+ *          user1   user2
+ *          /   \
+ *      user3   user4
+ */
 const users = [
     {
         // All Permissions User
@@ -22,7 +30,7 @@ const users = [
     {
         "username": "user2",
         "password": "asd",
-        "permissions": [PERMS.USER_READ, PERMS.PURCHASE_ORDER_READ, PERMS.PURCHASE_ORDER_WRITE],
+        "permissions": [PERMS.USER_READ],
         "name": "Thorin",
         "position": "Customer Success Specialist",
         "reportsTo": "admin"
@@ -37,10 +45,10 @@ const users = [
         "reportsTo": "user1"
     },
     {
-        // Full Supplier and Part API Access
+        // Full Supplier and Part API Access. Read/Write Access to Sales Order API.
         "username": "user4",
         "password": "asd",
-        "permissions": [PERMS.PART_READ, PERMS.PART_WRITE, PERMS.SUPPLIER_READ, PERMS.SUPPLIER_WRITE],
+        "permissions": [PERMS.PART_READ, PERMS.PART_WRITE, PERMS.SUPPLIER_READ, PERMS.SUPPLIER_WRITE, PERMS.SALES_ORDER_READ, PERMS.SALES_ORDER_WRITE],
         "name": "Gandalf",
         "position": "Sales Intern",
         "reportsTo": "user1"

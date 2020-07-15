@@ -31,6 +31,8 @@ describe.only('Testing /api/v1/salesOrder endpoint', () => {
     let authenticatedUnauthorizedAgent = null;  // No access to SALES_ORDER API
     // TODO: Add SALES_ORDER_<STATUS>_READ/WRITE Perms
 
+    let salesOrderObjID = null;
+
     const newSalesOrderMetaData = {
         customerName: testCustomers[1].name, 
         additionalInfo: 'API TEST: New Sales Order Meta-Data',
@@ -64,12 +66,16 @@ describe.only('Testing /api/v1/salesOrder endpoint', () => {
         await dbi.addSalesOrders(...testSalesOrders);
         await dbi.addPurchaseOrders(...testPurchaseOrders);
 
+        // Obtain SalesOrderObjID
+        const salesOrderDoc = await SalesOrderModel.findOne({ createdBy: testUsers[3].username });
+        salesOrderObjID = salesOrderDoc._id; // readable by `authenticatedReadAgent`
+
         // Login
         const admin = testUsers[0];
         authenticatedAdminAgent = await getAuthenticatedAgent(server, admin.username, admin.password);
         const readUser = testUsers[3];
         authenticatedReadAgent = await getAuthenticatedAgent(server, readUser.username, readUser.password);
-        const unauthorizedUser = testUsers[4];
+        const unauthorizedUser = testUsers[2];
         authenticatedUnauthorizedAgent = await getAuthenticatedAgent(server, unauthorizedUser.username, unauthorizedUser.password);
 
         done();
@@ -379,7 +385,7 @@ describe.only('Testing /api/v1/salesOrder endpoint', () => {
                 .send(newSalesOrderMetaData)
                 .expect(403)
         
-        // Has neither SUPPLIER_READ nor SALES_ORDER_WRITE perm
+        // Has neither SALES_ORDER_READ nor SALES_ORDER_WRITE perm
         await authenticatedUnauthorizedAgent
                 .post(salesOrderEndpoint)
                 .send(newSalesOrderMetaData)
@@ -401,83 +407,87 @@ describe.only('Testing /api/v1/salesOrder endpoint', () => {
     })
 
 
-    // /**
-    //  * -------------------------
-    //  * GET (individual resource)
-    //  * -------------------------
-    //  */
-    // it(`GET /:supplierObjID: User with SALES_ORDER_READ perm
-    //     should be able to access supplier data with default
-    //     query fields`, async (done) => {
-    //     await authenticatedReadAgent
-    //             .get(`${salesOrderEndpoint}/${supplierObjID}`)
-    //             .expect(200)
-    //             .expect(res => {
-    //                 expect(res.body.name).toBeTruthy();
-    //                 expect(res.body.address).toBeTruthy();
-    //                 expect(res.body.telephone).toBeTruthy();
-    //                 expect(res.body.fax).toBeTruthy();
-    //                 expect(res.body.additionalInfo).toBeTruthy();
-    //                 expect(res.body.parts).toBeTruthy();
-    //             })
-    //     done();
-    // })
+    /**
+     * ------------------------------------------------
+     * GET (Sales Order Meta-DAta: Individual Resource)
+     * ------------------------------------------------
+     */
+    it(`GET /:salesOrderObjID: User with SALES_ORDER_READ perm
+        should not be able to access an invalid salesOrderObjID`, async (done) => {
+        // Invalid ObjID (valid for another collection)
+        const partDoc = await PartModel.findOne({});
+        await authenticatedReadAgent
+                .get(`${salesOrderEndpoint}/${partDoc._id}`)
+                .expect(400);
 
-    // it(`GET /:supplierObjID: User with SALES_ORDE_READ perm
-    //     should be able to access supplier data and specify
-    //     fields to include in query`, async (done) => {
-    //     // Include `name` and `telephone` fields
-    //     let query = queryString.stringify({ inc: ['name', 'telephone']})
-    //     await authenticatedReadAgent
-    //             .get(`${salesOrderEndpoint}/${supplierObjID}?${query}`)
-    //             .expect(200)
-    //             .expect(res => {
-    //                 expect(res.body.name).toBeTruthy();
-    //                 expect(res.body.address).not.toBeTruthy();
-    //                 expect(res.body.telephone).toBeTruthy();
-    //                 expect(res.body.fax).not.toBeTruthy();
-    //                 expect(res.body.additionalInfo).not.toBeTruthy();
-    //                 expect(res.body.parts).not.toBeTruthy();
-    //             })
+        // Invalid ObjID (wrong format)
+        await authenticatedReadAgent
+                .get(`${salesOrderEndpoint}/123`)
+                .expect(400);
+        done();
+    })
+
+    it(`GET /:salesOrderObjID: User without SALES_ORDER_READ perm 
+        should not be able to access the endpoint and retrieve
+        sales order meta data`, async(done) => {
+        await authenticatedUnauthorizedAgent
+                .get(`${salesOrderEndpoint}/${salesOrderObjID}`)
+                .expect(403);
+        done();
+    })
+
+    it(`GET /:salesOrderObjID: User with SALES_ORDER_READ perm
+        should only be able to access a sales order meta data
+        created by a user under the user in the user hierarchy`, async (done) => {
+        // `admin` user creates a sales order meta data object
+        let adminCreatedSalesOrderMetaDataObjID = null;
+        authenticatedAdminAgent
+            .post(salesOrderEndpoint)
+            .send(newSalesOrderMetaData)
+            .expect(200)
+            .then(res => {
+                adminCreatedSalesOrderMetaDataObjID = res.body._id;
+            })
+
+        // `user4` user creates a sales order meta data object
+        let user4CreatedSalesOrderMetaDataObjID = null;
+        const user4Account = testUsers[4];
+        const authenticatedUser4Agent = await getAuthenticatedAgent(server, 
+                                                                    user4Account.username, 
+                                                                    user4Account.password);
+        authenticatedUser4Agent
+            .post(salesOrderEndpoint)
+            .send(newSalesOrderMetaData)
+            .expect(200)
+            .then(res => {
+                user4CreatedSalesOrderMetaDataObjID = res.body._id;
+            })
+    
+        // `user1` should only be able to access the sales order
+        // meta data object created by `user4` but not `admin`
+        const user1Account = testUsers[1];
+        const authenticatedUser1Agent = await getAuthenticatedAgent(server, 
+                                                                    user1Account.username, 
+                                                                    user1Account.password);
+        authenticatedUser1Agent
+            .get(`${salesOrderEndpoint}/${adminCreatedSalesOrderMetaDataObjID}`)
+            .expect(403);
+        authenticatedUser1Agent
+            .get(`${salesOrderEndpoint}/${user4CreatedSalesOrderMetaDataObjID}`)
+            .expect(200)
+            .expect(res => {
+                expect(res.body.createdBy).toBe(user4Account.username);
+                expect(res.body.latestStatus).toBe(SO_STATES.NEW);
+                expect(res.body.additionalInfo).toBe(newSalesOrderMetaData.additionalInfo);
+                expect(res.body.orderNumber).toBeTruthy();
+                expect(res.body.orders).toBeTruthy();
+                expect(res.body.customer.name).toBe(newSalesOrderMetaData.customerName);
+            })
+
+        done();
         
-    //     // Include `name` only
-    //     query = queryString.stringify({ inc: 'name'})
-    //     await authenticatedReadAgent
-    //             .get(`${salesOrderEndpoint}/${supplierObjID}?${query}`)
-    //             .expect(200)
-    //             .expect(res => {
-    //                 expect(res.body.name).toBeTruthy();
-    //                 expect(res.body.address).not.toBeTruthy();
-    //                 expect(res.body.telephone).not.toBeTruthy();
-    //                 expect(res.body.fax).not.toBeTruthy();
-    //                 expect(res.body.additionalInfo).not.toBeTruthy();
-    //                 expect(res.body.parts).not.toBeTruthy();
-    //             })
-    //     done();
-    // })
-
-    // it(`GET /:supplierObjID: User with SALES_ORDE_READ perm
-    //     should not be able to access an invalid supplierObjID`, async (done) => {
-    //     // Invalid ObjID (valid for another collection)
-    //     await authenticatedReadAgent
-    //             .get(`${salesOrderEndpoint}/${partObjID}`)
-    //             .expect(400);
-
-    //     // Invalid ObjID (wrong format)
-    //     await authenticatedReadAgent
-    //             .get(`${salesOrderEndpoint}/123`)
-    //             .expect(400);
-    //     done();
-    // })
-
-    // it(`GET /:supplierObjID: User without SALES_ORDE_READ perm 
-    //     should not be able to access the endpoint and retrieve
-    //     supplier data`, async(done) => {
-    //     await authenticatedUnauthorizedAgent
-    //             .get(`${salesOrderEndpoint}/${supplierObjID}`)
-    //             .expect(403);
-    //     done();
-    // })
+    })
+    
 
     // /**
     //  * ----------------------------

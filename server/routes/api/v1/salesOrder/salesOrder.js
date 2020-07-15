@@ -17,7 +17,11 @@ router.use(isAuthenticated);
  * Mounted on /api/v1/salesOrder
  * 
  * Returns salesOrder meta-data (on the collection
- * level). Request query string can specify:
+ * level). Only data created by users under the
+ * requesting user in the user hierarchy will be
+ * returned.
+ * 
+ * Request query string can specify:
  * 1. Which fields to include (`inc`)
  *    - e.g. ?inc=createdBy (single field)
  *    - e.g. ?inc=createdBy&inc=latestStatus (multiple fields)
@@ -111,7 +115,7 @@ router.get('/',
 /**
  * Mounted on /api/v1/salesOrder
  * 
- * Creates a new sales order (meta-data).
+ * Creates a new sales order (meta-data). 
  * 
  * Only `customerName` and `additionalInfo` can be
  * specified by the request body in JSON. All other
@@ -155,21 +159,36 @@ router.post('/',
     }
 })
 
+/**
+ * Mounted on /api/v1/salesOrder/:salesOrderObjID
+ * 
+ * Returns sales order meta data for the individual
+ * resource identified by `salesOrderObjID`. The 
+ * requesting user will only be able to access the resource
+ * if it is created by a user under the requesting
+ * user in the user hierarchy. Otherwise, a 403 
+ * response is sent.
+ * 
+ * Note: No query string support is enabled for this 
+ * method.
+ * 
+ * Note: the `customer`'s `name` path is auto-populated
+ * in every response.
+ */
 router.get('/:salesOrderObjID',
            isAuthorized(PERMS.SALES_ORDER_READ),
+           setUserHierarchy, 
            async function(req, res) {
-    let {
-        inc = ['createdBy', 'orderNumber', 'latestStatus', 'customer', 'additionalInfo', 'orders'],
-    } = req.query;
-
-    // Convert `inc`/`sort` to array if only a single field is specified
-    if (!Array.isArray(inc)) { inc = [inc]; }
-
     try {
-        let salesOrderDoc = await SalesOrderModel.findOne({ _id: req.params.salesOrderObjID }, inc.join(' '));
-        if (!salesOrderDoc) {
-            return res.status(400).send('Invalid Sales Order ID');
+        let salesOrderDoc = await SalesOrderModel.findOne({ _id: req.params.salesOrderObjID })
+                                                 .populate('customer', 'name');
+        if (!salesOrderDoc) { 
+            return res.status(400).send('Invalid Sales Order ID'); 
         }
+        if (!req.userHierarchy.includes(salesOrderDoc.createdBy)) { 
+            return res.sendStatus(403); 
+        }
+
         return res.status(200).json(salesOrderDoc);
     } catch(err) {
         logger.error(`GET /salesOrder/:salesOrderObjID: Could not get sales order: ${err}`);
