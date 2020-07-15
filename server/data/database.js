@@ -177,7 +177,8 @@ const SalesOrderStateSchema = new Schema({
               required: true,
               enum: Object.keys(SO_STATES) },
     additionalInfo: { type: String, default: '' },
-    parts: [SalesOrderPartInfoSchema]
+    parts: [SalesOrderPartInfoSchema],
+    updatedBy: { type: String, required: true }, // User.username
 }, { timestamps: true })
 const SalesOrderSchema = new Schema({
     createdBy: { type: String, required: true, index: true }, // User.username
@@ -221,7 +222,8 @@ const PurchaseOrderStateSchema = new Schema({
               required: true,
               enum: Object.keys(PO_STATES)},
     additionalInfo: { type: String, default: '' },
-    parts: [PurchaseOrderPartInfoSchema]
+    parts: [PurchaseOrderPartInfoSchema],
+    updatedBy: { type: String, required: true }, // User.username
 }, { timestamps: true })
 const PurchaseOrderSchema = new Schema({
     createdBy: { type: String, required: true, index: true }, // User.username

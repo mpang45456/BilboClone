@@ -48,7 +48,8 @@ const users = [
         // Full Supplier and Part API Access. Read/Write Access to Sales Order API.
         "username": "user4",
         "password": "asd",
-        "permissions": [PERMS.PART_READ, PERMS.PART_WRITE, PERMS.SUPPLIER_READ, PERMS.SUPPLIER_WRITE, PERMS.SALES_ORDER_READ, PERMS.SALES_ORDER_WRITE],
+        "permissions": [PERMS.PART_READ, PERMS.PART_WRITE, PERMS.SUPPLIER_READ, PERMS.SUPPLIER_WRITE, 
+                        PERMS.SALES_ORDER_READ, PERMS.SALES_ORDER_WRITE],
         "name": "Gandalf",
         "position": "Sales Intern",
         "reportsTo": "user1"
@@ -255,6 +256,7 @@ const salesOrders = [
             {
                 status: SO_STATES.QUOTATION,
                 additionalInfo: 'Made a draft first. Pending confirmation with customer.',
+                updatedBy: users[3].username,
                 parts: [
                     {
                         partNumber: 'BA2132-21Z', // Must be translated into Part ObjID,
@@ -273,6 +275,7 @@ const salesOrders = [
             {
                 status: SO_STATES.CONFIRMED,
                 additionalInfo: 'Customer has confirmed part requirements',
+                updatedBy: users[3].username,
                 parts: [
                     {
                         partNumber: 'BA2132-21Z', // Must be translated into Part ObjID,
@@ -302,6 +305,7 @@ const salesOrders = [
             {
                 status: SO_STATES.QUOTATION,
                 additionalInfo: 'Customer will confirm details by 8th August.',
+                updatedBy: users[1].username,
                 parts: [
                     {
                         partNumber: 'BA2132-21Z', // Must be translated into Part ObjID,
@@ -320,6 +324,7 @@ const salesOrders = [
             {
                 status: SO_STATES.CONFIRMED,
                 additionalInfo: 'Customer has confirmed part requirements',
+                updatedBy: users[1].username,
                 parts: [
                     {
                         partNumber: 'BA2132-21Z', // Must be translated into Part ObjID,
@@ -349,6 +354,7 @@ const salesOrders = [
             {
                 status: SO_STATES.QUOTATION,
                 additionalInfo: 'Yet another draft.',
+                updatedBy: users[3].username,
                 parts: [
                     {
                         partNumber: 'PN121', // Must be translated into Part ObjID,
@@ -379,6 +385,7 @@ const purchaseOrders = [
             {
                 status: PO_STATES.QUOTATION,
                 additionalInfo: 'Supplier should be able to deliver everything by 10th August',
+                updatedBy: users[0].username,
                 parts: [
                     {
                         partNumber: 'BA2132-21Z', // Must be translated into Part ObjID,
@@ -403,6 +410,7 @@ const purchaseOrders = [
             {
                 status: PO_STATES.CONFIRMED,
                 additionalInfo: 'Supplier has guaranteed that everything can be delivered by 9th August',
+                updatedBy: users[0].username,
                 parts: [
                     {
                         partNumber: 'BA2132-21Z', // Must be translated into Part ObjID,

@@ -248,6 +248,7 @@ class DatabaseInteractor {
                 const soStateDoc = SalesOrderStateModel({
                     status: soState.status,
                     additionalInfo: soState.additionalInfo,
+                    updatedBy: soState.updatedBy,
                     parts: allParts,
                 })
                 
@@ -288,6 +289,7 @@ class DatabaseInteractor {
                 const poStateDoc = PurchaseOrderStateModel({
                     status: poState.status,
                     additionalInfo: poState.additionalInfo,
+                    updatedBy: poState.updatedBy,
                     parts: allParts,
                 })
                 

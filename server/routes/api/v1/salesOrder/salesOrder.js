@@ -199,11 +199,42 @@ router.get('/:salesOrderObjID',
     }
 })
 
+// Note: No pagination
+// Note: no filtering, no sorting (must be chronological)
 router.get('/:salesOrderObjID/state',
            isAuthorized(PERMS.SALES_ORDER_READ),
+           setUserHierarchy,
            async function(req, res) {
-    console.log(req.user);
-    res.send('hello world');
+    try {
+        let salesOrderDoc = await SalesOrderModel.findOne({ _id: req.params.salesOrderObjID });
+        // Check if user is within user hierarchy for sales order
+        if (!req.userHierarchy.includes(salesOrderDoc.createdBy)) { 
+            return res.sendStatus(403); 
+        }
+        
+        // Check if user has permission to read sales order state data
+        // by checking `latestStatus`
+        if (!req.user.permissions.includes(`SALES_ORDER_${salesOrderDoc.latestStatus}_READ`)) {
+            return res.sendStatus(403);
+        }
+
+        // Query Parameters
+        let {
+            inc = ['status', 'additionalInfo', 'parts', 'updatedBy'],
+        } = req.query;
+    
+        // Convert `inc`/`sort` to array if only a single field is specified
+        if (!Array.isArray(inc)) { inc = [inc]; }
+    
+        await salesOrderDoc.populate('orders', inc.join(' ')).execPopulate();
+        return res.status(200).json(salesOrderDoc.orders);
+    } catch (err) {
+        logger.error(`GET /salesOrder/:salesOrderObjID/state: Could not get sales order states: ${err}`);
+        if (err instanceof mongoose.Error.CastError) {
+            return res.status(400).send('Invalid Sales Order ID');
+        }
+        return res.sendStatus(500);
+    }
 })
 
 module.exports = {
