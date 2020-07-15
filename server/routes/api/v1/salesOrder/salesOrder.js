@@ -199,6 +199,13 @@ router.get('/:salesOrderObjID',
     }
 })
 
+router.get('/:salesOrderObjID/state',
+           isAuthorized(PERMS.SALES_ORDER_READ),
+           async function(req, res) {
+    console.log(req.user);
+    res.send('hello world');
+})
+
 module.exports = {
     salesOrderRouter: router,
 }

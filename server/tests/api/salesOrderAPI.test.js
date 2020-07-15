@@ -485,7 +485,6 @@ describe.only('Testing /api/v1/salesOrder endpoint', () => {
             })
 
         done();
-        
     })
     
 

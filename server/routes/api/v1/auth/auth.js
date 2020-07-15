@@ -121,6 +121,7 @@ function isAuthenticated(req, res, next) {
         return res.sendStatus(401);
     }
 
+    user.permissions = pt.decode(user.permissions);
     req.user = user;
     next();
 }
@@ -142,8 +143,7 @@ function isAuthenticated(req, res, next) {
  */
 function isAuthorized(...requiredPerms) {
     return function(req, res, next) {
-        let userPerms = pt.decode(req.user.permissions);
-        if (!requiredPerms.every((requiredPerm) => userPerms.includes(requiredPerm))) {
+        if (!requiredPerms.every((requiredPerm) => req.user.permissions.includes(requiredPerm))) {
             return res.sendStatus(403);
         } else {
             next();
