@@ -236,7 +236,7 @@ incorporated into the database during testing/development.
 */
 const salesOrders = [
     {
-        createdBy: users[0].username,
+        createdBy: users[3].username,
         latestStatus: SO_STATES.CONFIRMED,
         customer: customers[0].name,        // Must be translated into Customer ObjID
         orderNumber: 'SO-000001',           // This field is not used by `DatabaseInteractor`
@@ -327,6 +327,29 @@ const salesOrders = [
                     }
                 ]
             }
+        ]
+    },
+    {
+        createdBy: users[3].username,
+        latestStatus: SO_STATES.QUOTATION,
+        customer: customers[2].name,        // Must be translated into Customer ObjID
+        orderNumber: 'SO-000003',           // This field is not used by `DatabaseInteractor`
+                                            // `SalesOrderSchema.setOrderNumber()` used instead
+                                            // Just for documentation purposes. 
+        additionalInfo: 'Third Sales Order.',
+        orders: [
+            {
+                status: SO_STATES.QUOTATION,
+                additionalInfo: 'Yet another draft.',
+                parts: [
+                    {
+                        partNumber: 'PN121', // Must be translated into Part ObjID,
+                        quantity: 1000,
+                        additionalInfo: 'Blue in color',
+                        fulfilledBy: []
+                    }
+                ]
+            },
         ]
     },
 ]

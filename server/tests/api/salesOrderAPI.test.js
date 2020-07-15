@@ -13,11 +13,16 @@ const { SO_STATES, PO_STATES } = require('../../data/databaseEnum');
 const testSalesOrders = require('../../data/databaseBootstrap').salesOrders;
 const testPurchaseOrders = require('../../data/databaseBootstrap').purchaseOrders;
 const testUsers = require('../../data/databaseBootstrap').users;
+const testCustomers = require('../../data/databaseBootstrap').customers;
 const { DatabaseInteractor } = require('../../data/DatabaseInteractor');
 const { salesOrderEndpoint,
         getAuthenticatedAgent } = require('./testUtils');
 const CONFIG = require('../../config');
 
+/**
+ * Note: This API uses the user hierarchy. Hence, the tester
+ * must take note of the user hierarchy when writing assertions.
+ */
 describe.only('Testing /api/v1/salesOrder endpoint', () => {
     let dbi = null;
     let server = null;
@@ -25,6 +30,11 @@ describe.only('Testing /api/v1/salesOrder endpoint', () => {
     let authenticatedReadAgent = null;          // SALES_ORDER_READ
     let authenticatedUnauthorizedAgent = null;  // No access to SALES_ORDER API
     // TODO: Add SALES_ORDER_<STATUS>_READ/WRITE Perms
+
+    const newSalesOrderMetaData = {
+        customerName: testCustomers[1].name, 
+        additionalInfo: 'API TEST: New Sales Order Meta-Data',
+    }
 
     beforeAll(async (done) => {
         dbi = new DatabaseInteractor();
@@ -69,6 +79,12 @@ describe.only('Testing /api/v1/salesOrder endpoint', () => {
      * ---------------------------------------
      * GET (Sales Order Meta-Data: collection)
      * ---------------------------------------
+     * 
+     * Note: authenticatedReadAgent has 2 sales
+     * orders (testSalesOrders[0] and testSalesOrders[2]),
+     * although there are 3 sales orders in total
+     * available in the test. This is due to the
+     * user hierarchy.
      */
     it(`GET /: User with SALES_ORDER_READ perm should be able
         to access the collection endpoint and retrieve the sales
@@ -140,6 +156,14 @@ describe.only('Testing /api/v1/salesOrder endpoint', () => {
 
     it(`GET /: User with SALES_ORDER_READ perm should be able
         to retrieve sales order meta-data with custom filters`, async (done) => {
+        // Without filters
+        await authenticatedReadAgent
+                .get(`${salesOrderEndpoint}?${query}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.salesOrders.length).toBe(2);
+                })
+        
         // Filter for sales orders (meta-data) with SO_STATES.CONFIRMED as their 
         // latest status
         let filter = { "latestStatus": SO_STATES.CONFIRMED };
@@ -150,7 +174,7 @@ describe.only('Testing /api/v1/salesOrder endpoint', () => {
                 .get(`${salesOrderEndpoint}?${query}`)
                 .expect(200)
                 .expect(res => {
-                    expect(res.body.salesOrders.length).toBe(2);
+                    expect(res.body.salesOrders.length).toBe(1);
                 })
 
         // Filter for sales orders (meta-data) whose `additionalInfo` field
@@ -178,8 +202,8 @@ describe.only('Testing /api/v1/salesOrder endpoint', () => {
                 .expect(res => {
                     expect(res.body.salesOrders.length).toBe(2);
                     expect(res.body.salesOrders[0].orderNumber).toBe(testSalesOrders[0].orderNumber);
-                    expect(res.body.salesOrders[1].orderNumber).toBe(testSalesOrders[1].orderNumber);
-                    expect(res.body.totalPages).toBe(Math.ceil(testSalesOrders.length / 2));
+                    expect(res.body.salesOrders[1].orderNumber).toBe(testSalesOrders[2].orderNumber);
+                    expect(res.body.totalPages).toBe(1);
                     expect(res.body.currentPage).toBe(1);
                 })
         
@@ -190,7 +214,7 @@ describe.only('Testing /api/v1/salesOrder endpoint', () => {
                 .expect(200)
                 .expect(res => {
                     expect(res.body.salesOrders.length).toBe(0);
-                    expect(res.body.totalPages).toBe(Math.ceil(testSalesOrders.length / 2));
+                    expect(res.body.totalPages).toBe(1);
                     expect(res.body.currentPage).toBe(2);
                 })
         done();
@@ -221,10 +245,50 @@ describe.only('Testing /api/v1/salesOrder endpoint', () => {
                 .get(`${salesOrderEndpoint}?${query}`)
                 .expect(200)
                 .expect(res => {
-                    expect(res.body.salesOrders.length).toBe(testSalesOrders.length);
-                    expect(res.body.salesOrders[0].orderNumber).toBe(testSalesOrders[testSalesOrders.length - 1].orderNumber);
-                    expect(res.body.salesOrders[1].orderNumber).toBe(testSalesOrders[testSalesOrders.length - 2].orderNumber);
+                    expect(res.body.salesOrders.length).toBe(2);
+                    expect(res.body.salesOrders[0].orderNumber).toBe(testSalesOrders[2].orderNumber); 
+                    expect(res.body.salesOrders[1].orderNumber).toBe(testSalesOrders[0].orderNumber);
                 })
+        done();
+    })
+
+    it(`GET /: User with SALES_ORDER_READ perm should only be
+        able to view sales order meta-data created by users 
+        underneath the user in the user hierarchy`, async (done) => {
+        const user1Account = await getAuthenticatedAgent(server, testUsers[1].username, testUsers[1].password);
+        await user1Account
+                .get(salesOrderEndpoint)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.salesOrders.length).toBe(3);
+                })
+        
+        await authenticatedReadAgent
+                .get(salesOrderEndpoint)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.salesOrders.length).toBe(2);
+                })
+        done();
+    })
+
+    it(`GET /: User with SALES_ORDER_READ perm should only be
+        able to view sales order meta-data created by users 
+        underneath the user in the user hierarchy, and user should
+        not be able to tamper with the user hierarchy.`, async (done) => {
+        let filter = { "createdBy": { "$in": ["admin", "user1"] }};
+        let query = queryString.stringify({
+            filter: JSON.stringify(filter)
+        });
+        await authenticatedReadAgent
+                .get(`${salesOrderEndpoint}?${query}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.salesOrders.length).toBe(2);
+                    expect(res.body.salesOrders[0].createdBy).toBe(testUsers[3].username);
+                    expect(res.body.salesOrders[1].createdBy).toBe(testUsers[3].username);
+                })
+
         done();
     })
 
@@ -234,6 +298,93 @@ describe.only('Testing /api/v1/salesOrder endpoint', () => {
         await authenticatedUnauthorizedAgent
                 .get(salesOrderEndpoint)
                 .expect(403);
+        done();
+    })
+
+    /**
+     * -----------------------------------------
+     * POST (Create a New Sales Order Meta-Data)
+     * -----------------------------------------
+     */
+    it(`POST /: User with SALES_ORDER_WRITE perm should
+        be able to create a new sales order meta-data`, async (done) => {
+        // Create new Sales Order Meta-Data
+        await authenticatedAdminAgent
+                .post(salesOrderEndpoint)
+                .send(newSalesOrderMetaData)
+                .expect(200)
+
+        // Should be able to retrieve in GET (collection) method
+        await authenticatedAdminAgent
+                .get(salesOrderEndpoint)
+                .expect(200)
+                .then(res => {
+                    expect(res.body.salesOrders.length).toBe(testSalesOrders.length + 1);
+                })
+        done();
+    })
+
+    it(`POST /: User with SALES_ORDER_WRITE perm should
+        not be able to create a new sales order meta data 
+        if the customer name field is missing`, async (done) => {
+        const newSalesOrderMetaDataWithoutCustomerName = JSON.parse(JSON.stringify(newSalesOrderMetaData));
+        delete newSalesOrderMetaDataWithoutCustomerName.customerName;
+
+        await authenticatedAdminAgent
+            .post(salesOrderEndpoint)
+            .send(newSalesOrderMetaDataWithoutCustomerName)
+            .expect(400)
+        
+        done();
+    })
+
+    it(`POST /: User with SALES_ORDER_WRITE perm should
+        not be able to specify 'createdBy', 'orderNumber'
+        and 'latestStatus' fields when creating a new
+        sales order meta-data, even if the values are
+        provided in the request`, async (done) => {
+        const newSalesOrderMetaDataWithExtraData = JSON.parse(JSON.stringify(newSalesOrderMetaData));
+        newSalesOrderMetaData.createdBy = testUsers[3].username;
+        newSalesOrderMetaData.latestStatus = SO_STATES.FULFILLED;
+        newSalesOrderMetaData.orderNumber = 'SO-INVALID';
+
+        let newSalesOrderObjID = null;
+        await authenticatedAdminAgent
+                .post(salesOrderEndpoint)
+                .send(newSalesOrderMetaDataWithExtraData)
+                .expect(200)
+                .then(res => {
+                    newSalesOrderObjID = res.body._id;
+                })
+
+        await authenticatedAdminAgent
+                .get(`${salesOrderEndpoint}/${newSalesOrderObjID}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.createdBy).not.toBe(newSalesOrderMetaDataWithExtraData.createdBy);
+                    expect(res.body.createdBy).toBe(testUsers[0].username);
+                    expect(res.body.latestStatus).not.toBe(newSalesOrderMetaDataWithExtraData.latestStatus);
+                    expect(res.body.latestStatus).toBe(SO_STATES.NEW);
+                    expect(res.body.orderNumber).not.toBe(newSalesOrderMetaDataWithExtraData.orderNumber);
+                })
+        
+        done();
+    })
+
+    it(`POST /: User without SALES_ORDER_WRITE perm should
+        not be able to create a new sales order meta-data`, async (done) => {
+        // Has SALES_ORDER_READ perm
+        await authenticatedReadAgent
+                .post(salesOrderEndpoint)
+                .send(newSalesOrderMetaData)
+                .expect(403)
+        
+        // Has neither SUPPLIER_READ nor SALES_ORDER_WRITE perm
+        await authenticatedUnauthorizedAgent
+                .post(salesOrderEndpoint)
+                .send(newSalesOrderMetaData)
+                .expect(403)
+        
         done();
     })
 
@@ -333,7 +484,7 @@ describe.only('Testing /api/v1/salesOrder endpoint', () => {
     //  * POST (Create a New Supplier)
     //  * ----------------------------
     //  */
-    // it(`POST /: User with SUPPLIER_WRITE perm should
+    // it(`POST /: User with SALES_ORDER_WRITE perm should
     //     be able to create a new supplier`, async (done) => {
     //     await authenticatedAdminAgent
     //             .post(salesOrderEndpoint)

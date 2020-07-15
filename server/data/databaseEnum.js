@@ -1,5 +1,6 @@
 // All possible states for Sales Orders
 const SO_STATES = Object.freeze({
+    NEW: 'NEW',
     QUOTATION: 'QUOTATION',
     CONFIRMED: 'CONFIRMED',
     PREPARING: 'PREPARING',
@@ -10,6 +11,7 @@ const SO_STATES = Object.freeze({
 
 // All possible states for Purchase Orders
 const PO_STATES = Object.freeze({
+    NEW: 'NEW',
     QUOTATION: 'QUOTATION',
     CONFIRMED: 'CONFIRMED',
     SENT: 'SENT',

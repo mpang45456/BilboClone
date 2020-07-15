@@ -85,6 +85,7 @@ class DatabaseInteractor {
      */
     async __resetAndSeedDatabase() {
         // Initialise Counters (For Sales and Purchase Orders)
+        await this.clearModelData(CounterModel);
         this.__initCounters();
 
         // Clear Model Data

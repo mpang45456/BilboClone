@@ -64,9 +64,9 @@ class UserHierarchy {
  * `isAuthenticated` middleware (because it relies on
  * `isAuthenticated` to set `req.user` first)
  */
-function setUserHierarchy(req, res, next) {
+async function setUserHierarchy(req, res, next) {
     try {
-        req.userHierarchy = UserHierarchy.getAllDescendents(req.user.username);
+        req.userHierarchy = await UserHierarchy.getAllDescendents(req.user.username);
         req.userHierarchy.push(req.user.username);
     } catch(err) {
         return res.status(500).send("Ooops, something went wrong");
@@ -75,5 +75,6 @@ function setUserHierarchy(req, res, next) {
 }
 
 module.exports = {
-    UserHierarchy
+    UserHierarchy,
+    setUserHierarchy,
 }
