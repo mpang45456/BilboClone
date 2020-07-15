@@ -409,7 +409,7 @@ describe.only('Testing /api/v1/salesOrder endpoint', () => {
 
     /**
      * ------------------------------------------------
-     * GET (Sales Order Meta-DAta: Individual Resource)
+     * GET (Sales Order Meta-Data: Individual Resource)
      * ------------------------------------------------
      */
     it(`GET /:salesOrderObjID: User with SALES_ORDER_READ perm
@@ -483,6 +483,80 @@ describe.only('Testing /api/v1/salesOrder endpoint', () => {
                 expect(res.body.orders).toBeTruthy();
                 expect(res.body.customer.name).toBe(newSalesOrderMetaData.customerName);
             })
+
+        done();
+    })
+
+    /**
+     * -----------------------------------------
+     * GET (Sales Order State Data - Collection)
+     * -----------------------------------------
+     */
+    it(`GET /:salesOrderObjID/state: User with SALES_ORDER_READ 
+        perm should be able to read sales order meta data with
+        default query fields`, async (done) => {
+        authenticatedAdminAgent
+            .get(`${salesOrderEndpoint}/${salesOrderObjID}/state`)
+            .expect(200)
+            .expect(res => {
+                expect(res.body.length).toBe(2);
+                expect(res.body[0].status).toBeTruthy();
+                expect(res.body[0].additionalInfo).toBeTruthy();
+                expect(res.body[0].parts).toBeTruthy();
+                expect(res.body[0].updatedBy).toBeTruthy();
+            })
+        
+        done();
+    })
+
+    it(`GET /:salesOrderObjID/state: User with SALES_ORDER_READ 
+        perm should be able to read sales order meta data with
+        custom query fields`, async (done) => {
+        let query = queryString.stringify({ inc: ['status', 'updatedBy', 'updatedAt'] });
+        authenticatedAdminAgent
+            .get(`${salesOrderEndpoint}/${salesOrderObjID}/state`)
+            .expect(200)
+            .expect(res => {
+                expect(res.body.length).toBe(2);
+                expect(res.body[0].status).toBeTruthy();
+                expect(res.body[0].additionalInfo).not.toBeTruthy();
+                expect(res.body[0].parts).not.toBeTruthy();
+                expect(res.body[0].updatedBy).toBeTruthy();
+                expect(res.body[0].updatedAt).toBeTruthy();
+            })
+        
+        done();
+    })
+    
+    it(`GET /:salesOrderObjID/state: User with SALES_ORDER_READ 
+        perm should only be able to access sales order state data
+        if the sales order meta data is created by a user that is
+        in the requesting user's user hierarchy`, async (done) => {
+        // Created by `user1` (so readable by `admin` but not `user3`)
+        const salesOrderDoc = await SalesOrderModel.findOne({ orderNumber: 'SO-000002' });
+
+        // `admin` user account
+        authenticatedAdminAgent
+            .get(`${salesOrderEndpoint}/${salesOrderDoc._id}/state`)
+            .expect(200)
+            .expect(res => {
+                expect(res.body.length).toBe(2);
+            })
+
+        // `user3` user account
+        authenticatedReadAgent
+            .get(`${salesOrderEndpoint}/${salesOrderDoc._id}/state`)
+            .expect(403);
+        
+        done();
+    })
+
+    it(`GET /:salesOrderObjID/state: User without SALES_ORDER_READ 
+        perm should not be able to access the endpoint and read
+        sales order state data`, async (done) => {
+        authenticatedUnauthorizedAgent
+            .get(`${salesOrderEndpoint}/${salesOrderObjID}/state`)
+            .expect(403);
 
         done();
     })

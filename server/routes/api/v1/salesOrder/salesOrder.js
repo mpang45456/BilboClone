@@ -13,6 +13,7 @@ const CONFIG = require('../../../../config');
 // Router Set-Up
 router.use(isAuthenticated);
 
+// TODO: Consider implementing a DELETE method
 /**
  * Mounted on /api/v1/salesOrder
  * 
@@ -199,8 +200,31 @@ router.get('/:salesOrderObjID',
     }
 })
 
-// Note: No pagination
-// Note: no filtering, no sorting (must be chronological)
+/**
+ * Mounted on '/api/v1/salesOrder/:salesOrderObjID/state
+ * 
+ * Returns sales order state data for the sales order
+ * identified by `salesOrderObjID`. Hence, this provides
+ * a history of changes to the state of the sales order.
+ * 
+ * Request query string can specify:
+ * 1. Which fields to include in sales order state (`inc`):
+ *    - The granularity is up till `SalesOrderStateSchema`
+ *      Hence, if including `parts`, then both `SalesOrderPartInfo`
+ *      and `SalesOrderPartFulfillment` will be automatically
+ *      included. 
+ *    - can include `createdAt` and `updatedAt` as well
+ * 
+ * Note: no pagination, filtering or sorting is enabled
+ * for this method. 
+ * 
+ * Note: The sales order must be created by a user within
+ * the requesting user's user hierarchy in order to be 
+ * authorized to access this resource. In other words, there 
+ * are 2 layers of authorization: 
+ * 1. PERMS.SALES_ORDER_READ, then
+ * 2. User hierarchy checks
+ */
 router.get('/:salesOrderObjID/state',
            isAuthorized(PERMS.SALES_ORDER_READ),
            setUserHierarchy,
@@ -209,13 +233,7 @@ router.get('/:salesOrderObjID/state',
         let salesOrderDoc = await SalesOrderModel.findOne({ _id: req.params.salesOrderObjID });
         // Check if user is within user hierarchy for sales order
         if (!req.userHierarchy.includes(salesOrderDoc.createdBy)) { 
-            return res.sendStatus(403); 
-        }
-        
-        // Check if user has permission to read sales order state data
-        // by checking `latestStatus`
-        if (!req.user.permissions.includes(`SALES_ORDER_${salesOrderDoc.latestStatus}_READ`)) {
-            return res.sendStatus(403);
+            return res.status(403).send('Unauthorized: User Hierarchy'); 
         }
 
         // Query Parameters
@@ -223,7 +241,7 @@ router.get('/:salesOrderObjID/state',
             inc = ['status', 'additionalInfo', 'parts', 'updatedBy'],
         } = req.query;
     
-        // Convert `inc`/`sort` to array if only a single field is specified
+        // Convert `inc` to array if only a single field is specified
         if (!Array.isArray(inc)) { inc = [inc]; }
     
         await salesOrderDoc.populate('orders', inc.join(' ')).execPopulate();
