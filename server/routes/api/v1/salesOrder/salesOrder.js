@@ -3,7 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 
 const logger = require('../../../../utils');
-const { SupplierModel, PartModel, CustomerModel, SalesOrderModel, SalesOrderStateModel } = require('../../../../data/database');
+const { SupplierModel, PartModel, CustomerModel, SalesOrderModel, SalesOrderStateModel, PurchaseOrderModel, PurchaseOrderStateModel } = require('../../../../data/database');
 const { PO_STATES, SO_STATES } = require('../../../../data/databaseEnum');
 const { isAuthenticated, isAuthorized } = require('../auth/auth');
 const { setUserHierarchy } = require('../user/hierarachy');
@@ -254,6 +254,107 @@ router.get('/:salesOrderObjID/state',
         return res.sendStatus(500);
     }
 })
+
+// TODO: Update docs
+// No manipulation done by method for partInfo. Must be in
+// correct format (i.e. part must be partObjID and not part number)
+// Data format exactly as in Schemas
+router.post('/:salesOrderObjID/state',
+            isAuthorized(PERMS.SALES_ORDER_READ),
+            setUserHierarchy,
+            async function(req, res) {
+    try {
+        let salesOrderDoc = await SalesOrderModel.findOne({ _id: req.params.salesOrderObjID })
+                                                 .populate('orders');
+        // Check if user is within user hierarchy for sales order
+        if (!req.userHierarchy.includes(salesOrderDoc.createdBy)) { 
+            return res.status(403).send('Unauthorized: User Hierarchy'); 
+        }
+
+        let { status, additionalInfo, parts } = req.body;
+        const soStateDoc = new SalesOrderStateModel({ status, 
+                                                      additionalInfo, 
+                                                      parts,
+                                                      updatedBy: req.user.username });
+        
+        for (let part of parts) {
+            // Check that partObjID is valid and corresponds to an actual part
+            const partDoc = await PartModel.findOne({ _id: part.part });
+            if (!partDoc) { return res.status(400).send('Invalid Part ID'); }
+        }
+                                                        
+        // TODO: Update allocation
+        // Note: Allocation only occurs when status is CONFIRMED
+        // if (status === SO_STATES.CONFIRMED) {
+        //     await performReversion(salesOrderDoc);
+
+        //     for (let part of parts) {
+    
+        //         // TODO: Check that part's partNumber and purchaseOrder's partNumber tally
+        //         for (let fulfillmentTarget of fulfilledBy) {
+        //             const poDoc = await PurchaseOrderModel.findOne({ _id: fulfillmentTarget.purchaseOrder });
+        //             // po must be in `quotation` state
+        //             if (poDoc.latestStatus !== PO_STATES.QUOTATION) {
+        //                 return res.status(400).send('Purchase Order Not in Quotation State');
+        //             }
+        //             poDoc.orders.
+        //             // po must cntain part number
+        //             // TODO: Check that allocation can happen (exists, sufficient, overwrite existing allocation)
+    
+        //         }
+    
+    
+        //         // TODO: This section of code must be carefully tested
+        //     }
+        // }
+
+
+
+
+
+
+
+
+
+
+
+
+        // Update Sales Order Meta Data
+        salesOrderDoc.latestStatus = status;
+        salesOrderDoc.orders.push(soStateDoc);
+        await salesOrderDoc.save();
+        await soStateDoc.save();
+
+        return res.status(200).json(soStateDoc);
+    } catch (err) {
+        // logger.error(`GET /salesOrder/:salesOrderObjID/state: Could not get sales order states: ${err}`);
+        // if (err instanceof mongoose.Error.CastError) {
+        //     return res.status(400).send('Invalid Sales Order ID');
+        // }
+        return res.sendStatus(500);
+    }
+})
+
+async function performReversion(salesOrderDoc) {
+    if (salesOrderDoc.orders && 
+        salesOrderDoc.orders[salesOrderDoc.orders.length - 1].status === SO_STATES.CONFIRMED) {
+        // Get last so state
+        const latestState = salesOrderDoc.orders[salesOrderDoc.orders.length - 1];
+        for (let latestStatePartInfo of latestState.parts) {
+            for (let fulfilledByObj of latestStatePartInfo.fulfilledBy) {
+                let poDoc = PurchaseOrderModel.update({ _id: fulfilledByObj.purchaseOrder },
+                                                      { $pull: {}}
+                    )
+                
+                ;
+                poDoc.orders[poDoc.orders.length - 1].parts.find(partInfo => partInfo.part === latestStatePartInfo.part)[0]
+                                                           .fulfilledFor
+
+            }
+        }
+            
+    }
+}
 
 module.exports = {
     salesOrderRouter: router,

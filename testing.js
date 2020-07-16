@@ -7,10 +7,90 @@ const { SupplierModel,
         PurchaseOrderModel } = require('./server/data/database');
 const { suppliers, salesOrders } = require('./server/data/databaseBootstrap');
 const { DatabaseInteractor } = require('./server/data/DatabaseInteractor');
+const { SO_STATES, PO_STATES } = require('./server/data/databaseEnum');
 
 (async function() {
     let dbi = new DatabaseInteractor();
     await dbi.initConnection(true);
+
+    // This works
+    // const latestState = await SalesOrderModel.findOne({}).select({ 'orders': { '$slice': -1 }}).exec();
+    // console.log(latestState);
+
+    // Check initial latest state
+    let salesOrderDoc = await SalesOrderModel.findOne({ orderNumber: 'SO-000001'})
+    let latestSOStateDoc = await SalesOrderStateModel.findOne({ _id: salesOrderDoc.orders[salesOrderDoc.orders.length - 1] });
+    console.log("------------- LATEST STATE -------------");
+    console.log(latestSOStateDoc);
+
+    // Populate Sales Order with Allocation (simulate user's allocation)
+    let purchaseOrderDoc = await PurchaseOrderModel.findOne({ orderNumber: 'PO-000001' });
+    latestSOStateDoc._doc._id = mongoose.Types.ObjectId();
+    latestSOStateDoc.isNew = true;
+    latestSOStateDoc.parts.map(partInfo => {
+        partInfo.fulfilledBy.push({
+            purchaseOrder: purchaseOrderDoc._id,
+            quantity: partInfo.quantity,
+        })
+    })
+    await latestSOStateDoc.save();
+    salesOrderDoc.orders.push(latestSOStateDoc);
+    await salesOrderDoc.save();
+    salesOrderDoc = await SalesOrderModel.findOne({ orderNumber: 'SO-000001'});
+    latestSOStateDoc = await SalesOrderStateModel.findOne({ _id: salesOrderDoc.orders[salesOrderDoc.orders.length - 1] });
+    console.log("------------- LATEST STATE -------------");
+    console.log(JSON.stringify(latestSOStateDoc, null, 2));
+
+    // Populate Purchase Order with Allocation (clean slate, no reversion necessary)
+    salesOrderDoc = await SalesOrderModel.findOne({ orderNumber: 'SO-000001'});
+    latestSOStateDoc = await SalesOrderStateModel.findOne({ _id: salesOrderDoc.orders[salesOrderDoc.orders.length - 1] }); // In the backend, this data comes in via request body
+    await Promise.all(latestSOStateDoc.parts.map(async soPartInfo => {
+        for (let fulfilledByTarget of soPartInfo.fulfilledBy) {
+            let purchaseOrderDocInner = await PurchaseOrderModel.findOne({ _id: fulfilledByTarget.purchaseOrder._id });
+            // console.log(purchaseOrderDocInner);
+            let latestPOStateDoc = await PurchaseOrderStateModel.findOne({ _id: purchaseOrderDocInner.orders[purchaseOrderDocInner.orders.length - 1] });
+            // console.log(latestPOStateDoc);
+            let index = latestPOStateDoc.parts.findIndex(poPartInfo => {
+                // console.log("------------- PO PART INFO -------------");
+                // console.log(poPartInfo);
+                // console.log("------------- SO PART INFO -------------");
+                // console.log(soPartInfo)
+                // console.log(`******** VALUE: ${String(poPartInfo.part) === String(soPartInfo.part)}`);
+                return String(poPartInfo.part) === String(soPartInfo.part);
+            })// TODO: check not undefined
+            // TODO: Change to updateCall
+            latestPOStateDoc.parts[index].fulfilledFor.push({
+                salesOrder: salesOrderDoc._id,
+                quantity: fulfilledByTarget.quantity,
+            })
+            await latestPOStateDoc.save();
+        }
+    }))
+
+    let purchaseOrderDoc2 = await PurchaseOrderModel.findOne({ orderNumber: 'PO-000001' });
+    let latestPOStateDoc = await PurchaseOrderStateModel.findOne({ _id: purchaseOrderDoc2.orders[purchaseOrderDoc2.orders.length - 1] });
+    console.log("------------- LATEST PO STATE -------------");
+    console.log(JSON.stringify(latestPOStateDoc, null, 2));
+
+    // Find latest SO state --> if confirmed --> perform reversion
+    //                      --> not confirmed --> proceed to perform allocation
+    // Get Purchase Order
+    // let purchaseOrderDoc = await PurchaseOrderModel.findOne({});
+
+    // // Populate with Purchase Order for Allocation
+    // salesOrderDoc.orders[salesOrderDoc.orders.length - 1].parts.map(partInfo => {
+    //     partInfo.fulfilledBy.push({
+    //         purchaseOrder: purchaseOrderDoc._id,
+    //         quantity: partInfo.quantity,
+    //     })
+    // })
+    // console.log(salesOrderDoc.orders[salesOrderDoc.orders.length - 1].parts);
+    // await salesOrderDoc.save();
+    // salesOrderDoc = await SalesOrderModel.findOne({ orderNumber: 'SO-000001'})
+    //                                      .populate('orders');
+    // console.log("------------- STARTING OUT -------------");
+    // console.log(salesOrderDoc.orders[salesOrderDoc.orders.length - 1]);
+
 
     
 
