@@ -130,3 +130,14 @@ are all siloed)
 `RESET_DB_ALL`: Resets all collections in the `test` database (because `NODE_ENV` is set to `test` in the npm script, see `package.json`)
 `RESET_DB_USERS`: Resets user collection
 ... and so on
+
+
+
+
+
+
+## Rules for Sales Order/Purchase Order States
+- Can only go forward, cannot go backwards
+- Can stay in the same state and persist changes
+- Can only make allocations from the sales orders side
+- Can only make allocations to purchase orders that have CONFIRMED status

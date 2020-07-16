@@ -24,14 +24,27 @@ const { SO_STATES, PO_STATES } = require('./server/data/databaseEnum');
     console.log(latestSOStateDoc);
 
     // Populate Sales Order with Allocation (simulate user's allocation)
-    let purchaseOrderDoc = await PurchaseOrderModel.findOne({ orderNumber: 'PO-000001' });
+    let purchaseOrderDoc1 = await PurchaseOrderModel.findOne({ orderNumber: 'PO-000001' });
+    let purchaseOrderDoc2 = await PurchaseOrderModel.findOne({ orderNumber: 'PO-000002' });
     latestSOStateDoc._doc._id = mongoose.Types.ObjectId();
     latestSOStateDoc.isNew = true;
-    latestSOStateDoc.parts.map(partInfo => {
-        partInfo.fulfilledBy.push({
-            purchaseOrder: purchaseOrderDoc._id,
-            quantity: partInfo.quantity,
-        })
+    // latestSOStateDoc.parts.map(partInfo => {
+    //     partInfo.fulfilledBy.push({
+    //         purchaseOrder: purchaseOrderDoc._id,
+    //         quantity: partInfo.quantity,
+    //     })
+    // })
+    latestSOStateDoc.parts[0].fulfilledBy.push({
+        purchaseOrder: purchaseOrderDoc1._id,
+        quantity: latestSOStateDoc.parts[0].quantity,
+    })
+    latestSOStateDoc.parts[1].fulfilledBy.push({
+        purchaseOrder: purchaseOrderDoc1._id,
+        quantity: latestSOStateDoc.parts[1].quantity,
+    })
+    latestSOStateDoc.parts[2].fulfilledBy.push({
+        purchaseOrder: purchaseOrderDoc2._id,
+        quantity: latestSOStateDoc.parts[2].quantity,
     })
     await latestSOStateDoc.save();
     salesOrderDoc.orders.push(latestSOStateDoc);
@@ -67,10 +80,42 @@ const { SO_STATES, PO_STATES } = require('./server/data/databaseEnum');
         }
     }))
 
-    let purchaseOrderDoc2 = await PurchaseOrderModel.findOne({ orderNumber: 'PO-000001' });
+    purchaseOrderDoc2 = await PurchaseOrderModel.findOne({ orderNumber: 'PO-000001' });
     let latestPOStateDoc = await PurchaseOrderStateModel.findOne({ _id: purchaseOrderDoc2.orders[purchaseOrderDoc2.orders.length - 1] });
     console.log("------------- LATEST PO STATE -------------");
     console.log(JSON.stringify(latestPOStateDoc, null, 2));
+
+    // Perform Reversion (based on SO state)
+    salesOrderDoc = await SalesOrderModel.findOne({ orderNumber: 'SO-000001'});
+    latestSOStateDoc = await SalesOrderStateModel.findOne({ _id: salesOrderDoc.orders[salesOrderDoc.orders.length - 1] }); // In the backend, this data comes in via request body
+    // Find the POs that the SO uses
+    let allPOs = latestSOStateDoc.parts.map(partInfo => {
+        return partInfo.fulfilledBy.map(fulfilledByTarget => String(fulfilledByTarget.purchaseOrder));
+    }).flat();
+    let allUniquePOs = Array.from(new Set(allPOs));
+    for (let poObjID of allUniquePOs) {
+        let poDoc = await PurchaseOrderModel.findOne({ _id: poObjID });
+        // console.log('PODOC');
+        // console.log(poDoc);
+        let poDocLatestState = await PurchaseOrderStateModel.findOne({ _id: poDoc.orders[poDoc.orders.length - 1]});
+        poDocLatestState.parts.map(partInfo => {
+            partInfo.fulfilledFor = partInfo.fulfilledFor.filter(fulfilledForTarget => {
+                String(fulfilledForTarget.salesOrder) !== String(salesOrderDoc._id);
+            })
+        })
+        // for (let i = 0; i < poDocLatestState.parts.length; i++) {
+        //     let index = poDocLatestState.parts[i].fulfilledFor.findIndex(fulfilledForTarget => String(fulfilledForTarget.purchaseOrder) === String(poDoc._id));
+        //     if (index > -1) {
+        //         poDocLatestState.parts[i].fulfilledFor.splice(index, 1);
+        //     }
+        // }
+        await poDocLatestState.save();
+    }
+    purchaseOrderDoc2 = await PurchaseOrderModel.findOne({ orderNumber: 'PO-000001' });
+    latestPOStateDoc = await PurchaseOrderStateModel.findOne({ _id: purchaseOrderDoc2.orders[purchaseOrderDoc2.orders.length - 1] });
+    console.log("------------- LATEST PO STATE (AFTER REVERSION) -------------");
+    console.log(JSON.stringify(latestPOStateDoc, null, 2));
+
 
     // Find latest SO state --> if confirmed --> perform reversion
     //                      --> not confirmed --> proceed to perform allocation

@@ -91,7 +91,7 @@ const suppliers = [
         address: 'Blk 321B Lorong Chuan Industrial Drive',
         parts: [
             {
-                partNumber: 'PN121',
+                partNumber: 'PN121-BX-N',
                 priceHistory: [],
                 description: 'A nail',
                 status: 'ACTIVE',
@@ -288,6 +288,13 @@ const salesOrders = [
                         quantity: 800,
                         additionalInfo: 'Not so urgent need for this part',
                         fulfilledBy: []
+                    },
+                    {
+                        // This part was not present during QUOTATION phase
+                        partNumber: 'PN121-BX-N', // Must be translated into Part ObjID,
+                        quantity: 950,
+                        additionalInfo: 'Not present during QUOTATION phase.',
+                        fulfilledBy: []
                     }
                 ]
             }
@@ -374,7 +381,7 @@ incorporated into the database during testing/development.
 */
 const purchaseOrders = [
     {
-        createdBy: users[0].username,
+        createdBy: users[3].username,
         latestStatus: PO_STATES.CONFIRMED,
         supplier: suppliers[3].name,        // Must be translated into Supplier ObjID
         orderNumber: 'PO-000001',           // This field is not used by `DatabaseInteractor`
@@ -385,7 +392,7 @@ const purchaseOrders = [
             {
                 status: PO_STATES.QUOTATION,
                 additionalInfo: 'Supplier should be able to deliver everything by 10th August',
-                updatedBy: users[0].username,
+                updatedBy: users[3].username,
                 parts: [
                     {
                         partNumber: 'BA2132-21Z', // Must be translated into Part ObjID,
@@ -410,7 +417,7 @@ const purchaseOrders = [
             {
                 status: PO_STATES.CONFIRMED,
                 additionalInfo: 'Supplier has guaranteed that everything can be delivered by 9th August',
-                updatedBy: users[0].username,
+                updatedBy: users[3].username,
                 parts: [
                     {
                         partNumber: 'BA2132-21Z', // Must be translated into Part ObjID,
@@ -430,6 +437,43 @@ const purchaseOrders = [
                         additionalInfo: '',
                         fulfilledFor: []
                     }
+                ]
+            },
+        ]
+    },
+    {
+        createdBy: users[3].username,
+        latestStatus: PO_STATES.CONFIRMED,
+        supplier: suppliers[1].name,        // Must be translated into Supplier ObjID
+        orderNumber: 'PO-000002',           // This field is not used by `DatabaseInteractor`
+                                            // `SalesOrderSchema.setOrderNumber()` used instead
+                                            // Just for documentation purposes. 
+        additionalInfo: 'Second Purchase Order',
+        orders: [
+            {
+                status: PO_STATES.QUOTATION,
+                additionalInfo: 'No delivery date promises',
+                updatedBy: users[3].username,
+                parts: [
+                    {
+                        partNumber: 'PN121-BX-N', // Must be translated into Part ObjID,
+                        quantity: 950,
+                        additionalInfo: 'Many-many relationship between SO and PO',
+                        fulfilledFor: []
+                    },
+                ]
+            },
+            {
+                status: PO_STATES.CONFIRMED,
+                additionalInfo: 'Delivery on 21st September',
+                updatedBy: users[3].username,
+                parts: [
+                    {
+                        partNumber: 'PN121-BX-N', // Must be translated into Part ObjID,
+                        quantity: 950,
+                        additionalInfo: 'Many-many relationship between SO and PO.',
+                        fulfilledFor: []
+                    },
                 ]
             },
         ]

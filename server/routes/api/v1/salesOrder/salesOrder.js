@@ -223,7 +223,7 @@ router.get('/:salesOrderObjID',
  * authorized to access this resource. In other words, there 
  * are 2 layers of authorization: 
  * 1. PERMS.SALES_ORDER_READ, then
- * 2. User hierarchy checks
+ * 2. User hierarchy checks // TODO: This might not make sense --> if the admin makes a change, you would want the users under admin to know too --> perhaps the only check should happen at the createdBy level
  */
 router.get('/:salesOrderObjID/state',
            isAuthorized(PERMS.SALES_ORDER_READ),
@@ -259,20 +259,29 @@ router.get('/:salesOrderObjID/state',
 // No manipulation done by method for partInfo. Must be in
 // correct format (i.e. part must be partObjID and not part number)
 // Data format exactly as in Schemas
+// TODO: Perform veritification checks --> check that there is sufficient number of parts in purchase order to satisfy sales order
+// Behaviour to test:
+/*
+- should only append 
+- actually performs allocation on so and po side
+// TODO: Check that allocation can happen (exists, sufficient, overwrite existing allocation)
+*/
 router.post('/:salesOrderObjID/state',
             isAuthorized(PERMS.SALES_ORDER_READ),
             setUserHierarchy,
             async function(req, res) {
     try {
-        let salesOrderDoc = await SalesOrderModel.findOne({ _id: req.params.salesOrderObjID })
-                                                 .populate('orders');
+        let salesOrderDoc = await SalesOrderModel.findOne({ _id: req.params.salesOrderObjID });
+        if (!salesOrderDoc) {
+            return res.status(400).send('Invalid Sales Order ID');
+        }
         // Check if user is within user hierarchy for sales order
         if (!req.userHierarchy.includes(salesOrderDoc.createdBy)) { 
             return res.status(403).send('Unauthorized: User Hierarchy'); 
         }
 
         let { status, additionalInfo, parts } = req.body;
-        const soStateDoc = new SalesOrderStateModel({ status, 
+        const newSOStateDoc = new SalesOrderStateModel({ status: status || salesOrderDoc.latestStatus, 
                                                       additionalInfo, 
                                                       parts,
                                                       updatedBy: req.user.username });
@@ -282,78 +291,84 @@ router.post('/:salesOrderObjID/state',
             const partDoc = await PartModel.findOne({ _id: part.part });
             if (!partDoc) { return res.status(400).send('Invalid Part ID'); }
         }
+
+        if (status === SO_STATES.CONFIRMED) {
+            // Allocation is only performed if the CONFIRMED status
+            const latestSOStateDoc = await SalesOrderStateModel.findOne({ _id: salesOrderDoc.orders[salesOrderDoc.orders.length - 1]});
+            // Reversion is only necessary if the previous state also had CONFIRMED status
+            // Because allocation is only performed if CONFIRMED status
+            if (latestSOStateDoc.status === SO_STATES.CONFIRMED) {
+                await revertAllocations(latestSOStateDoc, salesOrderDoc._id);
+            }
+    
+            performAllocations(parts, salesOrderDoc._id);
+        }
                                                         
-        // TODO: Update allocation
-        // Note: Allocation only occurs when status is CONFIRMED
-        // if (status === SO_STATES.CONFIRMED) {
-        //     await performReversion(salesOrderDoc);
-
-        //     for (let part of parts) {
-    
-        //         // TODO: Check that part's partNumber and purchaseOrder's partNumber tally
-        //         for (let fulfillmentTarget of fulfilledBy) {
-        //             const poDoc = await PurchaseOrderModel.findOne({ _id: fulfillmentTarget.purchaseOrder });
-        //             // po must be in `quotation` state
-        //             if (poDoc.latestStatus !== PO_STATES.QUOTATION) {
-        //                 return res.status(400).send('Purchase Order Not in Quotation State');
-        //             }
-        //             poDoc.orders.
-        //             // po must cntain part number
-        //             // TODO: Check that allocation can happen (exists, sufficient, overwrite existing allocation)
-    
-        //         }
-    
-    
-        //         // TODO: This section of code must be carefully tested
-        //     }
-        // }
-
-
-
-
-
-
-
-
-
-
-
-
         // Update Sales Order Meta Data
         salesOrderDoc.latestStatus = status;
-        salesOrderDoc.orders.push(soStateDoc);
+        salesOrderDoc.orders.push(newSOStateDoc);
         await salesOrderDoc.save();
-        await soStateDoc.save();
+        await newSOStateDoc.save();
 
-        return res.status(200).json(soStateDoc);
+        return res.status(200).json(newSOStateDoc);
     } catch (err) {
         // logger.error(`GET /salesOrder/:salesOrderObjID/state: Could not get sales order states: ${err}`);
         // if (err instanceof mongoose.Error.CastError) {
         //     return res.status(400).send('Invalid Sales Order ID');
         // }
+        logger.error(err);
         return res.sendStatus(500);
     }
 })
 
-async function performReversion(salesOrderDoc) {
-    if (salesOrderDoc.orders && 
-        salesOrderDoc.orders[salesOrderDoc.orders.length - 1].status === SO_STATES.CONFIRMED) {
-        // Get last so state
-        const latestState = salesOrderDoc.orders[salesOrderDoc.orders.length - 1];
-        for (let latestStatePartInfo of latestState.parts) {
-            for (let fulfilledByObj of latestStatePartInfo.fulfilledBy) {
-                let poDoc = PurchaseOrderModel.update({ _id: fulfilledByObj.purchaseOrder },
-                                                      { $pull: {}}
-                    )
-                
-                ;
-                poDoc.orders[poDoc.orders.length - 1].parts.find(partInfo => partInfo.part === latestStatePartInfo.part)[0]
-                                                           .fulfilledFor
+/**
+ * Revert the allocations stated in `soStateDoc`,
+ * which must be of schema `SalesOrderStateSchema`.
+ * 
+ * Note: it is assumed that the allocations stated in
+ * `soStateDoc` were actually performed.
+ * @param {Mongoose Document} soStateDoc 
+ */
+async function revertAllocations(soStateDoc, salesOrderObjID) {
+    // Find Purchase Orders associated with Sales Order State
+    // (because 1 SO can be fulfilled by multiple POs)
+    let allPOs = soStateDoc.parts.map(partInfo => {
+        return partInfo.fulfilledBy.map(fulfilledByTarget => String(fulfilledByTarget.purchaseOrder));
+    }).flat();
+    let allUniquePOs = Array.from(new Set(allPOs));
 
-            }
-        }
-            
+    // Perform reversions
+    for (let poObjID of allUniquePOs) {
+        let poDoc = await PurchaseOrderModel.findOne({ _id: poObjID });
+        let poLatestStateDoc = await PurchaseOrderStateModel.findOne({ _id: poDoc.orders[poDoc.orders.length - 1]});
+        poLatestStateDoc.parts.map(partInfo => {
+            // Remove the fulfillments associated with the SO
+            partInfo.fulfilledFor = partInfo.fulfilledFor.filter(fulfilledForTarget => {
+                String(fulfilledForTarget.salesOrder) !== salesOrderObjID;
+            })
+        })
+        await poLatestStateDoc.save();
     }
+}
+
+// Updates the latest PO State in place
+function performAllocations(partInfos, salesOrderObjID) {
+    console.log(JSON.stringify(partInfos, null, 2)); // FIXME: DEBUG
+    return Promise.all(partInfos.map(async soPartInfo => {
+        for (let fulfilledByTarget of soPartInfo.fulfilledBy) {
+            let purchaseOrderDocInner = await PurchaseOrderModel.findOne({ _id: fulfilledByTarget.purchaseOrder });
+            let poLatestStateDoc = await PurchaseOrderStateModel.findOne({ _id: purchaseOrderDocInner.orders[purchaseOrderDocInner.orders.length - 1] });
+            let index = poLatestStateDoc.parts.findIndex(poPartInfo => {
+                return String(poPartInfo.part) === String(soPartInfo.part);
+            })
+            // TODO: check not undefined
+            poLatestStateDoc.parts[index].fulfilledFor.push({
+                salesOrder: salesOrderObjID,
+                quantity: fulfilledByTarget.quantity,
+            })
+            await poLatestStateDoc.save();
+        }
+    }))
 }
 
 module.exports = {
