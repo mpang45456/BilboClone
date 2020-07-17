@@ -26,10 +26,9 @@ const CONFIG = require('../../config');
 describe('Testing /api/v1/salesOrder endpoint', () => {
     let dbi = null;
     let server = null;
-    let authenticatedAdminAgent = null;         // SALES_ORDER_READ, SALES_ORDER_WRITE, SALES_ORDER_<STATUS>_READ/WRITE
+    let authenticatedAdminAgent = null;         // SALES_ORDER_READ, SALES_ORDER_WRITE
     let authenticatedReadAgent = null;          // SALES_ORDER_READ
     let authenticatedUnauthorizedAgent = null;  // No access to SALES_ORDER API
-    // TODO: Add SALES_ORDER_<STATUS>_READ/WRITE Perms
 
     let salesOrderObjID = null;
 
@@ -356,9 +355,9 @@ describe('Testing /api/v1/salesOrder endpoint', () => {
         sales order meta-data, even if the values are
         provided in the request`, async (done) => {
         const newSalesOrderMetaDataWithExtraData = JSON.parse(JSON.stringify(newSalesOrderMetaData));
-        newSalesOrderMetaData.createdBy = testUsers[3].username;
-        newSalesOrderMetaData.latestStatus = SO_STATES.FULFILLED;
-        newSalesOrderMetaData.orderNumber = 'SO-INVALID';
+        newSalesOrderMetaDataWithExtraData.createdBy = testUsers[3].username;
+        newSalesOrderMetaDataWithExtraData.latestStatus = SO_STATES.FULFILLED;
+        newSalesOrderMetaDataWithExtraData.orderNumber = 'SO-INVALID';
 
         let newSalesOrderObjID = null;
         await authenticatedAdminAgent
@@ -399,19 +398,6 @@ describe('Testing /api/v1/salesOrder endpoint', () => {
         
         done();
     })
-
-    it(`These are the things that need to be tested: `, async (done) => {
-        const testString = `
-        GET sales order meta-data collection: 
-            - default query fields
-            - use of query strings
-            - use of filters
-            - exclusion of customer
-            - pagination
-        `;
-        done();
-    })
-
 
     /**
      * ------------------------------------------------
