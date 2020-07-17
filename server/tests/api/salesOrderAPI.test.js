@@ -23,7 +23,7 @@ const CONFIG = require('../../config');
  * Note: This API uses the user hierarchy. Hence, the tester
  * must take note of the user hierarchy when writing assertions.
  */
-describe.only('Testing /api/v1/salesOrder endpoint', () => {
+describe('Testing /api/v1/salesOrder endpoint', () => {
     let dbi = null;
     let server = null;
     let authenticatedAdminAgent = null;         // SALES_ORDER_READ, SALES_ORDER_WRITE, SALES_ORDER_<STATUS>_READ/WRITE
@@ -560,6 +560,159 @@ describe.only('Testing /api/v1/salesOrder endpoint', () => {
 
         done();
     })
+    
+    /**
+     * ----------------------------------------------------
+     * GET (Latest Sales Order State - Individual Resource)
+     * ----------------------------------------------------
+     */
+    it(`GET /:salesOrderObjID/state/latest: User with SALES_ORDER_READ 
+        perm should be able to access the endpoint to retrieve the 
+        latest sales order state data for a particular sales order 
+        if the sales order was created by someone within the user's 
+        user hierarchy`, async (done) => {
+        const salesOrderDoc = await SalesOrderModel.findOne({ orderNumber: 'SO-000001' });
+        await authenticatedReadAgent
+            .get(`${salesOrderEndpoint}/${salesOrderDoc._id}/state/latest`)
+            .expect(200)
+            .expect(res => {
+                const numOfStates = testSalesOrders[0].orders.length
+                expect(res.body.additionalInfo).toBe(testSalesOrders[0].orders[numOfStates - 1].additionalInfo);
+                expect(res.body.status).toBe(testSalesOrders[0].orders[numOfStates - 1].status);
+                expect(res.body.updatedBy).toBe(testSalesOrders[0].orders[numOfStates - 1].updatedBy);
+                for (const [index, part] of res.body.parts.entries()) {
+                    expect(part.additionalInfo).toBe(testSalesOrders[0].orders[numOfStates -1].parts[index].additionalInfo);
+                    expect(part.fulfilledBy).toStrictEqual(testSalesOrders[0].orders[numOfStates -1].parts[index].fulfilledBy);
+                    expect(part.quantity).toBe(testSalesOrders[0].orders[numOfStates -1].parts[index].quantity);
+                }
+            })
+        done();
+    })
+
+    it(`GET /:salesOrderObjID/state/latest: User with SALES_ORDER_READ 
+        perm should not be able to access the endpoint to retrieve the 
+        latest sales order state data for a particular sales order 
+        if the sales order was created by someone outside the user's 
+        user hierarchy`, async (done) => {
+        // Created by `user1`
+        const salesOrderDoc = await SalesOrderModel.findOne({ orderNumber: 'SO-000002' });
+        await authenticatedReadAgent
+            .get(`${salesOrderEndpoint}/${salesOrderDoc._id}/state/latest`)
+            .expect(403);
+
+        done();
+    })
+
+    it(`GET /:salesOrderObjID/state/latest: User without SALES_ORDER_READ 
+        perm should not be able to access the endpoint to retrieve the 
+        latest sales order state data regardless of user hierarchy`, async (done) => {
+        await authenticatedUnauthorizedAgent
+            .get(`${salesOrderEndpoint}/${salesOrderObjID}/state/latest`)
+            .expect(403);
+
+        done();
+    })
+
+    it(`GET /:salesOrderObjID/state/latest: User with SALES_ORDER_READ 
+        perm should get 400 status code response when providing an
+        invalid sales order object ID`, async (done) => {
+        // Valid ObjectID, but not from SalesOrderModel
+        const partDoc = await PartModel.findOne({});
+        await authenticatedAdminAgent
+            .get(`${salesOrderEndpoint}/${partDoc._id}/state/latest`)
+            .expect(400);
+        
+        // Invalid ObjectID
+        await authenticatedAdminAgent
+            .get(`${salesOrderEndpoint}/123/state/latest`)
+            .expect(400);
+        done();
+    })
+    
+    /**
+     * ----------------------------------------------------
+     * GET (Particular Sales Order State - Individual Resource)
+     * ----------------------------------------------------
+     */
+    it(`GET /:salesOrderObjID/state/:index: User with SALES_ORDER_READ 
+        perm should be able to access the endpoint to retrieve the 
+        sales order state data at the index for a particular sales order 
+        if the sales order was created by someone within the user's 
+        user hierarchy`, async (done) => {
+        const salesOrderDoc = await SalesOrderModel.findOne({ orderNumber: 'SO-000001' });
+        
+        for (let i = 0; i < testSalesOrders[0].orders.length; i++) {
+            await authenticatedReadAgent
+                .get(`${salesOrderEndpoint}/${salesOrderDoc._id}/state/${i}`)
+                .expect(200)
+                .expect(res => {
+                    const numOfStates = testSalesOrders[0].orders.length
+                    expect(res.body.additionalInfo).toBe(testSalesOrders[0].orders[i].additionalInfo);
+                    expect(res.body.status).toBe(testSalesOrders[0].orders[i].status);
+                    expect(res.body.updatedBy).toBe(testSalesOrders[0].orders[i].updatedBy);
+                    for (const [index, part] of res.body.parts.entries()) {
+                        expect(part.additionalInfo).toBe(testSalesOrders[0].orders[i].parts[index].additionalInfo);
+                        expect(part.fulfilledBy).toStrictEqual(testSalesOrders[0].orders[i].parts[index].fulfilledBy);
+                        expect(part.quantity).toBe(testSalesOrders[0].orders[i].parts[index].quantity);
+                    }
+                })
+        }
+        done();
+    })
+
+    it(`GET /:salesOrderObjID/state/:index: User with SALES_ORDER_READ 
+        perm should not be able to access the endpoint to retrieve the 
+        sales order state data at the index for a particular sales order 
+        if the sales order was created by someone outside the user's 
+        user hierarchy`, async (done) => {
+        // Created by `user1`
+        const salesOrderDoc = await SalesOrderModel.findOne({ orderNumber: 'SO-000002' });
+        await authenticatedReadAgent
+            .get(`${salesOrderEndpoint}/${salesOrderDoc._id}/state/0`)
+            .expect(403);
+
+        done();
+    })
+
+    it(`GET /:salesOrderObjID/state/:index: User without SALES_ORDER_READ 
+        perm should not be able to access the endpoint to retrieve the 
+        latest sales order state data regardless of user hierarchy`, async (done) => {
+        await authenticatedUnauthorizedAgent
+            .get(`${salesOrderEndpoint}/${salesOrderObjID}/state/0`)
+            .expect(403);
+
+        done();
+    })
+
+    it(`GET /:salesOrderObjID/state/:index: User with SALES_ORDER_READ 
+        perm should get 400 status code response when providing an
+        invalid sales order object ID`, async (done) => {
+        // Valid ObjectID, but not from SalesOrderModel
+        const partDoc = await PartModel.findOne({});
+        await authenticatedAdminAgent
+            .get(`${salesOrderEndpoint}/${partDoc._id}/state/0`)
+            .expect(400);
+        
+        // Invalid ObjectID
+        await authenticatedAdminAgent
+            .get(`${salesOrderEndpoint}/123/state/0`)
+            .expect(400);
+        done();
+    })
+
+    it(`GET /:salesOrderObjID/state/:index: User with SALES_ORDER_READ 
+        perm receive null if the index specified is invalid`, async (done) => {
+        const invalidIndex = 1000;
+        await authenticatedReadAgent
+            .get(`${salesOrderEndpoint}/${salesOrderObjID}/state/${invalidIndex}`)
+            .expect(200)
+            .expect(res => {
+                expect(res.body).toBeNull();
+            });
+
+        done();
+    })
+
     
 
     // /**

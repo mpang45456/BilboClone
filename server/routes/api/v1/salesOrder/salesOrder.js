@@ -371,6 +371,80 @@ function performAllocations(partInfos, salesOrderObjID) {
     }))
 }
 
+/**
+ * Mounted on /api/v1/salesOrder/:salesOrderObjID/state/latest
+ * 
+ * Returns latest sales order state data for the sales
+ * order identified by `:salesOrderObjID`
+ * 
+ * Note: Authorization is performed in the following order:
+ * 1. User has `PERMS.SALES_ORDER_READ`
+ * 2. Sales order associated with `:salesOrderObjID` was
+ *    created by a user in the requesting user's user hierarchy
+ */
+router.get('/:salesOrderObjID/state/latest',
+           isAuthorized(PERMS.SALES_ORDER_READ),
+           setUserHierarchy,
+           async function(req, res) {
+    try {
+        let salesOrderDoc = await SalesOrderModel.findOne({ _id: req.params.salesOrderObjID });
+        if (!salesOrderDoc) { return res.status(400).send('Invalid Sales Order ID'); }
+        
+        // Check if user is within user hierarchy for sales order
+        if (!req.userHierarchy.includes(salesOrderDoc.createdBy)) { 
+            return res.status(403).send('Unauthorized: User Hierarchy'); 
+        }
+
+        const latestSOStateDoc = await SalesOrderStateModel.findOne({ _id: salesOrderDoc.orders[salesOrderDoc.orders.length - 1]});
+        return res.status(200).json(latestSOStateDoc);
+    } catch(err) {
+        logger.error(`GET /salesOrder/:salesOrderObjID/state/latest: Could not get latest sales order state: ${err}`);
+        if (err instanceof mongoose.Error.CastError) {
+            return res.status(400).send('Invalid supplier ID');
+        }
+        return res.sendStatus(500);
+    }
+})
+
+/**
+ * Mounted on /api/v1/salesOrder/:salesOrderObjID/state/:index
+ * 
+ * Returns sales order state data at `:index` for the sales
+ * order identified by `:salesOrderObjID`
+ * 
+ * Note: Authorization is performed in the following order:
+ * 1. User has `PERMS.SALES_ORDER_READ`
+ * 2. Sales order associated with `:salesOrderObjID` was
+ *    created by a user in the requesting user's user hierarchy
+ * 
+ * Note: If the index corresponds to a sales order state 
+ * that does not exist, then `null` is returned in the 
+ * response. 
+ */
+router.get('/:salesOrderObjID/state/:salesOrderStateIndex',
+           isAuthorized(PERMS.SALES_ORDER_READ),
+           setUserHierarchy,
+           async function(req, res) {
+    try {
+        let salesOrderDoc = await SalesOrderModel.findOne({ _id: req.params.salesOrderObjID });
+        if (!salesOrderDoc) { return res.status(400).send('Invalid Sales Order ID'); }
+        
+        // Check if user is within user hierarchy for sales order
+        if (!req.userHierarchy.includes(salesOrderDoc.createdBy)) { 
+            return res.status(403).send('Unauthorized: User Hierarchy'); 
+        }
+
+        const soStateDoc = await SalesOrderStateModel.findOne({ _id: salesOrderDoc.orders[Number(req.params.salesOrderStateIndex)] });
+        return res.status(200).json(soStateDoc);
+    } catch(err) {
+        logger.error(`GET /:salesOrderObjID/state/:salesOrderStateObjID: Could not get sales order state: ${err}`);
+        if (err instanceof mongoose.Error.CastError) {
+            return res.status(400).send('Invalid sales order meta-data/state ID');
+        }
+        return res.sendStatus(500);
+    }
+})
+
 module.exports = {
     salesOrderRouter: router,
 }
