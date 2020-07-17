@@ -19,6 +19,9 @@ router.use('/customer', customerRouter);
 const { salesOrderRouter } = require('./salesOrder/salesOrder');
 router.use('/salesOrder', salesOrderRouter);
 
+const { purchaseOrderRouter } = require('./purchaseOrder/purchaseOrder');
+router.use('/purchaseOrder', purchaseOrderRouter);
+
 module.exports = {
     apiV1Router: router
 }
