@@ -228,7 +228,7 @@ router.get('/:salesOrderObjID',
  * authorized to access this resource. In other words, there 
  * are 2 layers of authorization: 
  * 1. PERMS.SALES_ORDER_READ, then
- * 2. User hierarchy checks // TODO: This might not make sense --> if the admin makes a change, you would want the users under admin to know too --> perhaps the only check should happen at the createdBy level
+ * 2. User hierarchy checks
  */
 router.get('/:salesOrderObjID/state',
            isAuthorized(PERMS.SALES_ORDER_READ),
@@ -286,7 +286,7 @@ router.get('/:salesOrderObjID/state',
  *   `status`
  * - `orders` is appended with the new state
  * 
- * // TODO: Perform verificiation checks
+ * // TODO: Perform verification checks
  * - `parts` in `req.body` must have correct format
  * - objectIDs specified in request must actually correspond
  *   to a document of the correct Schema

@@ -24,7 +24,7 @@ const CONFIG = require('../../config');
  * Note: This API uses the user hierarchy. Hence, the tester
  * must take note of the user hierarchy when writing assertions.
  */
-describe('Testing /api/v1/salesOrder endpoint', () => {
+describe('Testing /api/v1/purchaseOrder endpoint', () => {
     let dbi = null;
     let server = null;
     let authenticatedAdminAgent = null;         // PURCHASE_ORDER_READ, PURCHASE_ORDER_WRITE

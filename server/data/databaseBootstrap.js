@@ -39,7 +39,7 @@ const users = [
         // Read Permissions User
         "username": "user3",
         "password": "asd",
-        "permissions": [PERMS.USER_READ, PERMS.SUPPLIER_READ, PERMS.PART_READ, PERMS.CUSTOMER_READ, PERMS.SALES_ORDER_READ, PERMS.PURCHASE_ORDER_READ],
+        "permissions": [PERMS.USER_READ, PERMS.SUPPLIER_READ, PERMS.PART_READ, PERMS.CUSTOMER_READ, PERMS.SALES_ORDER_READ, PERMS.PURCHASE_ORDER_READ, PERMS.WAREHOUSE_READ],
         "name": "Gandalf",
         "position": "Sales Intern",
         "reportsTo": "user1"
@@ -368,6 +368,57 @@ const salesOrders = [
                         partNumber: 'PN121', // Must be translated into Part ObjID,
                         quantity: 1000,
                         additionalInfo: 'Blue in color',
+                        fulfilledBy: []
+                    }
+                ]
+            },
+        ]
+    },
+    {
+        // For testing Warehouse API
+        createdBy: users[1].username,
+        latestStatus: SO_STATES.PREPARING,
+        customer: customers[3].name,        // Must be translated into Customer ObjID
+        orderNumber: 'SO-000004',           // This field is not used by `DatabaseInteractor`
+                                            // `SalesOrderSchema.setOrderNumber()` used instead
+                                            // Just for documentation purposes. 
+        additionalInfo: 'Fourth Sales Order.',
+        orders: [
+            {
+                status: SO_STATES.QUOTATION,
+                additionalInfo: 'Yet another draft.',
+                updatedBy: users[1].username,
+                parts: [
+                    {
+                        partNumber: 'PN101', // Must be translated into Part ObjID,
+                        quantity: 5000,
+                        additionalInfo: 'One of many',
+                        fulfilledBy: []
+                    }
+                ]
+            },
+            {
+                status: SO_STATES.CONFIRMED,
+                additionalInfo: 'Has been confirmed.',
+                updatedBy: users[1].username,
+                parts: [
+                    {
+                        partNumber: 'PN101', // Must be translated into Part ObjID,
+                        quantity: 5000,
+                        additionalInfo: 'One of many',
+                        fulfilledBy: []
+                    }
+                ]
+            },
+            {
+                status: SO_STATES.PREPARING,
+                additionalInfo: 'Awaiting warehouse reception and preparation.',
+                updatedBy: users[1].username,
+                parts: [
+                    {
+                        partNumber: 'PN101', // Must be translated into Part ObjID,
+                        quantity: 5000,
+                        additionalInfo: 'One of many',
                         fulfilledBy: []
                     }
                 ]
