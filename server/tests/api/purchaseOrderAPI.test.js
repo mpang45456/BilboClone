@@ -321,7 +321,7 @@ describe('Testing /api/v1/salesOrder endpoint', () => {
      * POST (Create a New Purchase Order Meta-Data)
      * -------------------------------------------
      */
-    it.only(`POST /: User with PURCHASE_ORDER_WRITE perm should
+    it(`POST /: User with PURCHASE_ORDER_WRITE perm should
         be able to create a new purchase order meta-data`, async (done) => {
         // Create new Purchase Order Meta-Data
         await authenticatedAdminAgent
@@ -339,7 +339,7 @@ describe('Testing /api/v1/salesOrder endpoint', () => {
         done();
     })
 
-    it.only(`POST /: User with PURCHASE_ORDER_WRITE perm should
+    it(`POST /: User with PURCHASE_ORDER_WRITE perm should
         not be able to create a new purchase order meta data 
         if the supplier name field is missing`, async (done) => {
         const newPurchaseOrderMetaDataWithoutSupplierName = JSON.parse(JSON.stringify(newPurchaseOrderMetaData));
@@ -353,7 +353,7 @@ describe('Testing /api/v1/salesOrder endpoint', () => {
         done();
     })
 
-    it.only(`POST /: User with PURCHASE_ORDER_WRITE perm should
+    it(`POST /: User with PURCHASE_ORDER_WRITE perm should
         not be able to specify 'createdBy', 'orderNumber'
         and 'latestStatus' fields when creating a new
         sales order meta-data, even if the values are
@@ -386,7 +386,7 @@ describe('Testing /api/v1/salesOrder endpoint', () => {
         done();
     })
 
-    it.only(`POST /: User without PURCHASE_ORDER_WRITE perm should
+    it(`POST /: User without PURCHASE_ORDER_WRITE perm should
         not be able to create a new purchase order meta-data`, async (done) => {
         // Has PURCHASE_ORDER_READ perm
         await authenticatedReadAgent
@@ -408,7 +408,7 @@ describe('Testing /api/v1/salesOrder endpoint', () => {
      * GET (Purchase Order Meta-Data: Individual Resource)
      * --------------------------------------------------
      */
-    it.only(`GET /:purchaseOrderObjID: User with PURCHASE_ORDER_READ perm
+    it(`GET /:purchaseOrderObjID: User with PURCHASE_ORDER_READ perm
         should not be able to access an invalid purchaseOrderObjID`, async (done) => {
         // Invalid ObjID (valid for another collection)
         const partDoc = await PartModel.findOne({});
@@ -423,7 +423,7 @@ describe('Testing /api/v1/salesOrder endpoint', () => {
         done();
     })
 
-    it.only(`GET /:purchaseOrderObjID: User without PURCHASE_ORDER_READ perm 
+    it(`GET /:purchaseOrderObjID: User without PURCHASE_ORDER_READ perm 
         should not be able to access the endpoint and retrieve
         purchase order meta data`, async(done) => {
         await authenticatedUnauthorizedAgent
@@ -432,7 +432,7 @@ describe('Testing /api/v1/salesOrder endpoint', () => {
         done();
     })
 
-    it.only(`GET /:purchaseOrderObjID: User with PURCHASE_ORDER_READ perm
+    it(`GET /:purchaseOrderObjID: User with PURCHASE_ORDER_READ perm
         should only be able to access a purchase order meta data
         created by a user under the user in the user hierarchy`, async (done) => {
         // `admin` user creates a purchase order meta data object
@@ -483,231 +483,236 @@ describe('Testing /api/v1/salesOrder endpoint', () => {
         done();
     })
 
-    // /**
-    //  * -----------------------------------------
-    //  * GET (Sales Order State Data - Collection)
-    //  * -----------------------------------------
-    //  */
-    // it(`GET /:purchaseOrderObjID/state: User with PURCHASE_ORDER_READ 
-    //     perm should be able to read sales order meta data with
-    //     default query fields`, async (done) => {
-    //     authenticatedAdminAgent
-    //         .get(`${purchaseOrderEndpoint}/${purchaseOrderObjID}/state`)
-    //         .expect(200)
-    //         .expect(res => {
-    //             expect(res.body.length).toBe(2);
-    //             expect(res.body[0].status).toBeTruthy();
-    //             expect(res.body[0].additionalInfo).toBeTruthy();
-    //             expect(res.body[0].parts).toBeTruthy();
-    //             expect(res.body[0].updatedBy).toBeTruthy();
-    //         })
+    /**
+     * -------------------------------------------
+     * GET (Purchase Order State Data - Collection)
+     * -------------------------------------------
+     */
+    it(`GET /:purchaseOrderObjID/state: User with PURCHASE_ORDER_READ 
+        perm should be able to read purchase order meta data with
+        default query fields`, async (done) => {
+        authenticatedAdminAgent
+            .get(`${purchaseOrderEndpoint}/${purchaseOrderObjID}/state`)
+            .expect(200)
+            .expect(res => {
+                expect(res.body.length).toBe(testPurchaseOrders[0].orders.length);
+                expect(res.body[0].status).toBeTruthy();
+                expect(res.body[0].additionalInfo).toBeTruthy();
+                expect(res.body[0].parts).toBeTruthy();
+                expect(res.body[0].updatedBy).toBeTruthy();
+            })
         
-    //     done();
-    // })
+        done();
+    })
 
-    // it(`GET /:purchaseOrderObjID/state: User with PURCHASE_ORDER_READ 
-    //     perm should be able to read sales order meta data with
-    //     custom query fields`, async (done) => {
-    //     let query = queryString.stringify({ inc: ['status', 'updatedBy', 'updatedAt'] });
-    //     authenticatedAdminAgent
-    //         .get(`${purchaseOrderEndpoint}/${purchaseOrderObjID}/state`)
-    //         .expect(200)
-    //         .expect(res => {
-    //             expect(res.body.length).toBe(2);
-    //             expect(res.body[0].status).toBeTruthy();
-    //             expect(res.body[0].additionalInfo).not.toBeTruthy();
-    //             expect(res.body[0].parts).not.toBeTruthy();
-    //             expect(res.body[0].updatedBy).toBeTruthy();
-    //             expect(res.body[0].updatedAt).toBeTruthy();
-    //         })
+    it(`GET /:purchaseOrderObjID/state: User with PURCHASE_ORDER_READ 
+        perm should be able to read purchase order meta data with
+        custom query fields`, async (done) => {
+        let query = queryString.stringify({ inc: ['status', 'updatedBy', 'updatedAt'] });
+        authenticatedAdminAgent
+            .get(`${purchaseOrderEndpoint}/${purchaseOrderObjID}/state`)
+            .expect(200)
+            .expect(res => {
+                expect(res.body.length).toBe(testPurchaseOrders[0].orders.length);
+                expect(res.body[0].status).toBeTruthy();s
+                expect(res.body[0].additionalInfo).not.toBeTruthy();
+                expect(res.body[0].parts).not.toBeTruthy();
+                expect(res.body[0].updatedBy).toBeTruthy();
+                expect(res.body[0].updatedAt).toBeTruthy();
+            })
         
-    //     done();
-    // })
+        done();
+    })
     
-    // it(`GET /:purchaseOrderObjID/state: User with PURCHASE_ORDER_READ 
-    //     perm should only be able to access sales order state data
-    //     if the sales order meta data is created by a user that is
-    //     in the requesting user's user hierarchy`, async (done) => {
-    //     // Created by `user1` (so readable by `admin` but not `user3`)
-    //     const salesOrderDoc = await SalesOrderModel.findOne({ orderNumber: 'SO-000002' });
+    it(`GET /:purchaseOrderObjID/state: User with PURCHASE_ORDER_READ 
+        perm should only be able to access purchase order state data
+        if the purchase order meta data is created by a user that is
+        in the requesting user's user hierarchy`, async (done) => {
+        // Created by `user1` (so readable by `admin` but not `user3`)
+        const purchaseOrderDoc = await PurchaseOrderModel.findOne({ orderNumber: 'PO-000002' });
 
-    //     // `admin` user account
-    //     authenticatedAdminAgent
-    //         .get(`${purchaseOrderEndpoint}/${salesOrderDoc._id}/state`)
-    //         .expect(200)
-    //         .expect(res => {
-    //             expect(res.body.length).toBe(2);
-    //         })
+        // `admin` user account
+        authenticatedAdminAgent
+            .get(`${purchaseOrderEndpoint}/${purchaseOrderDoc._id}/state`)
+            .expect(200)
+            .expect(res => {
+                expect(res.body.length).toBe(2);
+            })
 
-    //     // `user3` user account
-    //     authenticatedReadAgent
-    //         .get(`${purchaseOrderEndpoint}/${salesOrderDoc._id}/state`)
-    //         .expect(403);
+        // `user4` user account
+        const user4 = testUsers[4];
+        authenticatedUser4Account = await getAuthenticatedAgent(server, user4.username, user4.password);
+        authenticatedUser4Account
+            .get(`${purchaseOrderEndpoint}/${purchaseOrderDoc._id}/state`)
+            .expect(403);
         
-    //     done();
-    // })
+        done();
+    })
 
-    // it(`GET /:purchaseOrderObjID/state: User without PURCHASE_ORDER_READ 
-    //     perm should not be able to access the endpoint and read
-    //     sales order state data`, async (done) => {
-    //     authenticatedUnauthorizedAgent
-    //         .get(`${purchaseOrderEndpoint}/${purchaseOrderObjID}/state`)
-    //         .expect(403);
+    it(`GET /:purchaseOrderObjID/state: User without PURCHASE_ORDER_READ 
+        perm should not be able to access the endpoint and read
+        purchase order state data`, async (done) => {
+        authenticatedUnauthorizedAgent
+            .get(`${purchaseOrderEndpoint}/${purchaseOrderObjID}/state`)
+            .expect(403);
 
-    //     done();
-    // })
+        done();
+    })
     
-    // /**
-    //  * ----------------------------------------------------
-    //  * GET (Latest Sales Order State - Individual Resource)
-    //  * ----------------------------------------------------
-    //  */
-    // it(`GET /:purchaseOrderObjID/state/latest: User with PURCHASE_ORDER_READ 
-    //     perm should be able to access the endpoint to retrieve the 
-    //     latest sales order state data for a particular sales order 
-    //     if the sales order was created by someone within the user's 
-    //     user hierarchy`, async (done) => {
-    //     const salesOrderDoc = await SalesOrderModel.findOne({ orderNumber: 'SO-000001' });
-    //     await authenticatedReadAgent
-    //         .get(`${purchaseOrderEndpoint}/${salesOrderDoc._id}/state/latest`)
-    //         .expect(200)
-    //         .expect(res => {
-    //             const numOfStates = testSalesOrders[0].orders.length
-    //             expect(res.body.additionalInfo).toBe(testSalesOrders[0].orders[numOfStates - 1].additionalInfo);
-    //             expect(res.body.status).toBe(testSalesOrders[0].orders[numOfStates - 1].status);
-    //             expect(res.body.updatedBy).toBe(testSalesOrders[0].orders[numOfStates - 1].updatedBy);
-    //             for (const [index, part] of res.body.parts.entries()) {
-    //                 expect(part.additionalInfo).toBe(testSalesOrders[0].orders[numOfStates -1].parts[index].additionalInfo);
-    //                 expect(part.fulfilledBy).toStrictEqual(testSalesOrders[0].orders[numOfStates -1].parts[index].fulfilledBy);
-    //                 expect(part.quantity).toBe(testSalesOrders[0].orders[numOfStates -1].parts[index].quantity);
-    //             }
-    //         })
-    //     done();
-    // })
+    /**
+     * ----------------------------------------------------
+     * GET (Latest Sales Order State - Individual Resource)
+     * ----------------------------------------------------
+     */
+    it(`GET /:purchaseOrderObjID/state/latest: User with PURCHASE_ORDER_READ 
+        perm should be able to access the endpoint to retrieve the 
+        latest purchase order state data for a particular purchase order 
+        if the purchase order was created by someone within the user's 
+        user hierarchy`, async (done) => {
+        const purchaseOrderDoc = await PurchaseOrderModel.findOne({ orderNumber: 'PO-000001' });
+        await authenticatedAdminAgent
+            .get(`${purchaseOrderEndpoint}/${purchaseOrderDoc._id}/state/latest`)
+            .expect(200)
+            .expect(res => {
+                const numOfStates = testPurchaseOrders[0].orders.length;
+                expect(res.body.additionalInfo).toBe(testPurchaseOrders[0].orders[numOfStates - 1].additionalInfo);
+                expect(res.body.status).toBe(testPurchaseOrders[0].orders[numOfStates - 1].status);
+                expect(res.body.updatedBy).toBe(testPurchaseOrders[0].orders[numOfStates - 1].updatedBy);
+                for (const [index, part] of res.body.parts.entries()) {
+                    expect(part.additionalInfo).toBe(testPurchaseOrders[0].orders[numOfStates -1].parts[index].additionalInfo);
+                    expect(part.fulfilledBy).toStrictEqual(testPurchaseOrders[0].orders[numOfStates -1].parts[index].fulfilledBy);
+                    expect(part.quantity).toBe(testPurchaseOrders[0].orders[numOfStates -1].parts[index].quantity);
+                }
+            })
+        done();
+    })
 
-    // it(`GET /:purchaseOrderObjID/state/latest: User with PURCHASE_ORDER_READ 
-    //     perm should not be able to access the endpoint to retrieve the 
-    //     latest sales order state data for a particular sales order 
-    //     if the sales order was created by someone outside the user's 
-    //     user hierarchy`, async (done) => {
-    //     // Created by `user1`
-    //     const salesOrderDoc = await SalesOrderModel.findOne({ orderNumber: 'SO-000002' });
-    //     await authenticatedReadAgent
-    //         .get(`${purchaseOrderEndpoint}/${salesOrderDoc._id}/state/latest`)
-    //         .expect(403);
+    it(`GET /:purchaseOrderObjID/state/latest: User with PURCHASE_ORDER_READ 
+        perm should not be able to access the endpoint to retrieve the 
+        latest purchase order state data for a particular purchase order 
+        if the purchase order was created by someone outside the user's 
+        user hierarchy`, async (done) => {
+        // Created by `user3`
+        const purchaseOrderDoc = await PurchaseOrderModel.findOne({ orderNumber: 'PO-000001' });
+        const user4 = testUsers[4];
+        authenticatedUser4Agent = await getAuthenticatedAgent(server, user4.username, user4.password);
+        await authenticatedUser4Agent
+            .get(`${purchaseOrderEndpoint}/${purchaseOrderDoc._id}/state/latest`)
+            .expect(403);
 
-    //     done();
-    // })
+        done();
+    })
 
-    // it(`GET /:purchaseOrderObjID/state/latest: User without PURCHASE_ORDER_READ 
-    //     perm should not be able to access the endpoint to retrieve the 
-    //     latest sales order state data regardless of user hierarchy`, async (done) => {
-    //     await authenticatedUnauthorizedAgent
-    //         .get(`${purchaseOrderEndpoint}/${purchaseOrderObjID}/state/latest`)
-    //         .expect(403);
+    it(`GET /:purchaseOrderObjID/state/latest: User without PURCHASE_ORDER_READ 
+        perm should not be able to access the endpoint to retrieve the 
+        latest purchase order state data regardless of user hierarchy`, async (done) => {
+        await authenticatedUnauthorizedAgent
+            .get(`${purchaseOrderEndpoint}/${purchaseOrderObjID}/state/latest`)
+            .expect(403);
 
-    //     done();
-    // })
+        done();
+    })
 
-    // it(`GET /:purchaseOrderObjID/state/latest: User with PURCHASE_ORDER_READ 
-    //     perm should get 400 status code response when providing an
-    //     invalid sales order object ID`, async (done) => {
-    //     // Valid ObjectID, but not from SalesOrderModel
-    //     const partDoc = await PartModel.findOne({});
-    //     await authenticatedAdminAgent
-    //         .get(`${purchaseOrderEndpoint}/${partDoc._id}/state/latest`)
-    //         .expect(400);
+    it(`GET /:purchaseOrderObjID/state/latest: User with PURCHASE_ORDER_READ 
+        perm should get 400 status code response when providing an
+        invalid purchase order object ID`, async (done) => {
+        // Valid ObjectID, but not from PurchaseOrderModel
+        const partDoc = await PartModel.findOne({});
+        await authenticatedAdminAgent
+            .get(`${purchaseOrderEndpoint}/${partDoc._id}/state/latest`)
+            .expect(400);
         
-    //     // Invalid ObjectID
-    //     await authenticatedAdminAgent
-    //         .get(`${purchaseOrderEndpoint}/123/state/latest`)
-    //         .expect(400);
-    //     done();
-    // })
+        // Invalid ObjectID
+        await authenticatedAdminAgent
+            .get(`${purchaseOrderEndpoint}/123/state/latest`)
+            .expect(400);
+        done();
+    })
     
-    // /**
-    //  * --------------------------------------------------------
-    //  * GET (Particular Sales Order State - Individual Resource)
-    //  * --------------------------------------------------------
-    //  */
-    // it(`GET /:purchaseOrderObjID/state/:index: User with PURCHASE_ORDER_READ 
-    //     perm should be able to access the endpoint to retrieve the 
-    //     sales order state data at the index for a particular sales order 
-    //     if the sales order was created by someone within the user's 
-    //     user hierarchy`, async (done) => {
-    //     const salesOrderDoc = await SalesOrderModel.findOne({ orderNumber: 'SO-000001' });
+    /**
+     * --------------------------------------------------------
+     * GET (Particular Sales Order State - Individual Resource)
+     * --------------------------------------------------------
+     */
+    it(`GET /:purchaseOrderObjID/state/:index: User with PURCHASE_ORDER_READ 
+        perm should be able to access the endpoint to retrieve the 
+        purchase order state data at the index for a particular purchase order 
+        if the purchase order was created by someone within the user's 
+        user hierarchy`, async (done) => {
+        const purchaseOrderDoc = await PurchaseOrderModel.findOne({ orderNumber: 'PO-000001' });
         
-    //     for (let i = 0; i < testSalesOrders[0].orders.length; i++) {
-    //         await authenticatedReadAgent
-    //             .get(`${purchaseOrderEndpoint}/${salesOrderDoc._id}/state/${i}`)
-    //             .expect(200)
-    //             .expect(res => {
-    //                 const numOfStates = testSalesOrders[0].orders.length
-    //                 expect(res.body.additionalInfo).toBe(testSalesOrders[0].orders[i].additionalInfo);
-    //                 expect(res.body.status).toBe(testSalesOrders[0].orders[i].status);
-    //                 expect(res.body.updatedBy).toBe(testSalesOrders[0].orders[i].updatedBy);
-    //                 for (const [index, part] of res.body.parts.entries()) {
-    //                     expect(part.additionalInfo).toBe(testSalesOrders[0].orders[i].parts[index].additionalInfo);
-    //                     expect(part.fulfilledBy).toStrictEqual(testSalesOrders[0].orders[i].parts[index].fulfilledBy);
-    //                     expect(part.quantity).toBe(testSalesOrders[0].orders[i].parts[index].quantity);
-    //                 }
-    //             })
-    //     }
-    //     done();
-    // })
+        for (let i = 0; i < testPurchaseOrders[0].orders.length; i++) {
+            await authenticatedReadAgent
+                .get(`${purchaseOrderEndpoint}/${purchaseOrderDoc._id}/state/${i}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.additionalInfo).toBe(testPurchaseOrders[0].orders[i].additionalInfo);
+                    expect(res.body.status).toBe(testPurchaseOrders[0].orders[i].status);
+                    expect(res.body.updatedBy).toBe(testPurchaseOrders[0].orders[i].updatedBy);
+                    for (const [index, part] of res.body.parts.entries()) {
+                        expect(part.additionalInfo).toBe(testPurchaseOrders[0].orders[i].parts[index].additionalInfo);
+                        expect(part.fulfilledBy).toStrictEqual(testPurchaseOrders[0].orders[i].parts[index].fulfilledBy);
+                        expect(part.quantity).toBe(testPurchaseOrders[0].orders[i].parts[index].quantity);
+                    }
+                })
+        }
+        done();
+    })
 
-    // it(`GET /:purchaseOrderObjID/state/:index: User with PURCHASE_ORDER_READ 
-    //     perm should not be able to access the endpoint to retrieve the 
-    //     sales order state data at the index for a particular sales order 
-    //     if the sales order was created by someone outside the user's 
-    //     user hierarchy`, async (done) => {
-    //     // Created by `user1`
-    //     const salesOrderDoc = await SalesOrderModel.findOne({ orderNumber: 'SO-000002' });
-    //     await authenticatedReadAgent
-    //         .get(`${purchaseOrderEndpoint}/${salesOrderDoc._id}/state/0`)
-    //         .expect(403);
+    it(`GET /:purchaseOrderObjID/state/:index: User with PURCHASE_ORDER_READ 
+        perm should not be able to access the endpoint to retrieve the 
+        purchase order state data at the index for a particular purchase order 
+        if the purchase order was created by someone outside the user's 
+        user hierarchy`, async (done) => {
+        // Created by `user3`
+        const purchaseOrderDoc = await PurchaseOrderModel.findOne({ orderNumber: 'PO-000001' });
+        const user4 = testUsers[4];
+        authenticatedUser4Agent = await getAuthenticatedAgent(server, user4.username, user4.password);
+        await authenticatedUser4Agent
+            .get(`${purchaseOrderEndpoint}/${purchaseOrderDoc._id}/state/0`)
+            .expect(403);
 
-    //     done();
-    // })
+        done();
+    })
 
-    // it(`GET /:purchaseOrderObjID/state/:index: User without PURCHASE_ORDER_READ 
-    //     perm should not be able to access the endpoint to retrieve the 
-    //     latest sales order state data regardless of user hierarchy`, async (done) => {
-    //     await authenticatedUnauthorizedAgent
-    //         .get(`${purchaseOrderEndpoint}/${purchaseOrderObjID}/state/0`)
-    //         .expect(403);
+    it(`GET /:purchaseOrderObjID/state/:index: User without PURCHASE_ORDER_READ 
+        perm should not be able to access the endpoint to retrieve the 
+        latest purchase order state data regardless of user hierarchy`, async (done) => {
+        await authenticatedUnauthorizedAgent
+            .get(`${purchaseOrderEndpoint}/${purchaseOrderObjID}/state/0`)
+            .expect(403);
 
-    //     done();
-    // })
+        done();
+    })
 
-    // it(`GET /:purchaseOrderObjID/state/:index: User with PURCHASE_ORDER_READ 
-    //     perm should get 400 status code response when providing an
-    //     invalid sales order object ID`, async (done) => {
-    //     // Valid ObjectID, but not from SalesOrderModel
-    //     const partDoc = await PartModel.findOne({});
-    //     await authenticatedAdminAgent
-    //         .get(`${purchaseOrderEndpoint}/${partDoc._id}/state/0`)
-    //         .expect(400);
+    it(`GET /:purchaseOrderObjID/state/:index: User with PURCHASE_ORDER_READ 
+        perm should get 400 status code response when providing an
+        invalid purchase order object ID`, async (done) => {
+        // Valid ObjectID, but not from PurchaseOrderModel
+        const partDoc = await PartModel.findOne({});
+        await authenticatedAdminAgent
+            .get(`${purchaseOrderEndpoint}/${partDoc._id}/state/0`)
+            .expect(400);
         
-    //     // Invalid ObjectID
-    //     await authenticatedAdminAgent
-    //         .get(`${purchaseOrderEndpoint}/123/state/0`)
-    //         .expect(400);
-    //     done();
-    // })
+        // Invalid ObjectID
+        await authenticatedAdminAgent
+            .get(`${purchaseOrderEndpoint}/123/state/0`)
+            .expect(400);
+        done();
+    })
 
-    // it(`GET /:purchaseOrderObjID/state/:index: User with PURCHASE_ORDER_READ 
-    //     perm receive null if the index specified is invalid`, async (done) => {
-    //     const invalidIndex = 1000;
-    //     await authenticatedReadAgent
-    //         .get(`${purchaseOrderEndpoint}/${purchaseOrderObjID}/state/${invalidIndex}`)
-    //         .expect(200)
-    //         .expect(res => {
-    //             expect(res.body).toBeNull();
-    //         });
+    it(`GET /:purchaseOrderObjID/state/:index: User with PURCHASE_ORDER_READ 
+        perm receive null if the index specified is invalid`, async (done) => {
+        const invalidIndex = 1000;
+        await authenticatedReadAgent
+            .get(`${purchaseOrderEndpoint}/${purchaseOrderObjID}/state/${invalidIndex}`)
+            .expect(200)
+            .expect(res => {
+                expect(res.body).toBeNull();
+            });
 
-    //     done();
-    // })
+        done();
+    })
 
     // /**
     //  * -------------------------------------

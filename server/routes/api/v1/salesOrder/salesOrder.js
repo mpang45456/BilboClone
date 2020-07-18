@@ -293,6 +293,8 @@ router.get('/:salesOrderObjID/state',
  * - there should be sufficient quantities of a part 
  *   in the PO to be allocated
  * - PO actually contains the part
+ * - handle concurrency problems: lock the document? Minimise number of writes required per request?
+ * - status can only move forward.
  */
 router.post('/:salesOrderObjID/state',
             isAuthorized(PERMS.SALES_ORDER_WRITE),
@@ -439,7 +441,7 @@ router.get('/:salesOrderObjID/state/latest',
     } catch(err) {
         logger.error(`GET /salesOrder/:salesOrderObjID/state/latest: Could not get latest sales order state: ${err}`);
         if (err instanceof mongoose.Error.CastError) {
-            return res.status(400).send('Invalid supplier ID');
+            return res.status(400).send('Invalid Sales Order ID');
         }
         return res.sendStatus(500);
     }
