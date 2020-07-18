@@ -271,7 +271,7 @@ describe('Testing /api/v1/salesOrder endpoint', () => {
                 .get(salesOrderEndpoint)
                 .expect(200)
                 .expect(res => {
-                    expect(res.body.salesOrders.length).toBe(3);
+                    expect(res.body.salesOrders.length).toBe(4);
                 })
         
         await authenticatedReadAgent

@@ -4,12 +4,9 @@ const mongoose = require('mongoose');
 
 const logger = require('../../../../utils');
 const { SalesOrderModel, 
-        SalesOrderStateModel, 
-        PurchaseOrderModel, 
-        PurchaseOrderStateModel } = require('../../../../data/database');
+        SalesOrderStateModel } = require('../../../../data/database');
 const { SO_STATES } = require('../../../../data/databaseEnum');
-const { isAuthenticated, isAuthorized } = require('../auth/auth');
-const { setUserHierarchy } = require('../user/hierarachy');
+const { isAuthorized } = require('../auth/auth');
 const { PERMS } = require('../auth/permissions');
 const CONFIG = require('../../../../config');
 

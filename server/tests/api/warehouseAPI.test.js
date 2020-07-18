@@ -1,8 +1,6 @@
 const request = require('supertest');
 const app = require('../../app');
-const { SupplierModel, 
-        PartModel, 
-        CounterModel,
+const { CounterModel,
         SalesOrderModel, 
         SalesOrderStateModel, 
         PurchaseOrderModel, 
@@ -13,8 +11,6 @@ const { SO_STATES, PO_STATES } = require('../../data/databaseEnum');
 const testSalesOrders = require('../../data/databaseBootstrap').salesOrders;
 const testPurchaseOrders = require('../../data/databaseBootstrap').purchaseOrders;
 const testUsers = require('../../data/databaseBootstrap').users;
-const testCustomers = require('../../data/databaseBootstrap').customers;
-const testSuppliers = require('../../data/databaseBootstrap').suppliers;
 const { DatabaseInteractor } = require('../../data/DatabaseInteractor');
 const { warehouseEndpoint,
         salesOrderEndpoint,
@@ -22,7 +18,7 @@ const { warehouseEndpoint,
         getAuthenticatedAgent } = require('./testUtils');
 const CONFIG = require('../../config');
 
-describe('Testing /api/v1/warehouse endpoint', () => {
+describe('Testing /api/v1/warehouse endpoint (sales order + purchase order)', () => {
     let dbi = null;
     let server = null;
     let authenticatedAdminAgent = null;         // WAREHOUSE_READ, WAREHOUSE_WRITE

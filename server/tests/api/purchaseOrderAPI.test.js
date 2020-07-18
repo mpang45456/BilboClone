@@ -272,7 +272,7 @@ describe('Testing /api/v1/purchaseOrder endpoint', () => {
                 .get(purchaseOrderEndpoint)
                 .expect(200)
                 .expect(res => {
-                    expect(res.body.purchaseOrders.length).toBe(2);
+                    expect(res.body.purchaseOrders.length).toBe(3);
                 })
         
         // `user4` account

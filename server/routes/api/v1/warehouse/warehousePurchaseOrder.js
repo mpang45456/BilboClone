@@ -3,15 +3,10 @@ const router = express.Router();
 const mongoose = require('mongoose');
 
 const logger = require('../../../../utils');
-const { PartModel, 
-        CustomerModel, 
-        SalesOrderModel, 
-        SalesOrderStateModel, 
-        PurchaseOrderModel, 
+const { PurchaseOrderModel, 
         PurchaseOrderStateModel } = require('../../../../data/database');
 const { PO_STATES } = require('../../../../data/databaseEnum');
-const { isAuthenticated, isAuthorized } = require('../auth/auth');
-const { setUserHierarchy } = require('../user/hierarachy');
+const { isAuthorized } = require('../auth/auth');
 const { PERMS } = require('../auth/permissions');
 const CONFIG = require('../../../../config');
 
