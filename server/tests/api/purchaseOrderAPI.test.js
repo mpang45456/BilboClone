@@ -38,11 +38,11 @@ describe('Testing /api/v1/salesOrder endpoint', () => {
         additionalInfo: 'API TEST: New Purchase Order Meta-Data',
     }
 
-    // const newSalesOrderState = {
-    //     status: SO_STATES.FULFILLED,
-    //     additionalInfo: 'API TEST: Additional Info',
-    //     parts: [],
-    // }
+    const newPurchaseOrderState = {
+        status: PO_STATES.FULFILLED,
+        additionalInfo: 'API TEST: Additional Info',
+        parts: [],
+    }
 
     beforeAll(async (done) => {
         dbi = new DatabaseInteractor();
@@ -714,541 +714,152 @@ describe('Testing /api/v1/salesOrder endpoint', () => {
         done();
     })
 
-    // /**
-    //  * -------------------------------------
-    //  * POST (Create a New Sales Order State)
-    //  * -------------------------------------
-    //  */
-    // it(`POST /:purchaseOrderObjID/state: User with PURCHASE_ORDER_WRITE
-    //     perm should be able to create a new sales order state if
-    //     the sales order was created by someone within the user's
-    //     user hierarchy`, async (done) => {
-    //     // Sales Order created by `user3`
-    //     const user3Account = testUsers[3];
-    //     const salesOrderDoc = await SalesOrderModel.findOne({ createdBy: user3Account.username });
+    /**
+     * ----------------------------------------
+     * POST (Create a New Purchase Order State)
+     * ----------------------------------------
+     */
+    it(`POST /:purchaseOrderObjID/state: User with PURCHASE_ORDER_WRITE
+        perm should be able to create a new purchase order state if
+        the purchase order was created by someone within the user's
+        user hierarchy`, async (done) => {
+        // Purchase Order created by `user3`
+        const user3Account = testUsers[3];
+        const purchaseOrderDoc = await PurchaseOrderModel.findOne({ createdBy: user3Account.username });
 
-    //     // New State made by `user1`
-    //     const user1Account = testUsers[1];
-    //     const authenticatedUser1Agent = await getAuthenticatedAgent(server, 
-    //                                                                 user1Account.username, 
-    //                                                                 user1Account.password);
+        // Create Purchase Order State (by `admin`)
+        await authenticatedAdminAgent
+                .post(`${purchaseOrderEndpoint}/${purchaseOrderDoc._id}/state`)
+                .send(newPurchaseOrderState)
+                .expect(200);
+
+        // Check that Purchase Order State has been created
+        await authenticatedAdminAgent
+                .get(`${purchaseOrderEndpoint}/${purchaseOrderDoc._id}/state/latest`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.status).toBe(newPurchaseOrderState.status);
+                    expect(res.body.additionalInfo).toBe(newPurchaseOrderState.additionalInfo);
+                    expect(res.body.parts).toStrictEqual(newPurchaseOrderState.parts);
+                })
         
-    //     // Create Sales Order State
-    //     await authenticatedUser1Agent
-    //             .post(`${purchaseOrderEndpoint}/${salesOrderDoc._id}/state`)
-    //             .send(newSalesOrderState)
-    //             .expect(200);
+        done();
+    })
 
-    //     // Check that Sales Order State has been created
-    //     await authenticatedUser1Agent
-    //             .get(`${purchaseOrderEndpoint}/${salesOrderDoc._id}/state/latest`)
-    //             .expect(200)
-    //             .expect(res => {
-    //                 expect(res.body.status).toBe(newSalesOrderState.status);
-    //                 expect(res.body.additionalInfo).toBe(newSalesOrderState.additionalInfo);
-    //                 expect(res.body.parts).toStrictEqual(newSalesOrderState.parts);
-    //             })
+    it(`POST /:purchaseOrderObjID/state: User with PURCHASE_ORDER_WRITE
+        perm should not be able to create a new purchase order state if
+        the purchase order was created by someone outside the user's
+        user hierarchy`, async (done) => {
+        // Create Purchase Order (by `admin` account)
+        let newPurchaseOrderObjID = null;
+        await authenticatedAdminAgent
+                .post(purchaseOrderEndpoint)
+                .send({
+                    supplierName: testSuppliers[0].name,
+                    additionalInfo: 'API TEST: Additional Info (Admin)'
+                })
+                .expect(200)
+                .expect(res => {
+                    newPurchaseOrderObjID = res.body._id;
+                })
+
+        // Create Purchase Order State (Unauthorised)
+        const user4Account = testUsers[4];
+        const authenticatedUser4Agent = await getAuthenticatedAgent(server, 
+                                                                    user4Account.username, 
+                                                                    user4Account.password);
+        await authenticatedUser4Agent
+                .post(`${purchaseOrderEndpoint}/${newPurchaseOrderObjID}/state`)
+                .send(newPurchaseOrderState)
+                .expect(403);
         
-    //     done();
-    // })
+        done();
+    })
 
-    // it(`POST /:purchaseOrderObjID/state: User with PURCHASE_ORDER_WRITE
-    //     perm should not be able to create a new sales order state if
-    //     the sales order was created by someone outside the user's
-    //     user hierarchy`, async (done) => {
-    //     // Create Sales Order (by `admin` account)
-    //     let newSalesOrderObjID = null;
-    //     await authenticatedAdminAgent
-    //             .post(purchaseOrderEndpoint)
-    //             .send({
-    //                 customerName: testCustomers[0].name,
-    //                 additionalInfo: 'API TEST: Additional Info (Admin)'
-    //             })
-    //             .expect(200)
-    //             .expect(res => {
-    //                 newSalesOrderObjID = res.body._id;
-    //             })
+    it(`POST /:purchaseOrderObjID/state: When user with PURCHASE_ORDER_WRITE
+        perm creates new purchase order state, the state should be appended
+        to the purchase order`, async (done) => {
+        // Purchase Order created by `user3`
+        const purchaseOrderDoc = await PurchaseOrderModel.findOne({ createdBy: testPurchaseOrders[0].createdBy });
 
-    //     // Create Sales Order State (Unauthorised)
-    //     const user1Account = testUsers[1];
-    //     const authenticatedUser1Agent = await getAuthenticatedAgent(server, 
-    //                                                                 user1Account.username, 
-    //                                                                 user1Account.password);
-    //     await authenticatedUser1Agent
-    //             .post(`${purchaseOrderEndpoint}/${newSalesOrderObjID}/state`)
-    //             .send(newSalesOrderState)
-    //             .expect(403);
+        // Create Purchase Order State
+        await authenticatedAdminAgent
+                .post(`${purchaseOrderEndpoint}/${purchaseOrderDoc._id}/state`)
+                .send(newPurchaseOrderState)
+                .expect(200);
+
+        // Check that Purchase Order State has been created
+        await authenticatedAdminAgent
+                .get(`${purchaseOrderEndpoint}/${purchaseOrderDoc._id}/state`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.length).toBe(testPurchaseOrders[0].orders.length + 1);
+                })
         
-    //     done();
-    // })
-
-    // it(`POST /:purchaseOrderObjID/state: When user with PURCHASE_ORDER_WRITE
-    //     perm creates new sales order state, the state should be appended
-    //     to the sales order`, async (done) => {
-    //     // Sales Order created by `user3`
-    //     const salesOrderDoc = await SalesOrderModel.findOne({ orderNumber: testSalesOrders[0].orderNumber });
-
-    //     // New State made by `user1`
-    //     const user1Account = testUsers[1];
-    //     const authenticatedUser1Agent = await getAuthenticatedAgent(server, 
-    //                                                                 user1Account.username, 
-    //                                                                 user1Account.password);
-        
-    //     // Create Sales Order State
-    //     await authenticatedUser1Agent
-    //             .post(`${purchaseOrderEndpoint}/${salesOrderDoc._id}/state`)
-    //             .send(newSalesOrderState)
-    //             .expect(200);
-
-    //     // Check that Sales Order State has been created
-    //     await authenticatedUser1Agent
-    //             .get(`${purchaseOrderEndpoint}/${salesOrderDoc._id}/state`)
-    //             .expect(200)
-    //             .expect(res => {
-    //                 expect(res.body.length).toBe(testSalesOrders[0].orders.length + 1);
-    //             })
-        
-    //     done();
-    // })
+        done();
+    })
     
-    // it(`POST /:purchaseOrderObjID/state: When user with PURCHASE_ORDER_WRITE
-    //     perm creates new sales order state, the sale order's latest status
-    //     should be updated to the new state's status`, async (done) => {
-    //     // Sales Order created by `user3`
-    //     const salesOrderDoc = await SalesOrderModel.findOne({ orderNumber: testSalesOrders[0].orderNumber });
+    it(`POST /:purchaseOrderObjID/state: When user with PURCHASE_ORDER_WRITE
+        perm creates new purchase order state, the purchase order's latest status
+        should be updated to the new state's status`, async (done) => {
+        // Purchase Order created by `user3`
+        const purchaseOrderDoc = await PurchaseOrderModel.findOne({ createdBy: testPurchaseOrders[0].createdBy });
 
-    //     // New State made by `user1`
-    //     const user1Account = testUsers[1];
-    //     const authenticatedUser1Agent = await getAuthenticatedAgent(server, 
-    //                                                                 user1Account.username, 
-    //                                                                 user1Account.password);
+        // Create Purchase Order State
+        await authenticatedAdminAgent
+                .post(`${purchaseOrderEndpoint}/${purchaseOrderDoc._id}/state`)
+                .send(newPurchaseOrderState)
+                .expect(200);
+
+        // Check that Purchase Order State has been created
+        await authenticatedAdminAgent
+                .get(`${purchaseOrderEndpoint}/${purchaseOrderDoc._id}`)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.latestStatus).toBe(newPurchaseOrderState.status);
+                })
         
-    //     // Create Sales Order State
-    //     await authenticatedUser1Agent
-    //             .post(`${purchaseOrderEndpoint}/${salesOrderDoc._id}/state`)
-    //             .send(newSalesOrderState)
-    //             .expect(200);
+        done();
+    })
 
-    //     // Check that Sales Order State has been created
-    //     await authenticatedUser1Agent
-    //             .get(`${purchaseOrderEndpoint}/${salesOrderDoc._id}`)
-    //             .expect(200)
-    //             .expect(res => {
-    //                 expect(res.body.latestStatus).toBe(newSalesOrderState.status);
-    //             })
+    /**
+     * -------
+     * General
+     * -------
+     */
+    it(`Unauthenticated users should not be able to access
+        the Purchase Order API`, async (done) => {
+        const purchaseOrderDoc = await PurchaseOrderModel.findOne({ });
+        await request(server)
+                .get(purchaseOrderEndpoint)
+                .expect(401)
         
-    //     done();
-    // })
+        await request(server)
+                .post(purchaseOrderEndpoint)
+                .send(newPurchaseOrderMetaData)
+                .expect(401)
 
-    // it(`POST /:purchaseOrderObjID/state: When user with PURCHASE_ORDER_WRITE
-    //     perm creates new sales order state to perform parts allocation for the
-    //     first time, purchase order state is updated`, async (done) => {
-    //     // Obtain Sales Order
-    //     const salesOrderDoc = await SalesOrderModel.findOne({ orderNumber: testSalesOrders[0].orderNumber });
+        await request(server)
+                .get(`${purchaseOrderEndpoint}/${purchaseOrderDoc._id}`)
+                .expect(401)
+
+        await request(server)
+                .get(`${purchaseOrderEndpoint}/${purchaseOrderDoc._id}/state`)
+                .expect(401)
+
+        await request(server)
+                .post(`${purchaseOrderEndpoint}/${purchaseOrderDoc._id}/state`)
+                .send(newPurchaseOrderState)
+                .expect(401)
+
+        await request(server)
+                .get(`${purchaseOrderEndpoint}/${purchaseOrderDoc._id}/state/latest`)
+                .expect(401)
+
+        await request(server)
+                .get(`${purchaseOrderEndpoint}/${purchaseOrderDoc._id}/state/0`)
+                .expect(401)
         
-    //     // Create Sales Order State
-    //     const part0 = await PartModel.findOne({ partNumber: testSalesOrders[0].orders[1].parts[0].partNumber });
-    //     const part1 = await PartModel.findOne({ partNumber: testSalesOrders[0].orders[1].parts[1].partNumber });
-    //     const part2 = await PartModel.findOne({ partNumber: testSalesOrders[0].orders[1].parts[2].partNumber });
-    //     let poDoc0 = await PurchaseOrderModel.findOne({ orderNumber: testPurchaseOrders[0].orderNumber });
-    //     let poDoc1 = await PurchaseOrderModel.findOne({ orderNumber: testPurchaseOrders[1].orderNumber });
-    //     const newState = {
-    //         "status": SO_STATES.CONFIRMED,
-    //         "additionalInfo": "Performing Allocation For First Time",
-    //         "parts": [
-    //             {
-    //                 "part": String(part0._id),
-    //                 "quantity": 1000,
-    //                 "additionalInfo": "From POST Request: BA2132-21Z",
-    //                 "fulfilledBy": [
-    //                     { 
-    //                         "purchaseOrder": String(poDoc0._id),
-    //                         "quantity": 200
-    //                     }
-    //                 ]
-    //             },
-    //             {
-    //                 "part": String(part1._id),
-    //                 "quantity": 800,
-    //                 "additionalInfo": "From POST Request: BA9871-21Z",
-    //                 "fulfilledBy": [
-    //                     { 
-    //                         "purchaseOrder": String(poDoc0._id),
-    //                         "quantity": 800
-    //                     }
-    //                 ]
-    //             },
-    //             {
-    //                 "part": String(part2._id),
-    //                 "quantity": 950,
-    //                 "additionalInfo": "From POST Request: 121-BX-N",
-    //                 "fulfilledBy": [
-    //                     { 
-    //                         "purchaseOrder": String(poDoc1._id),
-    //                         "quantity": 950
-    //                     }
-    //                 ]
-    //             }
-    //         ]
-    //     }
-
-    //     await authenticatedAdminAgent
-    //             .post(`${purchaseOrderEndpoint}/${salesOrderDoc._id}/state`)
-    //             .send(newState)
-    //             .expect(200);
-
-    //     // Check that Sales Order State has been created
-    //     await authenticatedAdminAgent
-    //             .get(`${purchaseOrderEndpoint}/${salesOrderDoc._id}/state/latest`)
-    //             .expect(200)
-    //             .expect(res => {
-    //                 expect(res.body.status).toBe(newState.status);
-    //                 expect(res.body.additionalInfo).toBe(newState.additionalInfo);
-    //                 for (let [index, partInfo] of res.body.parts.entries()) {
-    //                     expect(partInfo.part).toBe(newState.parts[index].part);
-    //                     expect(partInfo.quantity).toBe(newState.parts[index].quantity);
-    //                     expect(partInfo.additionalInfo).toBe(newState.parts[index].additionalInfo);
-    //                     for (let [fulfilledByIndex, fulfilledByTarget] of partInfo.fulfilledBy.entries()) {
-    //                         expect(fulfilledByTarget.purchaseOrder).toBe(newState.parts[index].fulfilledBy[fulfilledByIndex].purchaseOrder);
-    //                         expect(fulfilledByTarget.quantity).toBe(newState.parts[index].fulfilledBy[fulfilledByIndex].quantity);
-    //                     }
-    //                 }
-    //             })
-
-    //     // Check that Purchase Orders have been populated
-    //     for (let soPartInfo of newState.parts) {
-    //         const poDoc = await PurchaseOrderModel.findOne({ _id: soPartInfo.fulfilledBy[0].purchaseOrder });
-    //         const latestPOState = await PurchaseOrderStateModel.findOne({ _id: poDoc.orders[poDoc.orders.length - 1] });
-    //         const poStatePartIndex = latestPOState.parts.findIndex(poPartInfo => String(poPartInfo.part) === String(soPartInfo.part));
-    //         expect(poStatePartIndex).not.toBe(-1);
-    //         expect(latestPOState.parts[poStatePartIndex].fulfilledFor.length).toBe(1);
-    //         expect(String(latestPOState.parts[poStatePartIndex].fulfilledFor[0].salesOrder)).toBe(String(salesOrderDoc._id));
-    //         expect(latestPOState.parts[poStatePartIndex].fulfilledFor[0].quantity).toBe(soPartInfo.fulfilledBy[0].quantity);
-    //     }
-        
-    //     done();
-    // })
-
-    // it(`POST /:purchaseOrderObjID/state: When user with PURCHASE_ORDER_WRITE
-    //     perm creates multiple new sales order states to perform parts 
-    //     allocation in stages, purchase order state only reflects the latest
-    //     part allocation (there should be no remnants/side effects from 
-    //     previous part allocations)`, async (done) => {
-    //     // Obtain Sales Order
-    //     const salesOrderDoc = await SalesOrderModel.findOne({ orderNumber: testSalesOrders[0].orderNumber });
-        
-    //     // Create Sales Order State
-    //     const part0 = await PartModel.findOne({ partNumber: testSalesOrders[0].orders[1].parts[0].partNumber });
-    //     const part1 = await PartModel.findOne({ partNumber: testSalesOrders[0].orders[1].parts[1].partNumber });
-    //     const part2 = await PartModel.findOne({ partNumber: testSalesOrders[0].orders[1].parts[2].partNumber });
-    //     let poDoc0 = await PurchaseOrderModel.findOne({ orderNumber: testPurchaseOrders[0].orderNumber });
-    //     let poDoc1 = await PurchaseOrderModel.findOne({ orderNumber: testPurchaseOrders[1].orderNumber });
-    //     const newState0 = {
-    //         "status": SO_STATES.CONFIRMED,
-    //         "additionalInfo": "Performing Allocation For First Time",
-    //         "parts": [
-    //             {
-    //                 "part": String(part0._id),
-    //                 "quantity": 1000,
-    //                 "additionalInfo": "From POST Request: BA2132-21Z",
-    //                 "fulfilledBy": [
-    //                     { 
-    //                         "purchaseOrder": String(poDoc0._id),
-    //                         "quantity": 250
-    //                     }
-    //                 ]
-    //             },
-    //             {
-    //                 "part": String(part1._id),
-    //                 "quantity": 800,
-    //                 "additionalInfo": "From POST Request: BA9871-21Z",
-    //                 "fulfilledBy": [
-    //                     { 
-    //                         "purchaseOrder": String(poDoc0._id),
-    //                         "quantity": 700
-    //                     }
-    //                 ]
-    //             },
-    //         ]
-    //     }
-    //     const newState1 = {
-    //         "status": SO_STATES.CONFIRMED,
-    //         "additionalInfo": "Performing Allocation For Second Time",
-    //         "parts": [
-    //             {
-    //                 "part": String(part0._id),
-    //                 "quantity": 1000,
-    //                 "additionalInfo": "From POST Request: BA2132-21Z",
-    //                 "fulfilledBy": [
-    //                     { 
-    //                         "purchaseOrder": String(poDoc0._id),
-    //                         "quantity": 1000
-    //                     }
-    //                 ]
-    //             },
-    //             {
-    //                 "part": String(part1._id),
-    //                 "quantity": 800,
-    //                 "additionalInfo": "From POST Request: BA9871-21Z",
-    //                 "fulfilledBy": [
-    //                     { 
-    //                         "purchaseOrder": String(poDoc0._id),
-    //                         "quantity": 800
-    //                     }
-    //                 ]
-    //             },
-    //             {
-    //                 "part": String(part2._id),
-    //                 "quantity": 950,
-    //                 "additionalInfo": "From POST Request: 121-BX-N",
-    //                 "fulfilledBy": [
-    //                     { 
-    //                         "purchaseOrder": String(poDoc1._id),
-    //                         "quantity": 950
-    //                     }
-    //                 ]
-    //             }
-    //         ]
-    //     }
-
-    //     // First Part Allocation
-    //     await authenticatedAdminAgent
-    //             .post(`${purchaseOrderEndpoint}/${salesOrderDoc._id}/state`)
-    //             .send(newState0)
-    //             .expect(200);
-        
-    //     // Second Part Allocation
-    //     await authenticatedAdminAgent
-    //             .post(`${purchaseOrderEndpoint}/${salesOrderDoc._id}/state`)
-    //             .send(newState1)
-    //             .expect(200);
-
-    //     // Check that both Sales Order States were created
-    //     await authenticatedAdminAgent
-    //             .get(`${purchaseOrderEndpoint}/${salesOrderDoc._id}/state`)
-    //             .expect(200)
-    //             .expect(res => {
-    //                 expect(res.body.length).toBe(testSalesOrders[0].orders.length + 2);
-    //             });
-
-    //     // Check that latest Sales Order State is accurate
-    //     await authenticatedAdminAgent
-    //             .get(`${purchaseOrderEndpoint}/${salesOrderDoc._id}/state/latest`)
-    //             .expect(200)
-    //             .expect(res => {
-    //                 expect(res.body.status).toBe(newState1.status);
-    //                 expect(res.body.additionalInfo).toBe(newState1.additionalInfo);
-    //                 for (let [index, partInfo] of res.body.parts.entries()) {
-    //                     expect(partInfo.part).toBe(newState1.parts[index].part);
-    //                     expect(partInfo.quantity).toBe(newState1.parts[index].quantity);
-    //                     expect(partInfo.additionalInfo).toBe(newState1.parts[index].additionalInfo);
-    //                     for (let [fulfilledByIndex, fulfilledByTarget] of partInfo.fulfilledBy.entries()) {
-    //                         expect(fulfilledByTarget.purchaseOrder).toBe(newState1.parts[index].fulfilledBy[fulfilledByIndex].purchaseOrder);
-    //                         expect(fulfilledByTarget.quantity).toBe(newState1.parts[index].fulfilledBy[fulfilledByIndex].quantity);
-    //                     }
-    //                 }
-    //             })
-
-    //     // Check that Purchase Orders have been populated
-    //     for (let soPartInfo of newState1.parts) {
-    //         const poDoc = await PurchaseOrderModel.findOne({ _id: soPartInfo.fulfilledBy[0].purchaseOrder });
-    //         const latestPOState = await PurchaseOrderStateModel.findOne({ _id: poDoc.orders[poDoc.orders.length - 1] });
-    //         const poStatePartIndex = latestPOState.parts.findIndex(poPartInfo => String(poPartInfo.part) === String(soPartInfo.part));
-    //         expect(poStatePartIndex).not.toBe(-1);
-    //         expect(latestPOState.parts[poStatePartIndex].fulfilledFor.length).toBe(1);
-    //         expect(String(latestPOState.parts[poStatePartIndex].fulfilledFor[0].salesOrder)).toBe(String(salesOrderDoc._id));
-    //         expect(latestPOState.parts[poStatePartIndex].fulfilledFor[0].quantity).toBe(soPartInfo.fulfilledBy[0].quantity);
-    //     }
-        
-    //     done();
-    // })
-
-    // it(`POST /:purchaseOrderObjID/state: When part allocations are 
-    //     mapped from multiple sales orders to the same purchase
-    //     order, the purchase order state should be updated correctly
-    //     (and the allocation from one sales order should not affect
-    //     that of another sales order)`, async (done) => {
-    //     // Obtain Sales Orders
-    //     const salesOrderDoc0 = await SalesOrderModel.findOne({ orderNumber: testSalesOrders[0].orderNumber });
-    //     const salesOrderDoc1 = await SalesOrderModel.findOne({ orderNumber: testSalesOrders[1].orderNumber });
-        
-    //     // Create Sales Order 0 State
-    //     let part0 = await PartModel.findOne({ partNumber: testSalesOrders[0].orders[1].parts[0].partNumber });
-    //     let part1 = await PartModel.findOne({ partNumber: testSalesOrders[0].orders[1].parts[1].partNumber });
-    //     let part2 = await PartModel.findOne({ partNumber: testSalesOrders[0].orders[1].parts[2].partNumber });
-    //     let poDoc0 = await PurchaseOrderModel.findOne({ orderNumber: testPurchaseOrders[0].orderNumber });
-    //     let poDoc1 = await PurchaseOrderModel.findOne({ orderNumber: testPurchaseOrders[1].orderNumber });
-    //     const newState0 = {
-    //         "status": SO_STATES.CONFIRMED,
-    //         "additionalInfo": "Performing Allocation For First Time",
-    //         "parts": [
-    //             {
-    //                 "part": String(part0._id),
-    //                 "quantity": 1000,
-    //                 "additionalInfo": "From POST Request: BA2132-21Z",
-    //                 "fulfilledBy": [
-    //                     { 
-    //                         "purchaseOrder": String(poDoc0._id),
-    //                         "quantity": 1000
-    //                     }
-    //                 ]
-    //             },
-    //             {
-    //                 "part": String(part1._id),
-    //                 "quantity": 800,
-    //                 "additionalInfo": "From POST Request: BA9871-21Z",
-    //                 "fulfilledBy": [
-    //                     { 
-    //                         "purchaseOrder": String(poDoc0._id),
-    //                         "quantity": 800
-    //                     }
-    //                 ]
-    //             },
-    //             {
-    //                 "part": String(part2._id),
-    //                 "quantity": 950,
-    //                 "additionalInfo": "From POST Request: 121-BX-N",
-    //                 "fulfilledBy": [
-    //                     { 
-    //                         "purchaseOrder": String(poDoc1._id),
-    //                         "quantity": 950
-    //                     }
-    //                 ]
-    //             }
-    //         ]
-    //     }
-        
-    //     // Sales Order 0 Part Allocation
-    //     await authenticatedAdminAgent
-    //             .post(`${purchaseOrderEndpoint}/${salesOrderDoc0._id}/state`)
-    //             .send(newState0)
-    //             .expect(200);
-
-    //     // Create Sales Order 1 State
-    //     part0 = await PartModel.findOne({ partNumber: testSalesOrders[1].orders[1].parts[0].partNumber });
-    //     part1 = await PartModel.findOne({ partNumber: testSalesOrders[1].orders[1].parts[1].partNumber });
-    //     poDoc0 = await PurchaseOrderModel.findOne({ orderNumber: testPurchaseOrders[0].orderNumber });
-    //     let newState1 = {
-    //         "status": SO_STATES.CONFIRMED,
-    //         "additionalInfo": "Performing Allocation For First Time",
-    //         "parts": [
-    //             {
-    //                 "part": String(part0._id),
-    //                 "quantity": 2500,
-    //                 "additionalInfo": "From POST Request: BA2132-21Z",
-    //                 "fulfilledBy": [
-    //                     { 
-    //                         "purchaseOrder": String(poDoc0._id),
-    //                         "quantity": 2500
-    //                     }
-    //                 ]
-    //             },
-    //             {
-    //                 "part": String(part1._id),
-    //                 "quantity": 300,
-    //                 "additionalInfo": "From POST Request: BA2133-21Z",
-    //                 "fulfilledBy": [
-    //                     { 
-    //                         "purchaseOrder": String(poDoc0._id),
-    //                         "quantity": 300
-    //                     }
-    //                 ]
-    //             },
-    //         ]
-    //     }
-        
-    //     // Sales Order 1 Part Allocation
-    //     await authenticatedAdminAgent
-    //             .post(`${purchaseOrderEndpoint}/${salesOrderDoc1._id}/state`)
-    //             .send(newState1)
-    //             .expect(200);
-
-    //     // Check that both Sales Order States were created
-    //     await authenticatedAdminAgent
-    //             .get(`${purchaseOrderEndpoint}/${salesOrderDoc0._id}/state`)
-    //             .expect(200)
-    //             .expect(res => {
-    //                 expect(res.body.length).toBe(testSalesOrders[0].orders.length + 1);
-    //             });
-
-    //     await authenticatedAdminAgent
-    //             .get(`${purchaseOrderEndpoint}/${salesOrderDoc1._id}/state`)
-    //             .expect(200)
-    //             .expect(res => {
-    //                 expect(res.body.length).toBe(testSalesOrders[1].orders.length + 1);
-    //             });
-        
-    //     // Check that Purchase Orders have been populated
-    //     poDoc0 = await PurchaseOrderModel.findOne({ orderNumber: testPurchaseOrders[0].orderNumber });
-    //     const latestPOState = await PurchaseOrderStateModel.findOne({ _id: poDoc0.orders[poDoc0.orders.length - 1] });
-    //     expect(latestPOState.parts[0].fulfilledFor.length).toBe(2);
-    //     expect(String(latestPOState.parts[0].fulfilledFor[0].salesOrder)).toBe(String(salesOrderDoc0._id));
-    //     expect(latestPOState.parts[0].fulfilledFor[0].quantity).toBe(newState0.parts[0].fulfilledBy[0].quantity);
-    //     expect(String(latestPOState.parts[0].fulfilledFor[1].salesOrder)).toBe(String(salesOrderDoc1._id));
-    //     expect(latestPOState.parts[0].fulfilledFor[1].quantity).toBe(newState1.parts[0].fulfilledBy[0].quantity);
-        
-    //     expect(latestPOState.parts[1].fulfilledFor.length).toBe(1);
-    //     expect(String(latestPOState.parts[1].fulfilledFor[0].salesOrder)).toBe(String(salesOrderDoc1._id));
-    //     expect(latestPOState.parts[1].fulfilledFor[0].quantity).toBe(newState1.parts[1].fulfilledBy[0].quantity);
-        
-    //     expect(latestPOState.parts[2].fulfilledFor.length).toBe(1);
-    //     expect(String(latestPOState.parts[2].fulfilledFor[0].salesOrder)).toBe(String(salesOrderDoc0._id));
-    //     expect(latestPOState.parts[2].fulfilledFor[0].quantity).toBe(newState0.parts[1].fulfilledBy[0].quantity);
-        
-    //     done();
-    // })
-
-    // it(`POST /:purchaseOrderObjID/state: User without PURCHASE_ORDER_WRITE
-    //     perm should not be able to create a new sales order state`, async (done) => {
-    //     const salesOrderDoc = await SalesOrderModel.findOne({ });
-        
-    //     // Create Sales Order State
-    //     await authenticatedUnauthorizedAgent
-    //             .post(`${purchaseOrderEndpoint}/${salesOrderDoc._id}/state`)
-    //             .send(newSalesOrderState)
-    //             .expect(403);
-
-    //     done();
-    // })
-
-    // /**
-    //  * -------
-    //  * General
-    //  * -------
-    //  */
-    // it(`Unauthenticated users should not be able to access
-    //     the Sales Order API`, async (done) => {
-    //     const salesOrderDoc = await SalesOrderModel.findOne({ });
-    //     await request(server)
-    //             .get(purchaseOrderEndpoint)
-    //             .expect(401)
-        
-    //     await request(server)
-    //             .post(purchaseOrderEndpoint)
-    //             .send(newSalesOrderMetaData)
-    //             .expect(401)
-
-    //     await request(server)
-    //             .get(`${purchaseOrderEndpoint}/${salesOrderDoc._id}`)
-    //             .expect(401)
-
-    //     await request(server)
-    //             .get(`${purchaseOrderEndpoint}/${salesOrderDoc._id}/state`)
-    //             .expect(401)
-
-    //     await request(server)
-    //             .post(`${purchaseOrderEndpoint}/${salesOrderDoc._id}/state`)
-    //             .send(newSalesOrderState)
-    //             .expect(401)
-
-    //     await request(server)
-    //             .get(`${purchaseOrderEndpoint}/${salesOrderDoc._id}/state/latest`)
-    //             .expect(401)
-
-    //     await request(server)
-    //             .get(`${purchaseOrderEndpoint}/${salesOrderDoc._id}/state/0`)
-    //             .expect(401)
-        
-    //     done();
-    // })
+        done();
+    })
 })

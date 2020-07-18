@@ -270,7 +270,8 @@ router.get('/:purchaseOrderObjID/state',
  * relatively 'dumb' and does not perform allocation logic.
  * 
  * Note: To be eligible for parts allocation, PO status 
- * must be set to `CONFIRMED`. 
+ * must be set to `CONFIRMED` (but this is driven by the 
+ * SO side, not by the PO API) // FIXME: Not Yet Implemented
  * 
  * State data: 
  * - new state is appended to purchase order. No changes 
@@ -286,7 +287,6 @@ router.post('/:purchaseOrderObjID/state',
             isAuthorized(PERMS.PURCHASE_ORDER_WRITE),
             setUserHierarchy,
             async function(req, res) {
-    // TODO: Perform checks via testing
     try {
         // Check for valid Purchase Order document
         let purchaseOrderDoc = await PurchaseOrderModel.findOne({ _id: req.params.purchaseOrderObjID });
