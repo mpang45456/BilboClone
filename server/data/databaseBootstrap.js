@@ -530,6 +530,30 @@ const purchaseOrders = [
             },
         ]
     },
+    {
+        createdBy: users[0].username,
+        latestStatus: PO_STATES.QUOTATION,
+        supplier: suppliers[3].name,        // Must be translated into Supplier ObjID
+        orderNumber: 'PO-000003',           // This field is not used by `DatabaseInteractor`
+                                            // `SalesOrderSchema.setOrderNumber()` used instead
+                                            // Just for documentation purposes. 
+        additionalInfo: 'Third Purchase Order',
+        orders: [
+            {
+                status: PO_STATES.QUOTATION,
+                additionalInfo: 'Just a draft.',
+                updatedBy: users[0].username,
+                parts: [
+                    {
+                        partNumber: 'PN101', // Must be translated into Part ObjID,
+                        quantity: 10,
+                        additionalInfo: 'Testing',
+                        fulfilledFor: []
+                    },
+                ]
+            },
+        ]
+    },
 ]
 
 module.exports = {

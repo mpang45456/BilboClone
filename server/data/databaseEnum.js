@@ -14,7 +14,6 @@ const PO_STATES = Object.freeze({
     NEW: 'NEW',
     QUOTATION: 'QUOTATION',
     CONFIRMED: 'CONFIRMED',
-    SENT: 'SENT',
     RECEIVED: 'RECEIVED',
     FULFILLED: 'FULFILLED',
 })
