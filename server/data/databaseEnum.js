@@ -6,6 +6,7 @@ const SO_STATES = Object.freeze({
     IN_DELIVERY: 'IN_DELIVERY',
     RECEIVED: 'RECEIVED',
     FULFILLED: 'FULFILLED',
+    CANCELLED: 'CANCELLED',
 })
 
 // All possible states for Purchase Orders
@@ -14,6 +15,7 @@ const PO_STATES = Object.freeze({
     CONFIRMED: 'CONFIRMED',
     RECEIVED: 'RECEIVED',
     FULFILLED: 'FULFILLED',
+    CANCELLED: 'CANCELLED',
 })
 
 module.exports = {

@@ -7,7 +7,7 @@ import { ShowMoreButton,
          BilboNavLink } from '../UtilComponents';
 import { Menu, Table, Steps, Popover } from 'antd';
 const { Step } = Steps;
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, StopOutlined } from "@ant-design/icons";
 import PropTypes from 'prop-types';
 import { bax, useAuth, PERMS, redirectToErrorPage } from '../../context/AuthContext';
 import CONFIG from '../../config';
@@ -101,10 +101,13 @@ function SalesOrderNavigator(props) {
                    onChange={onChange} >
                 {
                     CONFIG.SALES_ORDER_STEPS.map(({status, title}) => {
-                        return <Step key={title} title={title} />
+                        if (status === 'CANCELLED') {
+                            return <Step key={title} title={title} icon={<StopOutlined/>}/>
+                        } else {
+                            return <Step key={title} title={title} />
+                        }
                     })
                 }
-
             </Steps>
             <SalesOrderList status={CONFIG.SALES_ORDER_STEPS[currentStepIndex].status}/>
         </>

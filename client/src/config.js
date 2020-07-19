@@ -72,7 +72,10 @@ CONFIG.SALES_ORDER_STEPS = [
         status: 'FULFILLED',
         title: 'Fulfilled',
     },
-    
+    {
+        status: 'CANCELLED',
+        title: 'Cancelled',
+    },
 ]
 
 // Miscellaneous
