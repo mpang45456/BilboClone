@@ -48,7 +48,9 @@ const users = [
         // Full Supplier and Part API Access. Read/Write Access to Sales Order and Purchase Order APIs.
         "username": "user4",
         "password": "asd",
-        "permissions": [PERMS.PART_READ, PERMS.PART_WRITE, PERMS.SUPPLIER_READ, PERMS.SUPPLIER_WRITE, 
+        "permissions": [PERMS.PART_READ, PERMS.PART_WRITE, 
+                        PERMS.SUPPLIER_READ, PERMS.SUPPLIER_WRITE,
+                        PERMS.CUSTOMER_READ, PERMS.CUSTOMER_WRITE, 
                         PERMS.SALES_ORDER_READ, PERMS.SALES_ORDER_WRITE,
                         PERMS.PURCHASE_ORDER_READ, PERMS.PURCHASE_ORDER_WRITE],
         "name": "Gandalf",
