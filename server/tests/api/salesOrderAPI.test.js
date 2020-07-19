@@ -335,6 +335,32 @@ describe('Testing /api/v1/salesOrder endpoint', () => {
         done();
     })
 
+    it(`POST /: After user with SALES_ORDER_WRITE perm
+        creates new sales order meta data, the latest state
+        for the sales order should have QUOTATION status and
+        should be empty`, async (done) => {
+        let salesOrderObjID = null;
+        // Create new Sales Order Meta-Data
+        await authenticatedAdminAgent
+                .post(salesOrderEndpoint)
+                .send(newSalesOrderMetaData)
+                .expect(200)
+                .expect(res => {
+                    salesOrderObjID = res.body._id;
+                })
+
+        // Check latest state
+        await authenticatedAdminAgent
+                .get(`${salesOrderEndpoint}/${salesOrderObjID}/state/latest`)
+                .expect(200)
+                .then(res => {
+                    expect(res.body.status).toBe(SO_STATES.QUOTATION);
+                    expect(res.body.additionalInfo).toBe('');
+                    expect(res.body.parts).toStrictEqual([]);
+                })
+        done();
+    })
+
     it(`POST /: User with SALES_ORDER_WRITE perm should
         not be able to create a new sales order meta data 
         if the customer name field is missing`, async (done) => {
@@ -375,7 +401,7 @@ describe('Testing /api/v1/salesOrder endpoint', () => {
                     expect(res.body.createdBy).not.toBe(newSalesOrderMetaDataWithExtraData.createdBy);
                     expect(res.body.createdBy).toBe(testUsers[0].username);
                     expect(res.body.latestStatus).not.toBe(newSalesOrderMetaDataWithExtraData.latestStatus);
-                    expect(res.body.latestStatus).toBe(SO_STATES.NEW);
+                    expect(res.body.latestStatus).toBe(SO_STATES.QUOTATION);
                     expect(res.body.orderNumber).not.toBe(newSalesOrderMetaDataWithExtraData.orderNumber);
                 })
         
@@ -433,7 +459,7 @@ describe('Testing /api/v1/salesOrder endpoint', () => {
         created by a user under the user in the user hierarchy`, async (done) => {
         // `admin` user creates a sales order meta data object
         let adminCreatedSalesOrderMetaDataObjID = null;
-        authenticatedAdminAgent
+        await authenticatedAdminAgent
             .post(salesOrderEndpoint)
             .send(newSalesOrderMetaData)
             .expect(200)
@@ -447,7 +473,7 @@ describe('Testing /api/v1/salesOrder endpoint', () => {
         const authenticatedUser4Agent = await getAuthenticatedAgent(server, 
                                                                     user4Account.username, 
                                                                     user4Account.password);
-        authenticatedUser4Agent
+        await authenticatedUser4Agent
             .post(salesOrderEndpoint)
             .send(newSalesOrderMetaData)
             .expect(200)
@@ -461,15 +487,15 @@ describe('Testing /api/v1/salesOrder endpoint', () => {
         const authenticatedUser1Agent = await getAuthenticatedAgent(server, 
                                                                     user1Account.username, 
                                                                     user1Account.password);
-        authenticatedUser1Agent
+        await authenticatedUser1Agent
             .get(`${salesOrderEndpoint}/${adminCreatedSalesOrderMetaDataObjID}`)
             .expect(403);
-        authenticatedUser1Agent
+        await authenticatedUser1Agent
             .get(`${salesOrderEndpoint}/${user4CreatedSalesOrderMetaDataObjID}`)
             .expect(200)
             .expect(res => {
                 expect(res.body.createdBy).toBe(user4Account.username);
-                expect(res.body.latestStatus).toBe(SO_STATES.NEW);
+                expect(res.body.latestStatus).toBe(SO_STATES.QUOTATION);
                 expect(res.body.additionalInfo).toBe(newSalesOrderMetaData.additionalInfo);
                 expect(res.body.orderNumber).toBeTruthy();
                 expect(res.body.orders).toBeTruthy();
@@ -487,7 +513,7 @@ describe('Testing /api/v1/salesOrder endpoint', () => {
     it(`GET /:salesOrderObjID/state: User with SALES_ORDER_READ 
         perm should be able to read sales order meta data with
         default query fields`, async (done) => {
-        authenticatedAdminAgent
+        await authenticatedAdminAgent
             .get(`${salesOrderEndpoint}/${salesOrderObjID}/state`)
             .expect(200)
             .expect(res => {
@@ -505,8 +531,8 @@ describe('Testing /api/v1/salesOrder endpoint', () => {
         perm should be able to read sales order meta data with
         custom query fields`, async (done) => {
         let query = queryString.stringify({ inc: ['status', 'updatedBy', 'updatedAt'] });
-        authenticatedAdminAgent
-            .get(`${salesOrderEndpoint}/${salesOrderObjID}/state`)
+        await authenticatedAdminAgent
+            .get(`${salesOrderEndpoint}/${salesOrderObjID}/state?${query}`)
             .expect(200)
             .expect(res => {
                 expect(res.body.length).toBe(2);
@@ -528,7 +554,7 @@ describe('Testing /api/v1/salesOrder endpoint', () => {
         const salesOrderDoc = await SalesOrderModel.findOne({ orderNumber: 'SO-000002' });
 
         // `admin` user account
-        authenticatedAdminAgent
+        await authenticatedAdminAgent
             .get(`${salesOrderEndpoint}/${salesOrderDoc._id}/state`)
             .expect(200)
             .expect(res => {
@@ -536,7 +562,7 @@ describe('Testing /api/v1/salesOrder endpoint', () => {
             })
 
         // `user3` user account
-        authenticatedReadAgent
+        await authenticatedReadAgent
             .get(`${salesOrderEndpoint}/${salesOrderDoc._id}/state`)
             .expect(403);
         
@@ -546,7 +572,7 @@ describe('Testing /api/v1/salesOrder endpoint', () => {
     it(`GET /:salesOrderObjID/state: User without SALES_ORDER_READ 
         perm should not be able to access the endpoint and read
         sales order state data`, async (done) => {
-        authenticatedUnauthorizedAgent
+        await authenticatedUnauthorizedAgent
             .get(`${salesOrderEndpoint}/${salesOrderObjID}/state`)
             .expect(403);
 

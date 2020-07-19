@@ -49,10 +49,6 @@ CONFIG.ARCHIVED_TAG_COLOR = 'gold';
 // Sales Order Steps
 CONFIG.SALES_ORDER_STEPS = [
     {
-        status: 'NEW',
-        title: 'New',
-    },
-    {
         status: 'QUOTATION',
         title: 'Quotation',
     },

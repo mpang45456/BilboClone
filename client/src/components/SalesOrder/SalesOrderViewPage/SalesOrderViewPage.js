@@ -20,9 +20,42 @@ import queryString from 'query-string';
  */
 export default function SalesOrderViewPage(props) {
     // const { permissionsList } = useAuth();
+    const [ salesOrderMetaData, setSalesOrderMetaData ] = useState({});
+    const [ isLoadingSalesOrderDetails, setIsLoadingSalesOrderDetails] = useState(true);
+    useEffect(() => {
+        // Get Meta-Data
+        bax.get(`/api/v1/salesOrder/${props.match.params.salesOrderID}`)
+            .then(res => {
+                if (res.status === 200) {
+                    setSalesOrderMetaData(res.data);
+                    setIsLoadingSalesOrderDetails(false);
+                }
+            }).catch(err => {
+                setIsLoadingSalesOrderDetails(false);
+                redirectToErrorPage(err, history);
+            })
+    }, []) // Run only once (on component mounting)
+
+    function renderSwitcher(latestStatus) {
+        switch (latestStatus) {
+            case 'QUOTATION':
+                return <span>QUOTATION</span>
+            case 'CONFIRMED':
+                return <span>CONFIRMED</span>
+            case 'PREPARING':
+                return <span>PREPARING</span>
+            case 'IN_DELIVERY':
+                return <span>IN_DELIVERY</span>
+            case 'RECEIVED':
+                return <span>RECEIVED</span>
+            case 'FULFILLED':
+                return <span>FULFILLED</span>
+        }
+    }
+
     return (
         <div>
-            Hello
+            { renderSwitcher(salesOrderMetaData.latestStatus) }
         </div>
     );
 }

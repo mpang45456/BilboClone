@@ -22,7 +22,7 @@ const users = [
     {
         "username": "user1",
         "password": "asd",
-        "permissions": [PERMS.SALES_ORDER_READ, PERMS.SALES_ORDER_WRITE],
+        "permissions": [PERMS.SALES_ORDER_READ, PERMS.SALES_ORDER_WRITE, PERMS.PURCHASE_ORDER_READ, PERMS.PURCHASE_ORDER_WRITE],
         "name": "Balin",
         "position": "Sales Representative",
         "reportsTo": "admin"

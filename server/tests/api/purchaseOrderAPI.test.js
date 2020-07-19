@@ -339,6 +339,32 @@ describe('Testing /api/v1/purchaseOrder endpoint', () => {
         done();
     })
 
+    it(`POST /: After user with PURCHASE_ORDER_WRITE perm
+        creates new purchase order meta data, the latest state
+        for the purchase order should have QUOTATION status and
+        should be empty`, async (done) => {
+        let purchaseOrderObjID = null;
+        // Create new Purchase Order Meta-Data
+        await authenticatedAdminAgent
+                .post(purchaseOrderEndpoint)
+                .send(newPurchaseOrderMetaData)
+                .expect(200)
+                .expect(res => {
+                    purchaseOrderObjID = res.body._id;
+                })
+
+        // Check latest state
+        await authenticatedAdminAgent
+                .get(`${purchaseOrderEndpoint}/${purchaseOrderObjID}/state/latest`)
+                .expect(200)
+                .then(res => {
+                    expect(res.body.status).toBe(PO_STATES.QUOTATION);
+                    expect(res.body.additionalInfo).toBe('');
+                    expect(res.body.parts).toStrictEqual([]);
+                })
+        done();
+    })
+
     it(`POST /: User with PURCHASE_ORDER_WRITE perm should
         not be able to create a new purchase order meta data 
         if the supplier name field is missing`, async (done) => {
@@ -379,7 +405,7 @@ describe('Testing /api/v1/purchaseOrder endpoint', () => {
                     expect(res.body.createdBy).not.toBe(newPurchaseOrderMetaDataWithExtraData.createdBy);
                     expect(res.body.createdBy).toBe(testUsers[0].username);
                     expect(res.body.latestStatus).not.toBe(newPurchaseOrderMetaDataWithExtraData.latestStatus);
-                    expect(res.body.latestStatus).toBe(PO_STATES.NEW);
+                    expect(res.body.latestStatus).toBe(PO_STATES.QUOTATION);
                     expect(res.body.orderNumber).not.toBe(newPurchaseOrderMetaDataWithExtraData.orderNumber);
                 })
         
@@ -437,7 +463,7 @@ describe('Testing /api/v1/purchaseOrder endpoint', () => {
         created by a user under the user in the user hierarchy`, async (done) => {
         // `admin` user creates a purchase order meta data object
         let adminCreatedPurchaseOrderMetaDataObjID = null;
-        authenticatedAdminAgent
+        await authenticatedAdminAgent
             .post(purchaseOrderEndpoint)
             .send(newPurchaseOrderMetaData)
             .expect(200)
@@ -451,7 +477,7 @@ describe('Testing /api/v1/purchaseOrder endpoint', () => {
         const authenticatedUser4Agent = await getAuthenticatedAgent(server, 
                                                                     user4Account.username, 
                                                                     user4Account.password);
-        authenticatedUser4Agent
+        await authenticatedUser4Agent
             .post(purchaseOrderEndpoint)
             .send(newPurchaseOrderMetaData)
             .expect(200)
@@ -465,15 +491,15 @@ describe('Testing /api/v1/purchaseOrder endpoint', () => {
         const authenticatedUser1Agent = await getAuthenticatedAgent(server, 
                                                                     user1Account.username, 
                                                                     user1Account.password);
-        authenticatedUser1Agent
+        await authenticatedUser1Agent
             .get(`${purchaseOrderEndpoint}/${adminCreatedPurchaseOrderMetaDataObjID}`)
             .expect(403);
-        authenticatedUser1Agent
+        await authenticatedUser1Agent
             .get(`${purchaseOrderEndpoint}/${user4CreatedPurchaseOrderMetaDataObjID}`)
             .expect(200)
             .expect(res => {
                 expect(res.body.createdBy).toBe(user4Account.username);
-                expect(res.body.latestStatus).toBe(PO_STATES.NEW);
+                expect(res.body.latestStatus).toBe(PO_STATES.QUOTATION);
                 expect(res.body.additionalInfo).toBe(newPurchaseOrderMetaData.additionalInfo);
                 expect(res.body.orderNumber).toBeTruthy();
                 expect(res.body.orders).toBeTruthy();
@@ -491,7 +517,7 @@ describe('Testing /api/v1/purchaseOrder endpoint', () => {
     it(`GET /:purchaseOrderObjID/state: User with PURCHASE_ORDER_READ 
         perm should be able to read purchase order meta data with
         default query fields`, async (done) => {
-        authenticatedAdminAgent
+        await authenticatedAdminAgent
             .get(`${purchaseOrderEndpoint}/${purchaseOrderObjID}/state`)
             .expect(200)
             .expect(res => {
@@ -509,12 +535,12 @@ describe('Testing /api/v1/purchaseOrder endpoint', () => {
         perm should be able to read purchase order meta data with
         custom query fields`, async (done) => {
         let query = queryString.stringify({ inc: ['status', 'updatedBy', 'updatedAt'] });
-        authenticatedAdminAgent
-            .get(`${purchaseOrderEndpoint}/${purchaseOrderObjID}/state`)
+        await authenticatedAdminAgent
+            .get(`${purchaseOrderEndpoint}/${purchaseOrderObjID}/state?${query}`)
             .expect(200)
             .expect(res => {
                 expect(res.body.length).toBe(testPurchaseOrders[0].orders.length);
-                expect(res.body[0].status).toBeTruthy();s
+                expect(res.body[0].status).toBeTruthy();
                 expect(res.body[0].additionalInfo).not.toBeTruthy();
                 expect(res.body[0].parts).not.toBeTruthy();
                 expect(res.body[0].updatedBy).toBeTruthy();
@@ -532,7 +558,7 @@ describe('Testing /api/v1/purchaseOrder endpoint', () => {
         const purchaseOrderDoc = await PurchaseOrderModel.findOne({ orderNumber: 'PO-000002' });
 
         // `admin` user account
-        authenticatedAdminAgent
+        await authenticatedAdminAgent
             .get(`${purchaseOrderEndpoint}/${purchaseOrderDoc._id}/state`)
             .expect(200)
             .expect(res => {
@@ -542,7 +568,7 @@ describe('Testing /api/v1/purchaseOrder endpoint', () => {
         // `user4` user account
         const user4 = testUsers[4];
         authenticatedUser4Account = await getAuthenticatedAgent(server, user4.username, user4.password);
-        authenticatedUser4Account
+        await authenticatedUser4Account
             .get(`${purchaseOrderEndpoint}/${purchaseOrderDoc._id}/state`)
             .expect(403);
         
@@ -552,7 +578,7 @@ describe('Testing /api/v1/purchaseOrder endpoint', () => {
     it(`GET /:purchaseOrderObjID/state: User without PURCHASE_ORDER_READ 
         perm should not be able to access the endpoint and read
         purchase order state data`, async (done) => {
-        authenticatedUnauthorizedAgent
+        await authenticatedUnauthorizedAgent
             .get(`${purchaseOrderEndpoint}/${purchaseOrderObjID}/state`)
             .expect(403);
 
