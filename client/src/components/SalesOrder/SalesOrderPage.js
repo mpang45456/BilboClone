@@ -15,7 +15,18 @@ import { SO_STATES } from '../../../../server/data/databaseEnum';
 import { escapeRegex } from '../../utils';
 import queryString from 'query-string';
 
-// TODO: Add docs
+/**
+ * React component to display all sales orders
+ * according to status. Comprised of 2 main components
+ * 1. BilboPageHeader
+ *    - Title
+ *    - Show More Button (Add a Sales Order)
+ * 2. SalesOrderNavigator
+ *    - Status Navigator
+ *    - Table displaying all Sales Orders with the
+ *      corresponding status
+ * @param {object} props 
+ */
 export default function SalesOrderPage(props) {
     const { permissionsList } = useAuth();
     return (
@@ -66,7 +77,16 @@ AllSalesOrdersShowMoreButton.propTypes = {
     disabled: PropTypes.bool.isRequired
 }
 
-// TODO: Add docs
+/**
+ * React component to navigate the different
+ * sales orders according to their status.
+ * Comprised of 2 main components:
+ * 1. Steps (to navigate status)
+ * 2. SalesOrderList (to display the sales
+ *    orders that have the status selected
+ *    in the steps)
+ * @param {object} props 
+ */
 function SalesOrderNavigator(props) {
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
     const onChange = (newStepIndex) => {
@@ -86,13 +106,18 @@ function SalesOrderNavigator(props) {
                 }
 
             </Steps>
-            <SalesOrderList status={CONFIG.SALES_ORDER_STEPS[currentStepIndex]}/>
+            <SalesOrderList status={CONFIG.SALES_ORDER_STEPS[currentStepIndex].status}/>
         </>
     )
 }
 
-// TODO: Add docs
-// TODO: Document props
+/**
+ * Displays in a table the sales orders that have latest status
+ * corresponding to the selected status in the <Steps/>
+ * 
+ * Selected status is passed down via `props`.
+ * @param {object} props 
+ */
 function SalesOrderList(props) {
     const [dataSource, setDataSource] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -131,7 +156,7 @@ function SalesOrderList(props) {
         setIsLoading(true);
         // Send filter in query string
         let filter = JSON.stringify({
-            "latestStatus": props.status.status,
+            "latestStatus": props.status,
             "createdBy": { "$regex": escapeRegex(APIFilterQuery.createdBy), "$options": "i"},
             "orderNumber": { "$regex": escapeRegex(APIFilterQuery.orderNumber), "$options": "i"},
             "additionalInfo": { "$regex": escapeRegex(APIFilterQuery.additionalInfo), "$options": "i"},
@@ -209,4 +234,7 @@ function SalesOrderList(props) {
                 bordered
         />
     )
+}
+SalesOrderList.propTypes = {
+    status: PropTypes.string.isRequired,
 }
