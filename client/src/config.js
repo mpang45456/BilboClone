@@ -6,8 +6,8 @@ CONFIG.SERVER_URL = 'http://localhost:3000';
 // and are not the backend API URLs
 // Menu URLs (used as keys)
 CONFIG.HOME_URL = '/';
-CONFIG.SALES_ORDERS_URL = '/sales';
-CONFIG.PURCHASE_ORDERS_URL = '/purchases';
+CONFIG.SALES_ORDER_URL = '/sales';
+CONFIG.PURCHASE_ORDER_URL = '/purchases';
 CONFIG.PARTS_URL = '/parts';
 CONFIG.SUPPLIER_URL = '/suppliers';
 CONFIG.CUSTOMER_URL = '/customers';
@@ -45,6 +45,39 @@ CONFIG.DATA_SUB_MENU_KEY = 'dataSM';
 // Tag Colours
 CONFIG.ACTIVE_TAG_COLOR = 'green';
 CONFIG.ARCHIVED_TAG_COLOR = 'gold';
+
+// Sales Order Steps
+CONFIG.SALES_ORDER_STEPS = [
+    {
+        status: 'NEW',
+        title: 'New',
+    },
+    {
+        status: 'QUOTATION',
+        title: 'Quotation',
+    },
+    {
+        status: 'CONFIRMED',
+        title: 'Confirmed',
+    },
+    {
+        status: 'PREPARING',
+        title: 'Preparing',
+    },
+    {
+        status: 'IN_DELIVERY',
+        title: 'In-Delivery',
+    },
+    {
+        status: 'RECEIVED',
+        title: 'Received',
+    },
+    {
+        status: 'FULFILLED',
+        title: 'Fulfilled',
+    },
+    
+]
 
 // Miscellaneous
 CONFIG.DEFAULT_PAGE_SIZE = 10;

@@ -85,15 +85,15 @@ class Sidebar extends React.Component {
                     Home
                   </NavLink>
                 </Menu.Item>
-                <Menu.Item key={this.__getMenuKeyFromURL(CONFIG.SALES_ORDERS_URL)} 
+                <Menu.Item key={this.__getMenuKeyFromURL(CONFIG.SALES_ORDER_URL)} 
                            icon={<DollarOutlined />} >
-                  <NavLink to={CONFIG.SALES_ORDERS_URL}>
+                  <NavLink to={CONFIG.SALES_ORDER_URL}>
                     Sales Orders
                   </NavLink>
                 </Menu.Item>
-                <Menu.Item key={this.__getMenuKeyFromURL(CONFIG.PURCHASE_ORDERS_URL)} 
+                <Menu.Item key={this.__getMenuKeyFromURL(CONFIG.PURCHASE_ORDER_URL)} 
                            icon={<ShoppingCartOutlined />} >
-                  <NavLink to={CONFIG.PURCHASE_ORDERS_URL}>
+                  <NavLink to={CONFIG.PURCHASE_ORDER_URL}>
                     Purchase Orders
                   </NavLink>
                 </Menu.Item>

@@ -7,7 +7,7 @@ import BilboHeader from './BilboHeader';
 import BilboContent from './BilboContent';
 
 import HomePage from '../HomePage';
-import SalesPage from '../SalesPage';
+import SalesOrderPage from '../SalesOrder/SalesOrderPage';
 import PurchasePage from '../PurchasePage';
 import PartPage from '../Part/PartPage';
 import PartViewPage from '../Part/PartViewPage/PartViewPage';
@@ -52,8 +52,8 @@ export default class AppScaffold extends React.Component {
           <BilboContent>
             <Switch>
               <Route exact path={CONFIG.HOME_URL} component={HomePage} />
-              <Route path={CONFIG.SALES_ORDERS_URL} component={SalesPage} />
-              <Route path={CONFIG.PURCHASE_ORDERS_URL} component={PurchasePage} />
+              <Route path={CONFIG.SALES_ORDER_URL} component={SalesOrderPage} />
+              <Route path={CONFIG.PURCHASE_ORDER_URL} component={PurchasePage} />
               <Route path={`${CONFIG.PARTS_URL}add`} component={PartAddPage} />
               <Route path={`${CONFIG.PARTS_URL}/:partID`} component={PartViewPage} />
               <Route path={CONFIG.PARTS_URL} component={PartPage} />
