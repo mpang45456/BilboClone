@@ -15,6 +15,7 @@ import { bax, useAuth, PERMS, redirectToErrorPage } from '../../../context/AuthC
 import CONFIG from '../../../config';
 import { SO_STATES } from '../../../../../server/data/databaseEnum';
 import { escapeRegex } from '../../../utils';
+import SalesOrderQuotationContent from './SalesOrderQuotationContent';
 import queryString from 'query-string';
 
 /**
@@ -66,7 +67,8 @@ export default function SalesOrderViewPage(props) {
     function renderSwitcher(latestStatus) {
         switch (latestStatus) {
             case 'QUOTATION':
-                return <span>QUOTATION</span>
+                return <SalesOrderQuotationContent 
+                            salesOrderState={salesOrderStateData} />
             case 'CONFIRMED':
                 return <span>CONFIRMED</span>
             case 'PREPARING':
