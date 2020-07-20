@@ -32,6 +32,22 @@ import { isEmpty } from 'lodash';
  * 3. Content
  *    - What is displayed is dependent on 
  *      the current status of the sales order
+ * 
+ * Note: `salesOrderStateData` has format: 
+ * {
+ *      additionalInfo
+ *      status
+ *      updatedBy
+ *      createdAt
+ *      updatedAt
+ *      parts: [{
+ *          additionalInfo
+ *          fulfilledBy: []
+ *          part (partObjID)
+ *          partNumber (Part Number (Supplier Name))
+ *          quantity
+ *      }]
+ * }
  */
 export default function SalesOrderViewPage(props) {
     const { permissionsList } = useAuth();
@@ -52,16 +68,30 @@ export default function SalesOrderViewPage(props) {
                 })
     
             // Get State Data
+            let stateData = null;
             await bax.get(`/api/v1/salesOrder/${props.match.params.salesOrderID}/state/latest`)
                 .then(res => {
                     if (res.status === 200) {
-                        setSalesOrderStateData(res.data);
-                        setIsLoadingSalesOrderDetails(false);
+                        stateData = res.data;
                     }
                 }).catch(err => {
-                    setIsLoadingSalesOrderDetails(false);
                     redirectToErrorPage(err, history);
                 })
+
+            // Populate State Data with Part's Part Number and Supplier Name
+            await Promise.all(stateData.parts.map(async part => {
+                const query = queryString.stringify({inc: ['partNumber'], supplierPopulate: ['name']});
+                await bax.get(`/api/v1/part/${part.part}?${query}`)
+                         .then(res => {
+                             part.partNumber = `${res.data.partNumber} (${res.data.supplier.name})`;
+                         })
+            })).then(_ => {
+                setSalesOrderStateData(stateData);
+                setIsLoadingSalesOrderDetails(false);
+            }).catch(err => {
+                setIsLoadingSalesOrderDetails(false);
+                redirectToErrorPage(err, history);
+            })
         })();
     }, []) // Run only once (on component mounting)
 

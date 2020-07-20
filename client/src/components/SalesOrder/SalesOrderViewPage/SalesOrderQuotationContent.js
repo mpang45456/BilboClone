@@ -29,23 +29,6 @@ import { isEmpty } from 'lodash';
 // so there is no need to handle the case when the API call has 
 // not returned 
 export default function SalesOrderQuotationContent(props) {
-    // TODO: Populate the pre-existing parts
-    /*
-    salesOrderState: {
-        status
-        additionalInfo
-        parts: []
-        updatedBy:
-    }
-     */
-    // parts: [{part: '123', quantity: 123, additionalInfo: 'asd'}]
-    /*
-[{ additionalInfo: "Blue in color",
-                            fulfilledBy: [],
-                            part: "5f14f720e23ddf3bb629630d",
-                            quantity: 1000,
-                            _id: "5f14f720e23ddf3bb6296421" }]
-    */
     const onFinish = (values) => {
         // TODO: TO BE IMPLEMENTED
         console.log(values);
@@ -56,7 +39,7 @@ export default function SalesOrderQuotationContent(props) {
     // TODO: Allow selection for part number
     // TODO: Check for duplicate part number
     // TODO: Resolve opt group issue for parts with same supplier but same search term
-    // TODO: Resolve indexing (of partSearches) after the addition of the partsStatic section of the form
+    // TODO: Resolve indexing (of partSearches) after the addition of the partsExisting section of the form
     const [partSearches, setPartSearches] = useState(
         props.salesOrderStateData.parts.map(_ => {
             return {isGettingPartData: false, partsData: []};
@@ -100,11 +83,12 @@ export default function SalesOrderQuotationContent(props) {
         <Form name="quotationStatusForm" 
                 onFinish={onFinish}
                 initialValues={{
-                    partsStatic: props.salesOrderStateData.parts
+                    partsExisting: props.salesOrderStateData.parts
                 }}
                 autoComplete="off"
                 >
-            <Form.List name="partsStatic">
+            {/* Form Section for Existing Parts (in `props.salesOrderStateData.parts`) */}
+            <Form.List name="partsExisting">
             {(fields, { add, remove }) => {
                 return (
                 <div>
@@ -112,31 +96,13 @@ export default function SalesOrderQuotationContent(props) {
                     <Row key={field.key} style={{ width: '100%' }} >
                         <Form.Item
                             {...field}
-                            name={[field.name, 'part']}
-                            fieldKey={[field.fieldKey, 'part']}
-                            key={`${field.fieldKey}-part`}
+                            name={[field.name, 'partNumber']}
+                            fieldKey={[field.fieldKey, 'partNumber']}
+                            key={`${field.fieldKey}-partNumber`}
                             style={{width: '20%', marginRight: '5px'}}
-                            rules={[{ required: true, message: 'Missing part' }]}
+                            rules={[{ required: true, message: 'Missing partNumber' }]}
                         >
-                            <Select placeholder='Select Part Number'
-                                    notFoundContent={partSearches[index].isGettingPartData ? <Spin size='small'/>: null}
-                                    filterOption={false}
-                                    showSearch={true}
-                                    onSearch={(searchValue) => getPartData(searchValue, index)} >
-                                {
-                                    partSearches[index].partsData.map(partData => {
-                                        return (
-                                            <OptGroup key={partData.supplier._id}
-                                                        label={partData.supplier.name}>
-                                                <Option key={partData._id}
-                                                        value={partData._id} >
-                                                    {partData.partNumber}
-                                                </Option>
-                                            </OptGroup>
-                                        )
-                                    })
-                                }
-                            </Select>
+                            <Input disabled={true}></Input>
                         </Form.Item>
                         <Form.Item
                             {...field}
@@ -178,9 +144,9 @@ export default function SalesOrderQuotationContent(props) {
                             {...field}
                             name={[field.name, '_id']}
                             fieldKey={[field.fieldKey, '_id']}
-                            key={`${field.fieldKey}-partNumber`}
+                            key={`${field.fieldKey}-part`}
                         >
-                            <Input placeholder="Part Number" style={{ display: 'none'}} />
+                            <Input style={{ display: 'none'}} />
                         </Form.Item>
                     </Row>
                     ))}
@@ -189,10 +155,8 @@ export default function SalesOrderQuotationContent(props) {
             }}
             </Form.List>
 
-
-
-
-            <Form.List name="parts">
+            {/* Form Section for New (Yet-To-Be-Added) Parts */}
+            <Form.List name="partsNew">
             {(fields, { add, remove }) => {
                 return (
                 <div>
@@ -214,13 +178,10 @@ export default function SalesOrderQuotationContent(props) {
                                 {
                                     partSearches[index].partsData.map(partData => {
                                         return (
-                                            <OptGroup key={partData.supplier._id}
-                                                        label={partData.supplier.name}>
-                                                <Option key={partData._id}
-                                                        value={partData._id} >
-                                                    {partData.partNumber}
-                                                </Option>
-                                            </OptGroup>
+                                            <Option key={partData._id}
+                                                    value={partData._id} >
+                                                {`${partData.partNumber} (${partData.supplier.name})`}
+                                            </Option>
                                         )
                                     })
                                 }
