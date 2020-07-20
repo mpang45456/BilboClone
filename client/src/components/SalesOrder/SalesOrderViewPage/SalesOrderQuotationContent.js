@@ -5,8 +5,9 @@ import { ShowMoreButton,
          BilboDivider, 
          BilboSearchTable, 
          BilboDisplayOnlySteps,
+         BilboHoverableIconButton,
          BilboNavLink } from '../../UtilComponents';
-import { Menu, Select, Modal, Table, Steps, Popover, Spin, message, Form, Input, Button, Space } from 'antd';
+import { Menu, Select, Modal, Row, Col, Table, Steps, Popover, Spin, message, Form, Input, Button, Space } from 'antd';
 const { confirm } = Modal;
 const { Option } = Select;
 const { Step } = Steps;
@@ -18,6 +19,7 @@ import { SO_STATES } from '../../../../../server/data/databaseEnum';
 import { escapeRegex } from '../../../utils';
 import debounce from 'lodash/debounce';
 import queryString from 'query-string';
+import { theme } from '../../Theme';
 
 // TODO: Update docs
 export default function SalesOrderQuotationContent(props) {
@@ -78,68 +80,88 @@ export default function SalesOrderQuotationContent(props) {
             })
     }, debounceLimit)
 
+    const formItemLayoutWithOutLabel = {
+        wrapperCol: {
+          xs: { span: 24, offset: 0 },
+          sm: { span: 24, offset: 0 },
+        },
+      };
+
     return (
         <Form name="quotationStatusForm" 
               onFinish={onFinish}
               initialValues={{
                   parts: [{part: '123', quantity: 123, additionalInfo: 'asd'}]
               }}
-              autoComplete="off">
+              autoComplete="off"
+              >
           <Form.List name="parts">
             {(fields, { add, remove }) => {
               return (
                 <div>
                   {fields.map((field, index) => (
-                    <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="start">
-                      <Form.Item
-                        {...field}
-                        name={[field.name, 'part']}
-                        fieldKey={[field.fieldKey, 'part']}
-                        rules={[{ required: true, message: 'Missing part' }]}
-                      >
-                        <Select placeholder='Select Part Number'
-                                notFoundContent={partSelections[index].isGettingPartData ? <Spin size='small'/>: null}
-                                filterOption={false}
-                                showSearch={true}
-                                onSearch={(searchValue) => getPartData(searchValue, index)} >
-                            {
-                                partSelections[index].partsData.map(partData => {
-                                    return (
-                                        <Option key={partData._id}
-                                                value={partData._id} >
-                                            {partData._id}
-                                        </Option>
-                                    )
-                                })
-                            }
-                        </Select>
-                      </Form.Item>
-                      <Form.Item
-                        {...field}
-                        name={[field.name, 'quantity']}
-                        fieldKey={[field.fieldKey, 'quantity']}
-                        rules={[{ required: true, message: 'Missing quantity' }]}
-                      >
-                        <Input placeholder="Quantity" />
-                      </Form.Item>
-                      <Form.Item
-                        {...field}
-                        name={[field.name, 'additionalInfo']}
-                        fieldKey={[field.fieldKey, 'additionalInfo']}
-                      >
-                        <Input.TextArea placeholder="Additional Information" />
-                      </Form.Item>
-    
-                      <MinusCircleOutlined
-                        onClick={() => {
-                          // TODO: Need to remove from partSelections
-                          const updatedPartSelections = [...partSelections];
-                          updatedPartSelections.splice(index, 1);
-                          setPartSelections(updatedPartSelections);
-                          remove(field.name);
-                        }}
-                      />
-                    </Space>
+                    <Row key={field.key} style={{ width: '100%' }} >
+                        <Form.Item
+                            {...field}
+                            name={[field.name, 'part']}
+                            fieldKey={[field.fieldKey, 'part']}
+                            key={`${field.fieldKey}-part`}
+                            style={{width: '20%', marginRight: '5px'}}
+                            rules={[{ required: true, message: 'Missing part' }]}
+                        >
+                            <Select placeholder='Select Part Number'
+                                    notFoundContent={partSelections[index].isGettingPartData ? <Spin size='small'/>: null}
+                                    filterOption={false}
+                                    showSearch={true}
+                                    onSearch={(searchValue) => getPartData(searchValue, index)} >
+                                {
+                                    partSelections[index].partsData.map(partData => {
+                                        return (
+                                            <Option key={partData._id}
+                                                    value={partData._id} >
+                                                {partData._id}
+                                            </Option>
+                                        )
+                                    })
+                                }
+                            </Select>
+                        </Form.Item>
+                        <Form.Item
+                            {...field}
+                            style={{width: '15%', marginRight: '5px'}}
+                            name={[field.name, 'quantity']}
+                            fieldKey={[field.fieldKey, 'quantity']}
+                            key={`${field.fieldKey}-quantity`}
+                            rules={[{ required: true, message: 'Missing quantity' }]}
+                        >
+                            <Input placeholder="Quantity" />
+                        </Form.Item>
+                        <Form.Item
+                            {...field}
+                            style={{width: '55%', marginRight: '5px'}}
+                            name={[field.name, 'additionalInfo']}
+                            fieldKey={[field.fieldKey, 'additionalInfo']}
+                            key={`${field.fieldKey}-additionalInfo`}
+                        >
+                            <Input.TextArea placeholder="Additional Information" 
+                                            rows={1}
+                            />
+                        </Form.Item>
+        
+                        <BilboHoverableIconButton
+                            style={{fontSize: '15px'}}
+                            shape='circle'
+                            transformcolor={theme.colors.brightRed}
+                            onClick={() => {
+                            // TODO: Need to remove from partSelections
+                            const updatedPartSelections = [...partSelections];
+                            updatedPartSelections.splice(index, 1);
+                            setPartSelections(updatedPartSelections);
+                            remove(field.name);
+                            }} >
+                            <MinusCircleOutlined />
+                        </BilboHoverableIconButton>
+                    </Row>
                   ))}
     
                   <Form.Item>
@@ -155,9 +177,8 @@ export default function SalesOrderQuotationContent(props) {
                         setPartSelections(updatedPartSelections);
                         add();
                       }}
-                      block
                     >
-                      <PlusOutlined /> Add Another Part to Sales Order
+                      <PlusOutlined /> Add Another Part
                     </Button>
                   </Form.Item>
                 </div>
