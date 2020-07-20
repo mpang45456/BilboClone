@@ -62,10 +62,6 @@ router.use(isAuthenticated);
  * This is meant more as a convenience so that an extra API
  * call to the customer API can ba avoided.
  * 
- * Note: No filtering is allowed on the `createdBy` path.
- * Any filter on the path will be overwritten by the user
- * hierarchy filter. 
- * 
  * Note: response includes `salesOrders`, `totalPages` and
  * `currentPage`.
  */
@@ -91,7 +87,11 @@ router.get('/',
     }
 
     // Add UserHierarchy to Filter
-    filter.createdBy = { "$in": req.userHierarchy };
+    if (!filter.createdBy) {
+        filter.createdBy = { "$in": req.userHierarchy };
+    } else {
+        filter.createdBy["$in"] = req.userHierarchy;
+    }
 
     // Convert to Number
     limit = Number(limit);

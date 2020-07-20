@@ -91,7 +91,11 @@ router.get('/',
     }
 
     // Add UserHierarchy to Filter
-    filter.createdBy = { "$in": req.userHierarchy };
+    if (!filter.createdBy) {
+        filter.createdBy = { "$in": req.userHierarchy };
+    } else {
+        filter.createdBy["$in"] = req.userHierarchy;
+    }
 
     // Convert to Number
     limit = Number(limit);
