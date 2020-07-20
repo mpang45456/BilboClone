@@ -80,5 +80,6 @@ CONFIG.SALES_ORDER_STEPS = [
 
 // Miscellaneous
 CONFIG.DEFAULT_PAGE_SIZE = 10;
+CONFIG.DEBOUNCE_LIMIT = 300; // in ms
 
 export default CONFIG;

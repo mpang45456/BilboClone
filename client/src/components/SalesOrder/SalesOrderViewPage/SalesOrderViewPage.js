@@ -15,7 +15,7 @@ import { bax, useAuth, PERMS, redirectToErrorPage } from '../../../context/AuthC
 import CONFIG from '../../../config';
 import { SO_STATES } from '../../../../../server/data/databaseEnum';
 import { escapeRegex } from '../../../utils';
-import SalesOrderQuotationContent from './SalesOrderQuotationContent';
+import SalesOrderQuotationContent from './QuotationStatus/SalesOrderQuotationContent';
 import queryString from 'query-string';
 import { isEmpty } from 'lodash';
 
