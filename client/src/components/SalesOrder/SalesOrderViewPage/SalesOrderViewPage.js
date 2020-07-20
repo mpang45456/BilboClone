@@ -68,7 +68,9 @@ export default function SalesOrderViewPage(props) {
         switch (latestStatus) {
             case 'QUOTATION':
                 return <SalesOrderQuotationContent 
-                            salesOrderState={salesOrderStateData} />
+                            salesOrderStateData={salesOrderStateData} 
+                            salesOrderMetaData={salesOrderMetaData}
+                            />
             case 'CONFIRMED':
                 return <span>CONFIRMED</span>
             case 'PREPARING':
