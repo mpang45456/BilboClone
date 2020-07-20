@@ -4,8 +4,9 @@ import { ShowMoreButton,
          BilboPageHeader, 
          BilboDivider, 
          BilboSearchTable, 
+         BilboDisplayOnlySteps,
          BilboNavLink } from '../../UtilComponents';
-import { Menu, Modal, Table, Steps, Popover } from 'antd';
+import { Menu, Modal, Table, Steps, Popover, Spin, message } from 'antd';
 const { confirm } = Modal;
 const { Step } = Steps;
 import { PlusOutlined, StopOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
@@ -17,25 +18,49 @@ import { escapeRegex } from '../../../utils';
 import queryString from 'query-string';
 
 /**
- * // TODO: Update docs
+ * React Component to display the details of a
+ * sales order.
+ * 
+ * Composed of 3 main components:
+ * 1. BilboPageHeader
+ *    - Title
+ *    - ShowMoreButton (Cancel Sales Order)
+ * 2. Steps 
+ *    - Displays status (non-interactive)
+ * 3. Content
+ *    - What is displayed is dependent on 
+ *      the current status of the sales order
  */
 export default function SalesOrderViewPage(props) {
     const { permissionsList } = useAuth();
     const history = useHistory();
-    const [ salesOrderMetaData, setSalesOrderMetaData ] = useState({ latestStatus: CONFIG.SALES_ORDER_STEPS[0].status });
+    const [ salesOrderMetaData, setSalesOrderMetaData ] = useState({});
+    const [ salesOrderStateData, setSalesOrderStateData ] = useState({});
     const [ isLoadingSalesOrderDetails, setIsLoadingSalesOrderDetails] = useState(true);
     useEffect(() => {
-        // Get Meta-Data
-        bax.get(`/api/v1/salesOrder/${props.match.params.salesOrderID}`)
-            .then(res => {
-                if (res.status === 200) {
-                    setSalesOrderMetaData(res.data);
+        (async function() {
+            // Get Meta-Data
+            await bax.get(`/api/v1/salesOrder/${props.match.params.salesOrderID}`)
+                .then(res => {
+                    if (res.status === 200) {
+                        setSalesOrderMetaData(res.data);
+                    }
+                }).catch(err => {
+                    redirectToErrorPage(err, history);
+                })
+    
+            // Get State Data
+            await bax.get(`/api/v1/salesOrder/${props.match.params.salesOrderID}/state/latest`)
+                .then(res => {
+                    if (res.status === 200) {
+                        setSalesOrderStateData(res.data);
+                        setIsLoadingSalesOrderDetails(false);
+                    }
+                }).catch(err => {
                     setIsLoadingSalesOrderDetails(false);
-                }
-            }).catch(err => {
-                setIsLoadingSalesOrderDetails(false);
-                redirectToErrorPage(err, history);
-            })
+                    redirectToErrorPage(err, history);
+                })
+        })();
     }, []) // Run only once (on component mounting)
 
     function renderSwitcher(latestStatus) {
@@ -52,26 +77,32 @@ export default function SalesOrderViewPage(props) {
                 return <span>RECEIVED</span>
             case 'FULFILLED':
                 return <span>FULFILLED</span>
+            default:
+                return <span>LOADING</span>
         }
     }
 
     return (
         <div>
-            <BilboPageHeader 
-                title='Sales Order Details'
-                onBack={() => history.push(CONFIG.SALES_ORDER_URL)}
-                extra={[
-                    <CancelSalesOrderShowMoreButton 
-                        key='cancelSalesOrderShowMoreButton'
-                        salesOrderState={{test:'TO BE IMPLEMENTED'}}
-                        salesOrderID={props.match.params.salesOrderID}
-                        disabled={!permissionsList.includes(PERMS.SALES_ORDER_WRITE)}
-                    />
-                ]}
-            />
-            <BilboDivider />
-            <SalesOrderDisplaySteps status={salesOrderMetaData.latestStatus} />
-            { renderSwitcher(salesOrderMetaData.latestStatus) }
+            <Spin spinning={isLoadingSalesOrderDetails}> 
+                <BilboPageHeader 
+                    title='Sales Order Details'
+                    onBack={() => history.push(CONFIG.SALES_ORDER_URL)}
+                    extra={[
+                        <CancelSalesOrderShowMoreButton 
+                            key='cancelSalesOrderShowMoreButton'
+                            salesOrderState={salesOrderStateData}
+                            salesOrderID={props.match.params.salesOrderID}
+                            disabled={!permissionsList.includes(PERMS.SALES_ORDER_WRITE)}
+                        />
+                    ]}
+                />
+                <BilboDivider />
+                <BilboDisplayOnlySteps 
+                    activeStepIndex={CONFIG.SALES_ORDER_STEPS.findIndex(statusObj => statusObj.status === salesOrderStateData.status)}
+                    allStatusAndTitle={CONFIG.SALES_ORDER_STEPS} />
+                { renderSwitcher(salesOrderMetaData.latestStatus) }
+            </Spin>
         </div>
     );
 }
@@ -90,6 +121,7 @@ function CancelSalesOrderShowMoreButton(props) {
                 icon: <ExclamationCircleOutlined />,
                 content: 'Are you sure you wish to cancel this sales order?',
                 onOk: () => {
+                    // Make a copy of the current state and update status to CANCELLED
                     const newState = JSON.parse(JSON.stringify(props.salesOrderState));
                     newState.status = SO_STATES.CANCELLED;
                     bax.post(`/api/v1/salesOrder/${props.salesOrderID}/state`, newState)
@@ -128,33 +160,4 @@ CancelSalesOrderShowMoreButton.propTypes = {
     salesOrderState: PropTypes.object.isRequired,
     salesOrderID: PropTypes.string.isRequired,
     disabled: PropTypes.bool.isRequired
-}
-
-function SalesOrderDisplaySteps(props) {
-    const stepIndex = CONFIG.SALES_ORDER_STEPS.findIndex(statusObj => statusObj.status === props.status);
-    return (
-        <>
-            <Steps type='navigation'
-                   size='small'
-                   current={stepIndex}>
-                {
-                    CONFIG.SALES_ORDER_STEPS.map(({status, title}) => {
-                        if (status === 'CANCELLED') {
-                            return <Step key={title} title={title} icon={<StopOutlined/>}/>
-                        } else {
-                            return <Step key={title} title={title} />
-                        }
-                    })
-                }
-            </Steps>
-        </>
-    )
-}
-SalesOrderDisplaySteps.propTypes = {
-    // SO_STATES.<status>
-    status: PropTypes.string.isRequired,
-}
-
-function SalesOrderQuotationStatusPage(props) {
-
 }

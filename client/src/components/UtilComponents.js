@@ -3,12 +3,14 @@ import { NavLink, useHistory } from 'react-router-dom';
 import { PageHeader, Row, Dropdown, 
          Button, Spin, Descriptions, 
          Divider, Input, Select, Tag,
-         Timeline } from 'antd';
+         Timeline, Steps } from 'antd';
+const { Step } = Steps;
 const { Option } = Select;
 import { EllipsisOutlined, 
          SearchOutlined, 
          CloseCircleOutlined, 
          CheckCircleOutlined, 
+         StopOutlined,
          EditOutlined } from "@ant-design/icons";
 import { redirectToErrorPage } from '../context/AuthContext';
 import Highlighter from 'react-highlight-words';
@@ -523,3 +525,38 @@ export const BilboTimelineParagraphDescription = styled.p`
     font-size: 80%;
     max-width: 250px;
 `;
+
+/**
+ * Customised Component to display the status
+ * for SOs and POs in <Steps/>. These steps
+ * are for displaying the current status only and
+ * are not interactive.
+ * 
+ * Note: Used in SO/PO ViewPage. 
+ * 
+ * Note: Specifically checks for CANCELLED status
+ * to display with the <StopOutlined/> icon.
+ */
+export function BilboDisplayOnlySteps(props) {
+    return (
+        <>
+            <Steps type='navigation'
+                   size='small'
+                   current={props.activeStepIndex}>
+                {
+                    props.allStatusAndTitle.map(({status, title}) => {
+                        if (status === 'CANCELLED') {
+                            return <Step key={title} title={title} icon={<StopOutlined/>}/>
+                        } else {
+                            return <Step key={title} title={title} />
+                        }
+                    })
+                }
+            </Steps>
+        </>
+    )
+}
+BilboDisplayOnlySteps.propTypes = {
+    activeStepIndex: PropTypes.number.isRequired,
+    allStatusAndTitle: PropTypes.array.isRequired,
+}
