@@ -17,6 +17,7 @@ import { SO_STATES } from '../../../../../server/data/databaseEnum';
 import { escapeRegex } from '../../../utils';
 import SalesOrderQuotationContent from './SalesOrderQuotationContent';
 import queryString from 'query-string';
+import { isEmpty } from 'lodash';
 
 /**
  * React Component to display the details of a
@@ -64,6 +65,12 @@ export default function SalesOrderViewPage(props) {
         })();
     }, []) // Run only once (on component mounting)
 
+    // Only called when `salesOrderMetaData`
+    // and `salesOrderStateData` have been loaded
+    // by the API call. See return statement of this
+    // function component for details. This guarantees
+    // that the rendered status content components have
+    // non-empty meta and state data to work with.
     function renderSwitcher(latestStatus) {
         switch (latestStatus) {
             case 'QUOTATION':
@@ -105,7 +112,11 @@ export default function SalesOrderViewPage(props) {
                 <BilboDisplayOnlySteps 
                     activeStepIndex={CONFIG.SALES_ORDER_STEPS.findIndex(statusObj => statusObj.status === salesOrderStateData.status)}
                     allStatusAndTitle={CONFIG.SALES_ORDER_STEPS} />
-                { renderSwitcher(salesOrderMetaData.latestStatus) }
+                { 
+                    !isEmpty(salesOrderMetaData) &&
+                    !isEmpty(salesOrderStateData) &&
+                    renderSwitcher(salesOrderMetaData.latestStatus) 
+                }
             </Spin>
         </div>
     );

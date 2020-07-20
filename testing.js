@@ -287,6 +287,24 @@ const { SO_STATES, PO_STATES } = require('./server/data/databaseEnum');
 
 
 
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
 // (async function() {
 //     const dbi = new DatabaseInteractor();
 //     try {
@@ -388,3 +406,131 @@ const { SO_STATES, PO_STATES } = require('./server/data/databaseEnum');
 
 //     // dbi.closeConnection();
 // })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{/* <div>
+                    {props.salesOrderStateData.parts.map((part, index) => (
+                    <Row key={part._id} style={{ width: '100%' }} >
+                        <Form.Item
+                            name={[part._id, 'part']}
+                            fieldKey={[part._id, 'part']}
+                            key={`${part._id}-part`}
+                            style={{width: '20%', marginRight: '5px'}}
+                            rules={[{ required: true, message: 'Missing part' }]}
+                            initialValue={part.additionalInfo}
+                        >
+                            <Select placeholder='Select Part Number'
+                                    notFoundContent={partSelections[index].isGettingPartData ? <Spin size='small'/>: null}
+                                    filterOption={false}
+                                    showSearch={true}
+                                    onSearch={(searchValue) => getPartData(searchValue, index)} >
+                                {
+                                    partSelections[index].partsData.map(partData => {
+                                        return (
+                                            <OptGroup key={partData.supplier._id}
+                                                        label={partData.supplier.name}>
+                                                <Option key={partData._id}
+                                                        value={partData._id} >
+                                                    {partData.partNumber}
+                                                </Option>
+                                            </OptGroup>
+                                        )
+                                    })
+                                }
+                            </Select>
+                        </Form.Item>
+                        <Form.Item
+                            style={{width: '15%', marginRight: '5px'}}
+                            name={[part._id, 'quantity']}
+                            fieldKey={[part._id, 'quantity']}
+                            key={`${part._id}-quantity`}
+                            rules={[{ required: true, message: 'Missing quantity' }]}
+                        >
+                            <Input placeholder="Quantity" />
+                        </Form.Item>
+                        <Form.Item
+                            style={{width: '55%', marginRight: '5px'}}
+                            name={[part._id, 'additionalInfo']}
+                            fieldKey={[part._id, 'additionalInfo']}
+                            key={`${part._id}-additionalInfo`}
+                        >
+                            <Input.TextArea placeholder="Additional Information" 
+                                            rows={1}
+                            />
+                        </Form.Item>
+        
+                        <BilboHoverableIconButton
+                            style={{fontSize: '15px'}}
+                            shape='circle'
+                            transformcolor={theme.colors.brightRed}
+                            onClick={() => {
+                            // TODO: Need to remove from partSelections
+                            const updatedPartSelections = [...partSelections];
+                            updatedPartSelections.splice(index, 1);
+                            setPartSelections(updatedPartSelections);
+                            remove(index);
+                            }} >
+                            <MinusCircleOutlined />
+                        </BilboHoverableIconButton>
+                    </Row>
+                    ))}
+    
+                    <Form.Item>
+                    <Button
+                        type="dashed"
+                        onClick={() => {
+                        // TODO: Need to add to partSelections
+                        const updatedPartSelections = [...partSelections];
+                        updatedPartSelections.push({
+                            isGettingPartData: false,
+                            partsData: [],
+                        })
+                        setPartSelections(updatedPartSelections);
+                        add();
+                        }}
+                    >
+                        <PlusOutlined /> Add Another Part
+                    </Button>
+                    </Form.Item>
+                </div> */}
