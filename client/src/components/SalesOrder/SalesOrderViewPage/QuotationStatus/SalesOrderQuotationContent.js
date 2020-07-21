@@ -3,12 +3,13 @@ import { useHistory } from 'react-router-dom';
 import { ShowMoreButton, 
          BilboPageHeader, 
          BilboDividerWithText, 
+         BilboDivider,
          BilboDescriptions,
          BilboSearchTable, 
          BilboDisplayOnlySteps,
          BilboHoverableIconButton,
          BilboNavLink } from '../../../UtilComponents';
-import { Descriptions, Select, Modal, Divider, Col, Table, Steps, Popover, Spin, message, Form, Input, Button, InputNumber } from 'antd';
+import { Descriptions, Select, Space, Modal, Divider, Col, Row, Table, Steps, Popover, Spin, message, Form, Input, Button, InputNumber } from 'antd';
 const { confirm } = Modal;
 const { Option, OptGroup } = Select;
 const { Step } = Steps;
@@ -22,6 +23,8 @@ import debounce from 'lodash/debounce';
 import queryString from 'query-string';
 import { theme } from '../../../Theme';
 import { isEmpty } from 'lodash';
+import SalesOrderMetaDataDisplaySection from '../SalesOrderMetaDataDisplaySection';
+import SalesOrderStateAdditionalInfoEditableSection from '../SalesOrderStateAdditionalInfoEditableSection';
 import ExistingPartsFormSection from './ExistingPartsFormSection';
 import NewPartsFormSection from './NewPartsFormSection';
 
@@ -46,13 +49,15 @@ import NewPartsFormSection from './NewPartsFormSection';
  * state. Its state is handled by a separate React state
  * hook (`stateAdditionalInfo`) and is processed separately
  * in `submitForm`
+ * 
+ * // TODO: Perform form validation
  */
 export default function SalesOrderQuotationContent(props) {
     const [form] = Form.useForm();
     const history = useHistory();
     const [saveChangesLoading, setSaveChangesLoading] = useState(false);
     const [proceedNextStatusLoading, setProceedNextStatusLoading] = useState(false);
-    const [stateAdditionalInfo, setStateAdditionalInfo] = useState(props.salesOrderMetaData.additionalInfo);
+    const [stateAdditionalInfo, setStateAdditionalInfo] = useState(props.salesOrderStateData.additionalInfo);
 
     const submitForm = async (submissionType) => {
         // Prepare request body
@@ -107,38 +112,20 @@ export default function SalesOrderQuotationContent(props) {
                 },
                 okText: 'Confirm'
             })
-            
         }
-
     }
 
-    // TODO: Refactor components out
     return (
         <>
-            <BilboDividerWithText orientation='left'>Sales Order Information</BilboDividerWithText>
-            <BilboDescriptions bordered column={1}>
-                <Descriptions.Item label="Order Number">
-                    {props.salesOrderMetaData.orderNumber}
-                </Descriptions.Item>
-                <Descriptions.Item label="Owner" >
-                    {props.salesOrderMetaData.createdBy}
-                </Descriptions.Item>
-                <Descriptions.Item label="Customer" >
-                    {props.salesOrderMetaData.customer.name}
-                </Descriptions.Item>
-                <Descriptions.Item label="Overview Information" >
-                    {props.salesOrderMetaData.additionalInfo}
-                </Descriptions.Item>
-            </BilboDescriptions>
+            <SalesOrderMetaDataDisplaySection 
+                salesOrderMetaData={props.salesOrderMetaData} 
+            />
             
-            <BilboDividerWithText orientation='left'>Administrative Details</BilboDividerWithText>
-            <BilboDescriptions bordered column={1}>
-                <Descriptions.Item label="Additional Information">
-                    <Input.TextArea defaultValue={stateAdditionalInfo}
-                                    onChange={(e) => setStateAdditionalInfo(e.target.value)}
-                                    placeholder='Enter any other information about the sales order here'/>
-                </Descriptions.Item>
-            </BilboDescriptions>
+            <SalesOrderStateAdditionalInfoEditableSection 
+                stateAdditionalInfo={stateAdditionalInfo}
+                setStateAdditionalInfo={setStateAdditionalInfo} 
+            />
+
             <Form name="quotationStatusForm" 
                     form={form}
                     initialValues={{
@@ -152,17 +139,23 @@ export default function SalesOrderQuotationContent(props) {
                 <ExistingPartsFormSection />
                 <NewPartsFormSection />
         
-                <Form.Item>
-                <Button type="primary" loading={saveChangesLoading} onClick={() => submitForm('saveChanges')}>
-                    Save Changes
-                </Button>
-                </Form.Item>
-                
-                <Form.Item>
-                <Button type="primary" loading={proceedNextStatusLoading} onClick={() => submitForm('proceedNextStatus')}>
-                    Confirm and Proceed to Next Status
-                </Button>
-                </Form.Item>
+                <BilboDivider />
+                <Row justify='end'>
+                    <Space direction='vertical' style={{display: 'block', width: '20%'}}>
+                        <Row style={{ display: 'flex', alignContent: 'space-between' }}>
+                            <Button style={{marginRight: '5px'}} type="default" onClick={() => console.log('cancelled!')}>
+                                Cancel
+                            </Button>
+                            <Button style={{flexGrow: 2}} type="default" loading={saveChangesLoading} onClick={() => submitForm('saveChanges')}>
+                                Save Changes
+                            </Button>
+                        </Row>
+                        
+                        <Button style={{width: '100%'}} type="primary" loading={proceedNextStatusLoading} onClick={() => submitForm('proceedNextStatus')}>
+                            Confirm and Proceed
+                        </Button>
+                    </Space>
+                </Row>
             </Form>
         </>
     )
