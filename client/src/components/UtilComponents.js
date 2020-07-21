@@ -95,7 +95,7 @@ export function BilboLoadingSpinner(props) {
 // Styled Descriptions
 export const BilboDescriptions = styled(Descriptions)`
     & .ant-descriptions-item-label {
-        width: 150px;
+        width: 15%;
         border-right: 2px solid ${props => props.theme.colors.deepRed };
         padding: 5px 16px;
         lineHeight: 2.0;
@@ -113,6 +113,14 @@ export const BilboDivider = styled(Divider)`
         border-top: 1px solid ${props => props.theme.colors.lightGrey };
     }
 `;
+
+// Styled Divider with Text
+export const BilboDividerWithText = styled(Divider)`
+    &.ant-divider-horizontal.ant-divider-with-text::before, &.ant-divider-horizontal.ant-divider-with-text::after {
+        border-top: 1px solid ${props => props.theme.colors.lightGrey };
+    }
+`;
+
 
 // Utilities associated with a Search Table
 export const BilboSearchTable = {
