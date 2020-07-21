@@ -42,6 +42,8 @@ export default function SalesOrderQuotationContent(props) {
     const [proceedNextStatusLoading, setProceedNextStatusLoading] = useState(false);
     const [stateAdditionalInfo, setStateAdditionalInfo] = useState(props.salesOrderStateData.additionalInfo);
 
+    // Handler when either `Save Changes` or `Confirm and Proceed`
+    // buttons are clicked
     const submitForm = async (submissionType) => {
         const sendRequest = () => {
             // Prepare request body
@@ -108,6 +110,9 @@ export default function SalesOrderQuotationContent(props) {
             });
     }
 
+    // Handler when cancel button is clicked
+    const onCancel = () => { history.push(CONFIG.SALES_ORDER_URL); }
+
     return (
         <>
             <SalesOrderMetaDataDisplaySection 
@@ -136,7 +141,7 @@ export default function SalesOrderQuotationContent(props) {
                 <Row justify='end'>
                     <Space direction='vertical' style={{display: 'block', width: '20%'}}>
                         <Row style={{ display: 'flex', alignContent: 'space-between' }}>
-                            <Button style={{marginRight: '5px'}} type="default" onClick={() => console.log('cancelled!')}>
+                            <Button style={{marginRight: '5px'}} type="default" onClick={onCancel}>
                                 Cancel
                             </Button>
                             <Button style={{flexGrow: 2}} type="default" loading={saveChangesLoading} onClick={() => submitForm('saveChanges')}>
