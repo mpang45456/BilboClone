@@ -16,6 +16,7 @@ import CONFIG from '../../../config';
 import { SO_STATES } from '../../../../../server/data/databaseEnum';
 import { escapeRegex } from '../../../utils';
 import SalesOrderQuotationContent from './QuotationStatus/SalesOrderQuotationContent';
+import SalesOrderConfirmedContent from './ConfirmedStatus/SalesOrderConfirmedContent';
 import queryString from 'query-string';
 import { isEmpty } from 'lodash';
 
@@ -109,7 +110,10 @@ export default function SalesOrderViewPage(props) {
                             salesOrderMetaData={salesOrderMetaData}
                             />
             case 'CONFIRMED':
-                return <span>CONFIRMED</span>
+                return <SalesOrderConfirmedContent 
+                            salesOrderStateData={salesOrderStateData} 
+                            salesOrderMetaData={salesOrderMetaData}
+                            />
             case 'PREPARING':
                 return <span>PREPARING</span>
             case 'IN_DELIVERY':
