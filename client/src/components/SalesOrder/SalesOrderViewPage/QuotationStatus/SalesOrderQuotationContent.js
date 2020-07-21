@@ -82,7 +82,7 @@ export default function SalesOrderQuotationContent(props) {
             } else if (submissionType === 'proceedNextStatus') {
                 confirm({
                     icon: <ExclamationCircleOutlined />,
-                    content: 'Are you sure you wish to move this sales order to the next status? This is not reversible.',
+                    content: 'Are you sure you wish to move this sales order to the next status? This is NOT reversible.',
                     onOk: () => {
                         reqBody.status = SO_STATES.CONFIRMED;
                         setProceedNextStatusLoading(true);
