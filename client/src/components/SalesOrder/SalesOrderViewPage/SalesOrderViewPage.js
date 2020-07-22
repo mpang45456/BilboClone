@@ -19,9 +19,9 @@ import SalesOrderPreparingContent from './PreparingStatus/SalesOrderPreparingCon
 import SalesOrderInDeliveryContent from './InDeliveryStatus/SalesOrderInDeliveryContent';
 import SalesOrderReceivedContent from './ReceivedStatus/SalesOrderReceivedContent';
 import SalesOrderFulfilledContent from './FulfilledStatus/SalesOrderFulfilledContent';
+import EditHistory from './EditHistory/EditHistory';
 import queryString from 'query-string';
 import { isEmpty } from 'lodash';
-import styled from 'styled-components';
 
 /**
  * React Component to display the details of a
@@ -143,12 +143,6 @@ export default function SalesOrderViewPage(props) {
         }
     }
 
-
-    const BilboTabs = styled(Tabs)`
-        & .ant-tabs-nav-wrap {
-            border-bottom: 1px solid ${props => props.theme.colors.lightGrey };;
-        }
-    `;
     return (
         <div>
             <Spin spinning={isLoadingSalesOrderDetails}> 
@@ -177,7 +171,9 @@ export default function SalesOrderViewPage(props) {
                         }
                     </TabPane>
                     <TabPane tab='Edit History' key='2'>
-                        <h1>Edit History here pls</h1>
+                        <EditHistory 
+                            salesOrderMetaData={salesOrderMetaData} 
+                        />
                     </TabPane>
                 </BilboTabs>
             </Spin>
