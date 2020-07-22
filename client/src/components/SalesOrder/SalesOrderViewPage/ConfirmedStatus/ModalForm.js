@@ -27,7 +27,15 @@ import queryString from 'query-string';
 // Allows you to add allocations to multiple purchase orders
 export default function ModalForm(props) {
     const [form] = Form.useForm();
-    // Stores the search results for each purchase order number search bar
+    /* Stores the search results for each purchase order number search bar
+       Has format: 
+       {
+            isGettingPurchaseOrderData: bool, 
+            purchaseOrderData: []
+            min: Number
+            max: Number
+       }
+    */
     const [purchaseOrderSearches, setPurchaseOrderSearches] = useState([]);
     let existingAllocation = props.parentForm.getFieldsValue().parts[props.modalSelectedPartIndex].fulfilledBy;
 
@@ -63,35 +71,76 @@ export default function ModalForm(props) {
     }, CONFIG.DEBOUNCE_LIMIT);
 
     const onModalOk = () => {
-        // TODO: Perform processing to get the data into the accepted format in parent form
-        // TODO: Update docs: Update Parent Form values directly
-        let updatedParts = props.parentForm.getFieldValue('parts');
-        // Existing Parts Allocation
-        updatedParts[props.modalSelectedPartIndex].fulfilledBy = form.getFieldsValue().partsAllocationExisting;
-        // New Parts Allocation
-        if (form.getFieldsValue().partsAllocationNew) {
-            form.getFieldsValue().partsAllocationNew.map(partAllocation => {
-                // TODO: Might not need the || divider any more
-                const purchaseOrderObjID = partAllocation.purchaseOrderNumber.split('||')[0];
-                const purchaseOrderNumber = partAllocation.purchaseOrderNumber.split('||')[1]; // TODO: Use array destructuring syntax instead
-                updatedParts[props.modalSelectedPartIndex].fulfilledBy.push({
-                    ...partAllocation,
-                    purchaseOrder: purchaseOrderObjID,
-                    purchaseOrderNumber
-                })
-            });
-        }
-        console.log(updatedParts);
-        props.parentForm.setFieldsValue({parts: updatedParts});
+        form.validateFields()
+            .then(_ => {
 
-        // TODO: Perform validation
-        // console.log(form.getFieldsValue());
-        // form.resetFields();
-        props.closeModal();
+            }).catch(_ => {
+                // Do nothing. UI displays error message.
+            })
+
+        // // TODO: Perform processing to get the data into the accepted format in parent form
+        // // TODO: Update docs: Update Parent Form values directly
+        // let updatedParts = props.parentForm.getFieldValue('parts');
+        // // Existing Parts Allocation
+        // updatedParts[props.modalSelectedPartIndex].fulfilledBy = form.getFieldsValue().partsAllocationExisting;
+        // // New Parts Allocation
+        // if (form.getFieldsValue().partsAllocationNew) {
+        //     form.getFieldsValue().partsAllocationNew.map(partAllocation => {
+        //         // TODO: Might not need the || divider any more
+        //         const purchaseOrderObjID = partAllocation.purchaseOrderNumber.split('||')[0];
+        //         const purchaseOrderNumber = partAllocation.purchaseOrderNumber.split('||')[1]; // TODO: Use array destructuring syntax instead
+        //         updatedParts[props.modalSelectedPartIndex].fulfilledBy.push({
+        //             ...partAllocation,
+        //             purchaseOrder: purchaseOrderObjID,
+        //             purchaseOrderNumber
+        //         })
+        //     });
+        // }
+        // console.log(updatedParts);
+        // props.parentForm.setFieldsValue({parts: updatedParts});
+
+        // // TODO: Perform validation
+        // // console.log(form.getFieldsValue());
+        // // form.resetFields();
+        // props.closeModal();
     }
 
     const onModalCancel = () => {
         props.closeModal();
+    }
+
+    // Set the max quantity available for allocation in <InputNumber/>
+    const onSelectPurchaseOrder = (value, option, _) => {
+        // <Option/>'s key is `purchaseOrderObjID||purchaseOrderSearchIndex`
+        // `purchaseOrderSearchIndex` is index to array `purchaseOrderSearches`
+        const [purchaseOrderObjID, purchaseOrderSearchIndex] = option.key.split('||');
+        const query = queryString.stringify({ populateFulfilledFor: true });
+
+        // Obtain Purchase Order's State (for Fulfillment Information)
+        bax.get(`/api/v1/purchaseOrder/${purchaseOrderObjID}/state/latest?${query}`)
+            .then(res => {
+                const partBeingAllocated = props.parentForm.getFieldsValue().parts[props.modalSelectedPartIndex].part;
+                
+                // Index of part being allocated in purchase order
+                const partIndex = res.data.parts.findIndex(partInfo => partInfo.part === partBeingAllocated);
+                let quantityAlreadyAllocated = 0;
+                if (res.data.parts[partIndex].fulfilledFor) {
+                    res.data.parts[partIndex].fulfilledFor.map(fulfilledForTarget => {
+                        quantityAlreadyAllocated += fulfilledForTarget.quantity;
+                    })
+                }
+
+                // Max quantity that user may enter in <InputNumber/>
+                const quantityAvailable = res.data.parts[partIndex].quantity - quantityAlreadyAllocated;
+                
+                // Update purchaseOrderSearches with maximum quantity
+                // available for allocation. This affects <InputNumber/>
+                const updatedPurchaseOrderSearches = [...purchaseOrderSearches];
+                updatedPurchaseOrderSearches[purchaseOrderSearchIndex].max = quantityAvailable;
+                setPurchaseOrderSearches(updatedPurchaseOrderSearches);
+            }).catch(err => {
+                redirectToErrorPage(history, err);
+            })
     }
 
 
@@ -184,11 +233,12 @@ export default function ModalForm(props) {
                                             notFoundContent={purchaseOrderSearches[index].isGettingPurchaseOrderData ? <Spin size='small'/>: null}
                                             filterOption={false}
                                             showSearch={true}
-                                            onSearch={(searchValue) => getPurchaseOrderData(searchValue, index)} >
+                                            onSearch={(searchValue) => getPurchaseOrderData(searchValue, index)} 
+                                            onChange={onSelectPurchaseOrder}>
                                         {
                                             purchaseOrderSearches[index].purchaseOrderData.map(purchaseOrderInfo => {
                                                 return (
-                                                    <Option key={purchaseOrderInfo._id}
+                                                    <Option key={`${purchaseOrderInfo._id}||${field.fieldKey}`}
                                                             value={`${purchaseOrderInfo._id}||${purchaseOrderInfo.orderNumber}`} >
                                                         {`${purchaseOrderInfo.orderNumber}`}
                                                     </Option>
@@ -205,7 +255,11 @@ export default function ModalForm(props) {
                                     key={`${field.fieldKey}-quantity`}
                                     rules={[{ required: true, message: 'Missing quantity' }]}
                                 >
-                                    <InputNumber placeholder="Quantity" style={{ width: '100%' }}/>
+                                    <InputNumber placeholder="Quantity" 
+                                                 style={{ width: '100%' }}
+                                                 min={purchaseOrderSearches[field.fieldKey].min}
+                                                 max={purchaseOrderSearches[field.fieldKey].max}
+                                    />
                                 </Form.Item>
                 
                                 <BilboHoverableIconButton
@@ -213,12 +267,9 @@ export default function ModalForm(props) {
                                     shape='circle'
                                     transformcolor={theme.colors.brightRed}
                                     onClick={() => { 
-                                        // TODO: Remove from purchaseOrderSearches
                                         const updatedPurchaseOrderSearches = [...purchaseOrderSearches];
                                         updatedPurchaseOrderSearches.splice(field.fieldKey, 1);
                                         setPurchaseOrderSearches(updatedPurchaseOrderSearches);
-                                        console.log(field.fieldKey)
-                                        console.log(updatedPurchaseOrderSearches)
                                         remove(field.fieldKey); 
                                     }} >
                                     <MinusCircleOutlined />
@@ -234,6 +285,8 @@ export default function ModalForm(props) {
                                 updatedPurchaseOrderSearches.push({
                                     isGettingPurchaseOrderData: false,
                                     purchaseOrderData: [],
+                                    min: 0,
+                                    max: Number.MAX_SAFE_INTEGER, // FIXME: DEBUG
                                 })
                                 setPurchaseOrderSearches(updatedPurchaseOrderSearches);
                                 add();

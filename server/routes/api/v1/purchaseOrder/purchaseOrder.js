@@ -344,6 +344,10 @@ router.post('/:purchaseOrderObjID/state',
  * Returns latest purchase order state data for the purchase
  * order identified by `:purchaseOrderObjID`
  * 
+ * Query parameters can specify: 
+ * 1. Whether to populate the `fulfilledFor` path array
+ *    - ?populateFulfilledFor=true
+ * 
  * Note: Authorization is performed in the following order:
  * 1. User has `PERMS.PURCHASE_ORDER_READ`
  * 2. Purchase order associated with `:purchaseOrderObjID` was
@@ -354,6 +358,11 @@ router.get('/:purchaseOrderObjID/state/latest',
            setUserHierarchy,
            async function(req, res) {
     try {
+        // Query Parameters
+        let {
+            populateFulfilledFor = 'false',
+        } = req.query;
+
         let purchaseOrderDoc = await PurchaseOrderModel.findOne({ _id: req.params.purchaseOrderObjID });
         if (!purchaseOrderDoc) { return res.status(400).send('Invalid Purchase Order ID'); }
         
@@ -363,6 +372,9 @@ router.get('/:purchaseOrderObjID/state/latest',
         }
 
         const latestPOStateDoc = await PurchaseOrderStateModel.findOne({ _id: purchaseOrderDoc.orders[purchaseOrderDoc.orders.length - 1]});
+        if (populateFulfilledFor === 'true') {
+            await latestPOStateDoc.populate('parts.fulfilledFor.salesOrder').execPopulate();
+        }
         return res.status(200).json(latestPOStateDoc);
     } catch(err) {
         logger.error(`GET /purchaseOrder/:purchaseOrderObjID/state/latest: Could not get latest purchase order state: ${err}`);
@@ -379,6 +391,10 @@ router.get('/:purchaseOrderObjID/state/latest',
  * Returns purchase order state data at `:index` for the purchase
  * order identified by `:purchaseOrderObjID`
  * 
+ * Query parameters can specify: 
+ * 1. Whether to populate the `fulfilledFor` path array
+ *    - ?populateFulfilledFor=true
+ * 
  * Note: Authorization is performed in the following order:
  * 1. User has `PERMS.PURCHASE_ORDER_READ`
  * 2. Purchase order associated with `:purchaseOrderObjID` was
@@ -393,6 +409,11 @@ router.get('/:purchaseOrderObjID/state/:purchaseOrderStateIndex',
            setUserHierarchy,
            async function(req, res) {
     try {
+        // Query Parameters
+        let {
+            populateFulfilledFor = 'false',
+        } = req.query;
+
         let purchaseOrderDoc = await PurchaseOrderModel.findOne({ _id: req.params.purchaseOrderObjID });
         if (!purchaseOrderDoc) { return res.status(400).send('Invalid Purchase Order ID'); }
         
@@ -402,6 +423,9 @@ router.get('/:purchaseOrderObjID/state/:purchaseOrderStateIndex',
         }
 
         const poStateDoc = await PurchaseOrderStateModel.findOne({ _id: purchaseOrderDoc.orders[Number(req.params.purchaseOrderStateIndex)] });
+        if (populateFulfilledFor === 'true') {
+            await poStateDoc.populate('parts.fulfilledFor.salesOrder').execPopulate();
+        }
         return res.status(200).json(poStateDoc);
     } catch(err) {
         logger.error(`GET /:purchaseOrderObjID/state/:purchaseOrderStateObjID: Could not get purchase order state: ${err}`);

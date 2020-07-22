@@ -510,9 +510,9 @@ router.get('/:salesOrderObjID/state/:salesOrderStateIndex',
 
         const soStateDoc = await SalesOrderStateModel.findOne({ _id: salesOrderDoc.orders[Number(req.params.salesOrderStateIndex)] });
         if (populateFulfilledBy === 'true') {
-            await latestSOStateDoc.populate('parts.fulfilledBy.purchaseOrder').execPopulate();
+            await soStateDoc.populate('parts.fulfilledBy.purchaseOrder').execPopulate();
         }
-        
+
         return res.status(200).json(soStateDoc);
     } catch(err) {
         logger.error(`GET /:salesOrderObjID/state/:salesOrderStateObjID: Could not get sales order state: ${err}`);
