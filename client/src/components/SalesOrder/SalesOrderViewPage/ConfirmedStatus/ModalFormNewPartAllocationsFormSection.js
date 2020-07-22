@@ -165,8 +165,8 @@ export default function ModalFormNewPartAllocationsFormSection(props) {
                         >
                             <InputNumber placeholder="Quantity" 
                                             style={{ width: '100%' }}
-                                            min={purchaseOrderSearches[field.fieldKey].min}
-                                            max={purchaseOrderSearches[field.fieldKey].max}
+                                            min={purchaseOrderSearches[field.fieldKey] && purchaseOrderSearches[field.fieldKey].min || 0}
+                                            max={purchaseOrderSearches[field.fieldKey] && purchaseOrderSearches[field.fieldKey].max || Number.MAX_SAFE_INTEGER}
                             />
                         </Form.Item>
 
