@@ -86,7 +86,7 @@ export default function SalesOrderConfirmedContent(props) {
 
     // Handler when either `Save Changes` or `Confirm and Proceed`
     // buttons are clicked
-    const submitForm = async (submissionType) => {
+    const submitForm = (submissionType) => {
         // Prepare request body
         let reqBody = { additionalInfo: stateAdditionalInfo, 
                         parts: [] };
@@ -114,6 +114,12 @@ export default function SalesOrderConfirmedContent(props) {
                     redirectToErrorPage(err, history);
                 })
         } else if (submissionType === 'proceedNextStatus') {
+            // Check that parts are all mapped to at least one PO
+            if (reqBody.parts.some(partInfo => partInfo.fulfilledBy.length === 0)) {
+                message.error('Not all parts have been allocated!');
+                return;
+            }
+
             confirm({
                 icon: <ExclamationCircleOutlined />,
                 content: 'Are you sure you wish to move this sales order to the next status? This is NOT reversible.',
