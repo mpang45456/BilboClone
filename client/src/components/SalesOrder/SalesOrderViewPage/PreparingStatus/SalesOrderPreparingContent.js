@@ -30,6 +30,7 @@ export default function SalesOrderPreparingContent(props) {
             />
 
             {/* TODO: Marked for removal (not supposed to be accessible by sales user) */}
+            {/* FIXME: Remember to remove this! */}
             <BilboDivider />
             <ConfirmAndProceedButton nextState={SO_STATES,RECEIVED}
                                      salesOrderMetaData={props.salesOrderMetaData}

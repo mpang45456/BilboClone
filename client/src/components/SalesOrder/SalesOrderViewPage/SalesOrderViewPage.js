@@ -15,6 +15,8 @@ import SalesOrderQuotationContent from './QuotationStatus/SalesOrderQuotationCon
 import SalesOrderConfirmedContent from './ConfirmedStatus/SalesOrderConfirmedContent';
 import SalesOrderPreparingContent from './PreparingStatus/SalesOrderPreparingContent';
 import SalesOrderInDeliveryContent from './InDeliveryStatus/SalesOrderInDeliveryContent';
+import SalesOrderReceivedContent from './ReceivedStatus/SalesOrderReceivedContent';
+import SalesOrderFulfilledContent from './FulfilledStatus/SalesOrderFulfilledContent';
 import queryString from 'query-string';
 import { isEmpty } from 'lodash';
 
@@ -124,9 +126,15 @@ export default function SalesOrderViewPage(props) {
                             salesOrderMetaData={salesOrderMetaData}
                             />
             case 'RECEIVED':
-                return <span>RECEIVED</span>
+                return <SalesOrderReceivedContent 
+                            salesOrderStateData={salesOrderStateData} 
+                            salesOrderMetaData={salesOrderMetaData}
+                            />
             case 'FULFILLED':
-                return <span>FULFILLED</span>
+                return <SalesOrderFulfilledContent 
+                            salesOrderStateData={salesOrderStateData} 
+                            salesOrderMetaData={salesOrderMetaData}
+                            />
             default:
                 return <span>LOADING</span>
         }

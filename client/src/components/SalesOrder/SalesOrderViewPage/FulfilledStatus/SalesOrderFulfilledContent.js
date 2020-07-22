@@ -8,27 +8,21 @@ import ConfirmAndProceedButton from '../ConfirmAndProceedButton';
 
 /**
  * React Component to render content for Sales Orders
- * that have `SO_STATES.IN_DELIVERY` status.
+ * that have `SO_STATES.FULFILLED` status.
  */
-export default function SalesOrderInDeliveryContent(props) {
+export default function SalesOrderFulfilledContent(props) {
     return (
         <> 
             <BilboDividerWithText orientation='left'>Information</BilboDividerWithText>
-            <p>Sales Order's package is currently in-delivery. Proceed to the next status when you have received confirmation of delivery.</p>
+            <p>Sales Order has been fulfilled. This record is just for archival purposes.</p>
             <CollapsibleSalesOrderDataDisplay 
                 salesOrderMetaData={props.salesOrderMetaData} 
                 salesOrderStateData={props.salesOrderStateData} 
             />
-            
-            <BilboDivider />
-            <ConfirmAndProceedButton nextState={SO_STATES.RECEIVED}
-                                     salesOrderMetaData={props.salesOrderMetaData}
-                                     salesOrderStateData={props.salesOrderStateData}
-            />
         </>
     )
 }
-SalesOrderInDeliveryContent.propTypes = {
+SalesOrderFulfilledContent.propTypes = {
     salesOrderStateData: PropTypes.object.isRequired,
     salesOrderMetaData: PropTypes.object.isRequired,
 }
