@@ -15,7 +15,7 @@ export default function SalesOrderStateDataDisplaySection(props) {
             <BilboDividerWithText orientation='left'>Administrative Details</BilboDividerWithText>
             <BilboDescriptions bordered column={1}>
                 <Descriptions.Item label="Additional Information">
-                    <Input.TextArea defaultValue={props.salesOrderStateData.additionalInfo}
+                    <Input.TextArea value={props.salesOrderStateData.additionalInfo}
                                     readOnly={true}/>
                 </Descriptions.Item>
             </BilboDescriptions>
