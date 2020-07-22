@@ -16,7 +16,13 @@ import { theme } from '../../../Theme';
 export default function NewPartsFormSection(props) {
     // Keeps track of the searches (for part number) for each
     // dynamically added field. Only `partNumber` can be searched
-    // for (`quantity` and `additionalInfo` cannot)
+    // for (`quantity` and `additionalInfo` cannot). It has the form:
+    // [
+    //    {
+    //      partsData: [],
+    //      isGettingPartData: bool,
+    //    }
+    // ]
     const [partSearches, setPartSearches] = useState([]);
 
     // Function for retrieving parts that fit search description

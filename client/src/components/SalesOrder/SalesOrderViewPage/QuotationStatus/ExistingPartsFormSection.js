@@ -17,6 +17,15 @@ import { theme } from '../../../Theme';
  * to this component as a prop. Instead, it is populated
  * via the `initialValues` field in the parent `<Form/>
  * component
+ * 
+ * Note: The <Form.Item/> for `_id` is hidden. This
+ * is because the <Form.Item/> for `partNumber` displays
+ * the part number (for ease of understanding in the UI)
+ * but the `partObjID` is necessary for the API call
+ * during form submission. Hence, the <Form.Item/> for
+ * `_id` is in the form, but hidden from the user, 
+ * ensuring that `partObjID` is available during form
+ * submission.
  */
 export default function ExistingPartsFormSection(props) {
     return (
@@ -26,6 +35,7 @@ export default function ExistingPartsFormSection(props) {
             <div>
                 {fields.map((field, index) => (
                 <Row key={field.key} style={{ width: '100%' }} >
+                    {/* Displays part number, but actually need partObjID during API call */}
                     <Form.Item
                         {...field}
                         name={[field.name, 'partNumber']}
@@ -66,6 +76,7 @@ export default function ExistingPartsFormSection(props) {
                         <MinusCircleOutlined />
                     </BilboHoverableIconButton>
                     
+                    {/* Ensures that form will have partObjID during submission */}
                     <Form.Item
                         {...field}
                         name={[field.name, '_id']}

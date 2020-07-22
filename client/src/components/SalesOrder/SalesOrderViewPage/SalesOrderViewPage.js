@@ -87,6 +87,10 @@ export default function SalesOrderViewPage(props) {
                              part.partNumber = `${res.data.partNumber} (${res.data.supplier.name})`;
                          })
             })).then(_ => {
+                // FIXME: DEBUG
+                stateData.parts.map((partInfo, index) => {
+                    partInfo.fulfilledBy = [{purchaseOrder: `PO-test1-${index}`, quantity: 100}, {purchaseOrder: `PO-test2-${index}`, quantity: 50}];
+                })
                 setSalesOrderStateData(stateData);
                 setIsLoadingSalesOrderDetails(false);
             }).catch(err => {

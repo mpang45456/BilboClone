@@ -22,7 +22,7 @@ import { theme } from './Theme';
  * Customises the regular <button> HTML element, 
  * not the antd Button.
  */
-export const DarkInvertedStyledButton = styled.button`
+export const DarkInvertedStyledButton = styled(Button)`
     color: ${props => props.theme.colors.deepRed };
     font-size: 1em;
     padding: 0.25em 1em;
@@ -35,6 +35,19 @@ export const DarkInvertedStyledButton = styled.button`
     }
 
     &.ant-btn:hover {
+        color: ${props => props.theme.colors.marble };
+        background: ${props => props.theme.colors.deepRed };
+        border: 2px solid ${props => props.theme.colors.deepRed };
+    }
+
+    &.ant-btn:active {
+        color: ${props => props.theme.colors.marble };
+        background: ${props => props.theme.colors.deepRed };
+        border: 2px solid ${props => props.theme.colors.deepRed };
+        padding: 1px;
+    }
+
+    &.ant-btn:visited {
         color: ${props => props.theme.colors.marble };
         background: ${props => props.theme.colors.deepRed };
         border: 2px solid ${props => props.theme.colors.deepRed };

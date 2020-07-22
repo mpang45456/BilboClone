@@ -62,10 +62,6 @@ router.use(isAuthenticated);
  * This is meant more as a convenience so that an extra API
  * call to the supplier API can ba avoided.
  * 
- * Note: No filtering is allowed on the `createdBy` path.
- * Any filter on the path will be overwritten by the user
- * hierarchy filter. 
- * 
  * Note: response includes `purchaseOrders`, `totalPages` and
  * `currentPage`.
  */
