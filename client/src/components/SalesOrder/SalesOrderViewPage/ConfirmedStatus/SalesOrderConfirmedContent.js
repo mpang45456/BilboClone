@@ -16,6 +16,7 @@ import { theme } from '../../../Theme';
 import { debounce } from 'lodash';
 import queryString from 'query-string';
 import PartAllocationFormList from './PartAllocationFormList';
+import ModalForm from './ModalForm';
 
 /**
  * React Component to render content for Sales Orders
@@ -26,6 +27,10 @@ import PartAllocationFormList from './PartAllocationFormList';
  * state and not managed by the <Form/> component
  * directly. 
  * 
+ * Note: The <Form/> Component here is responsible for
+ * making API calls, not the form in the <ModalForm/>. 
+ * These are 2 completely separate forms. 
+ * 
  * Note: The <Form/> Component here is relatively dumb. It is
  * merely used as a store of data meant for submission. 
  * The manipulation of form data (for parts allocation 
@@ -33,9 +38,6 @@ import PartAllocationFormList from './PartAllocationFormList';
  * which has its own form state, but manipulates the
  * this <Form/> Component's data directly upon submission
  * of the modal form. 
- * 
- * Note: The <Form/> Component here is responsible for
- * making API calls, not the form in the <ModalForm/>
  * 
  * Note: It is imperative for the <ModalForm/> component
  * to be mounted/unmounted every time it is displayed/closed.
@@ -65,13 +67,14 @@ export default function SalesOrderConfirmedContent(props) {
 
     const [form] = Form.useForm();
     const history = useHistory();
+    const [saveChangesLoading, setSaveChangesLoading] = useState(false);
+    const [proceedNextStatusLoading, setProceedNextStatusLoading] = useState(false);
+    const [stateAdditionalInfo, setStateAdditionalInfo] = useState(salesOrderStateData.additionalInfo); // Managed differently from the form
+    
     // The index of the part (wrt `salesOrderStateData.parts`) to be allocated
     const [modalSelectedPartIndex, setModalSelectedPartIndex] = useState(0);
     // Determines whether to display the modal (will also cause modal to mount/unmount)
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [saveChangesLoading, setSaveChangesLoading] = useState(false);
-    const [proceedNextStatusLoading, setProceedNextStatusLoading] = useState(false);
-    const [stateAdditionalInfo, setStateAdditionalInfo] = useState(salesOrderStateData.additionalInfo); // Managed differently from the form
 
     const onAllocateButtonClick = (index) => {
         setModalSelectedPartIndex(index);
@@ -183,249 +186,4 @@ export default function SalesOrderConfirmedContent(props) {
 SalesOrderConfirmedContent.propTypes = {
     salesOrderStateData: PropTypes.object.isRequired,
     salesOrderMetaData: PropTypes.object.isRequired,
-}
-
-
-
-
-
-
-
-
-
-
-// TODO: Perform checks that PO is allowed for allocation (sufficient parts, has the part etc.)
-// TODO: Pass parent form down to setFieldValue for the 
-// TODO: Update docs: Mount a new ModalForm everytime modal is made visible
-function ModalForm(props) {
-    const [form] = Form.useForm();
-    // let existingAllocation = props.salesOrderStateData.parts[props.modalSelectedPartIndex].fulfilledBy;
-    let existingAllocation = props.parentForm.getFieldsValue().parts[props.modalSelectedPartIndex].fulfilledBy;
-    const [purchaseOrderSearches, setPurchaseOrderSearches] = useState([]);
-
-    // Function for retrieving purchase orders that fit search description
-    let lastFetchID = 0;
-    const getPurchaseOrderData = debounce((searchValue, index) => {
-        lastFetchID = (lastFetchID + 1) % 1000;
-        const thisFetchID = lastFetchID;
-
-        const updatedPurchaseOrderSearches = [...purchaseOrderSearches];
-        let filter = JSON.stringify({
-            "orderNumber": { "$regex": searchValue, "$options": "i"},
-        })
-        let query = queryString.stringify({inc: 'orderNumber', filter})
-        bax.get(`/api/v1/purchaseOrder?${query}`, { withCredentials: true })
-            .then(res => {
-                // Ensure correct order of callback
-                // Obsolete (slow) responses would have 
-                // a smaller `thisFetchID` and are discarded
-                // Note: `thisFetchID` is a local block variable,
-                // but `lastFetchID` is a variable local to
-                // the entire React component (it keeps incrementing)
-                if (thisFetchID === lastFetchID) {
-                    updatedPurchaseOrderSearches[index].purchaseOrderData = res.data.purchaseOrders;
-                    updatedPurchaseOrderSearches[index].isGettingPurchaseOrderData = false;
-
-                    // TODO: Perform additional checks --> no duplicates, available for allocation
-                    setPurchaseOrderSearches(updatedPurchaseOrderSearches);
-                }
-            }).catch(err => {
-                redirectToErrorPage(err, history);
-            })
-    }, CONFIG.DEBOUNCE_LIMIT);
-
-    const onModalOk = () => {
-        // TODO: Perform processing to get the data into the accepted format in parent form
-        // TODO: Update docs: Update Parent Form values directly
-        let updatedParts = props.parentForm.getFieldValue('parts');
-        // Existing Parts Allocation
-        updatedParts[props.modalSelectedPartIndex].fulfilledBy = form.getFieldsValue().partsAllocationExisting;
-        // New Parts Allocation
-        if (form.getFieldsValue().partsAllocationNew) {
-            form.getFieldsValue().partsAllocationNew.map(partAllocation => {
-                // TODO: Might not need the || divider any more
-                const purchaseOrderObjID = partAllocation.purchaseOrderNumber.split('||')[0];
-                const purchaseOrderNumber = partAllocation.purchaseOrderNumber.split('||')[1]; // TODO: Use array destructuring syntax instead
-                updatedParts[props.modalSelectedPartIndex].fulfilledBy.push({
-                    ...partAllocation,
-                    purchaseOrder: purchaseOrderObjID,
-                    purchaseOrderNumber
-                })
-            });
-        }
-        console.log(updatedParts);
-        props.parentForm.setFieldsValue({parts: updatedParts});
-
-        // TODO: Perform validation
-        // console.log(form.getFieldsValue());
-        // form.resetFields();
-        props.closeModal();
-    }
-
-    const onModalCancel = () => {
-        props.closeModal();
-    }
-
-
-    return(
-        <>
-            <Modal visible={true}
-                   onOk={onModalOk}
-                   onCancel={props.closeModal}
-                   >
-                <Form name='modalPartAllocationForm'
-                      form={form}
-                      initialValues={{
-                          partsAllocationExisting: existingAllocation
-                      }}
-                      autoComplete='off'
-                      >
-                    <Form.List name="partsAllocationExisting">
-                    {(fields, { add, remove }) => {
-                        return (
-                        <div>
-                            {fields.map((field, index) => (
-                            <Row key={field.key} style={{ width: '100%' }} >
-                                {/* Displays purchase order number, but actually need purchaseOrderObjID during API call */}
-                                <Form.Item
-                                    {...field}
-                                    name={[field.name, 'purchaseOrderNumber']}
-                                    fieldKey={[field.fieldKey, 'purchaseOrderNumber']}
-                                    key={`${field.fieldKey}-purchaseOrderNumber`}
-                                    style={{width: '20%', marginRight: '5px'}}
-                                    rules={[{ required: true, message: 'Missing Purchase Order Number' }]}
-                                >
-                                    <Input disabled={true}></Input>
-                                </Form.Item>
-                                <Form.Item
-                                    {...field}
-                                    style={{width: '15%', marginRight: '5px'}}
-                                    name={[field.name, 'quantity']}
-                                    fieldKey={[field.fieldKey, 'quantity']}
-                                    key={`${field.fieldKey}-quantity`}
-                                    rules={[{ required: true, message: 'Missing quantity' }]}
-                                >
-                                    <InputNumber disabled={true} placeholder="Quantity" style={{ width: '100%' }}/>
-                                </Form.Item>
-                
-                                <BilboHoverableIconButton
-                                    style={{fontSize: '15px'}}
-                                    shape='circle'
-                                    transformcolor={theme.colors.brightRed}
-                                    onClick={() => { remove(field.name); }} >
-                                    <MinusCircleOutlined />
-                                </BilboHoverableIconButton>
-                                
-                                {/* Ensures that form will have purchaseOrderObjID during submission */}
-                                <Form.Item
-                                    {...field}
-                                    name={[field.name, '_id']}
-                                    fieldKey={[field.fieldKey, '_id']}
-                                    key={`${field.fieldKey}-part`}
-                                >
-                                    <Input style={{ display: 'none'}} />
-                                </Form.Item>
-                            </Row>
-                            ))}
-                        </div>
-                        );
-                    }}
-                    </Form.List>
-
-
-
-
-
-
-
-                    <Form.List name="partsAllocationNew">
-                    {(fields, { add, remove }) => {
-                        return (
-                        <div>
-                            {fields.map((field, index) => (
-                            <Row key={field.key} style={{ width: '100%' }} >
-                                <Form.Item
-                                    {...field}
-                                    name={[field.name, 'purchaseOrderNumber']}
-                                    fieldKey={[field.fieldKey, 'purchaseOrderNumber']}
-                                    key={`${field.fieldKey}-purchaseOrderNumber`}
-                                    style={{width: '20%', marginRight: '5px'}}
-                                    rules={[{ required: true, message: 'Missing purchase order' }]}
-                                >
-                                    <Select placeholder='Select Purchase Order'
-                                            notFoundContent={purchaseOrderSearches[index].isGettingPurchaseOrderData ? <Spin size='small'/>: null}
-                                            filterOption={false}
-                                            showSearch={true}
-                                            onSearch={(searchValue) => getPurchaseOrderData(searchValue, index)} >
-                                        {
-                                            purchaseOrderSearches[index].purchaseOrderData.map(purchaseOrderInfo => {
-                                                return (
-                                                    <Option key={purchaseOrderInfo._id}
-                                                            value={`${purchaseOrderInfo._id}||${purchaseOrderInfo.orderNumber}`} >
-                                                        {`${purchaseOrderInfo.orderNumber}`}
-                                                    </Option>
-                                                )
-                                            })
-                                        }
-                                    </Select>
-                                </Form.Item>
-                                <Form.Item
-                                    {...field}
-                                    style={{width: '15%', marginRight: '5px'}}
-                                    name={[field.name, 'quantity']}
-                                    fieldKey={[field.fieldKey, 'quantity']}
-                                    key={`${field.fieldKey}-quantity`}
-                                    rules={[{ required: true, message: 'Missing quantity' }]}
-                                >
-                                    <InputNumber placeholder="Quantity" style={{ width: '100%' }}/>
-                                </Form.Item>
-                
-                                <BilboHoverableIconButton
-                                    style={{fontSize: '15px'}}
-                                    shape='circle'
-                                    transformcolor={theme.colors.brightRed}
-                                    onClick={() => { 
-                                        // TODO: Remove from purchaseOrderSearches
-                                        const updatedPurchaseOrderSearches = [...purchaseOrderSearches];
-                                        updatedPurchaseOrderSearches.splice(field.fieldKey, 1);
-                                        setPurchaseOrderSearches(updatedPurchaseOrderSearches);
-                                        console.log(field.fieldKey)
-                                        console.log(updatedPurchaseOrderSearches)
-                                        remove(field.fieldKey); 
-                                    }} >
-                                    <MinusCircleOutlined />
-                                </BilboHoverableIconButton>
-                            </Row>
-                            ))}
-
-                            <Form.Item>
-                            <Button
-                                type="dashed"
-                                onClick={() => {
-                                const updatedPurchaseOrderSearches = [...purchaseOrderSearches];
-                                updatedPurchaseOrderSearches.push({
-                                    isGettingPurchaseOrderData: false,
-                                    purchaseOrderData: [],
-                                })
-                                setPurchaseOrderSearches(updatedPurchaseOrderSearches);
-                                add();
-                                }}
-                            >
-                                <PlusOutlined /> Add Another Part Allocation
-                            </Button>
-                            </Form.Item>
-                        </div>
-                        );
-                    }}
-                    </Form.List>
-                </Form>
-            </Modal>
-        </>
-    )
-}
-ModalForm.propTypes = {
-    modalSelectedPartIndex: PropTypes.number.isRequired,
-    salesOrderStateData: PropTypes.object.isRequired, // TODO: Marked for removal
-    closeModal: PropTypes.func.isRequired,
-    parentForm: PropTypes.object.isRequired,
 }
