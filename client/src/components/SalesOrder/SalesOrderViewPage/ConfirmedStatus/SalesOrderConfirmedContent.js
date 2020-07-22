@@ -17,6 +17,8 @@ import { debounce } from 'lodash';
 import queryString from 'query-string';
 import PartAllocationFormList from './PartAllocationFormList';
 import ModalForm from './ModalForm';
+import SalesOrderMetaDataDisplaySection from '../SalesOrderMetaDataDisplaySection';
+import SalesOrderStateAdditionalInfoEditableSection from '../SalesOrderStateAdditionalInfoEditableSection';
 
 /**
  * React Component to render content for Sales Orders
@@ -52,9 +54,6 @@ import ModalForm from './ModalForm';
  * all parts have been allocated to at least one PO.
  * // TODO: The set of checks can be made more robust
  * // e.g. Check for minimum part allocation
- * 
- * // TODO: Create all other information components
- * // TODO: Make tags colourful. Change css
  */
 export default function SalesOrderConfirmedContent(props) {
     // Pre-process `salesOrderStateData` into format usable by <Form/>
@@ -147,6 +146,15 @@ export default function SalesOrderConfirmedContent(props) {
 
     return (
         <>
+            <SalesOrderMetaDataDisplaySection 
+                salesOrderMetaData={props.salesOrderMetaData} 
+            />
+            
+            <SalesOrderStateAdditionalInfoEditableSection 
+                stateAdditionalInfo={stateAdditionalInfo}
+                setStateAdditionalInfo={setStateAdditionalInfo} 
+            />
+
             <Form name='confirmedStatusForm'
                   form={form}
                   initialValues={{
@@ -154,11 +162,13 @@ export default function SalesOrderConfirmedContent(props) {
                   }}
                   autoComplete='off'
             >
+                <BilboDividerWithText orientation='left'>Part Allocation Details</BilboDividerWithText>
                 <PartAllocationFormList 
                     form={form}
                     onAllocateButtonClick={onAllocateButtonClick}
                 />
 
+                <BilboDivider />
                 <Row justify='end'>
                     <Space direction='vertical' style={{display: 'block', width: '20%'}}>
                         <Row style={{ display: 'flex', alignContent: 'space-between' }}>

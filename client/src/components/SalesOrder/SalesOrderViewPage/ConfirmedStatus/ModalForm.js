@@ -18,14 +18,6 @@ import queryString from 'query-string';
 import ModalFormExistingPartAllocationsFormSection from './ModalFormExistingPartAllocationsFormSection';
 import ModalFormNewPartAllocationsFormSection from './ModalFormNewPartAllocationsFormSection';
 
-
-
-
-
-
-// TODO: Perform checks that PO is allowed for allocation (sufficient parts, has the part etc.)
-// TODO: Perform duplicate PO allocation checks
-// Allows you to add allocations to multiple purchase orders
 /**
  * React Component that displays a Modal containing
  * a Form that performs part allocation for a specific
@@ -41,6 +33,13 @@ import ModalFormNewPartAllocationsFormSection from './ModalFormNewPartAllocation
  * available for allocation per purchase order (see 
  * <ModalFormNewPartAllocationsFormSection/>), and also
  * checks for duplicate purchase order allocations.
+ * 
+ * There are 2 main components that make up the <Form/>:
+ * 1. <ModalFormExistingPartAllocationsFormSection/>
+ *    - this form section helps display existing part allocations
+ * 2. <ModalFormNewPartAllocationsFormSection/>
+ *    - this form section allows users to dynamically add new
+ *      part allocations
  */
 export default function ModalForm(props) {
     const [form] = Form.useForm();
@@ -89,8 +88,6 @@ export default function ModalForm(props) {
                 // Do nothing. UI displays error message.
             })
     }
-
-
 
     return(
         <>
