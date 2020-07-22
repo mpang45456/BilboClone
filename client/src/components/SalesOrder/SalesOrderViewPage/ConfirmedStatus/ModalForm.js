@@ -23,10 +23,13 @@ import queryString from 'query-string';
 
 // TODO: Perform checks that PO is allowed for allocation (sufficient parts, has the part etc.)
 // TODO: Update docs: Mount a new ModalForm everytime modal is made visible
-
+// TODO: Perform duplicate PO allocation checks
 // Allows you to add allocations to multiple purchase orders
 export default function ModalForm(props) {
+    const history = useHistory();
     const [form] = Form.useForm();
+    const partBeingAllocated = props.parentForm.getFieldsValue().parts[props.modalSelectedPartIndex].part;
+
     /* Stores the search results for each purchase order number search bar
        Has format: 
        {
@@ -59,11 +62,22 @@ export default function ModalForm(props) {
                 // but `lastFetchID` is a variable local to
                 // the entire React component (it keeps incrementing)
                 if (thisFetchID === lastFetchID) {
-                    updatedPurchaseOrderSearches[index].purchaseOrderData = res.data.purchaseOrders;
-                    updatedPurchaseOrderSearches[index].isGettingPurchaseOrderData = false;
+                    Promise.all(res.data.purchaseOrders.map(purchaseOrderMetaData => {
+                        return bax.get(`/api/v1/purchaseOrder/${purchaseOrderMetaData._id}/state/latest`)
+                                  .then(res => res.data);
+                    })).then(poLatestStateArr => {
+                        let filteredPOs = [];
+                        poLatestStateArr.map((poLatestState, i) => {
+                            if (poLatestState.parts.findIndex(partInfo => partInfo.part === partBeingAllocated) !== -1) {
+                                filteredPOs.push(res.data.purchaseOrders[i]);
+                            }
+                        })
+                        
+                        updatedPurchaseOrderSearches[index].purchaseOrderData = filteredPOs;
+                        updatedPurchaseOrderSearches[index].isGettingPurchaseOrderData = false;
+                        setPurchaseOrderSearches(updatedPurchaseOrderSearches);
+                    })
 
-                    // TODO: Perform additional checks --> no duplicates, available for allocation
-                    setPurchaseOrderSearches(updatedPurchaseOrderSearches);
                 }
             }).catch(err => {
                 redirectToErrorPage(err, history);
@@ -71,38 +85,37 @@ export default function ModalForm(props) {
     }, CONFIG.DEBOUNCE_LIMIT);
 
     const onModalOk = () => {
+        // Upon submission of the modal form (by clicking on Ok button),
+        // parentForm's data will be updated directly. 
+        const updatedParentFormData = () => {
+            // Parent Form's state
+            let updatedParts = props.parentForm.getFieldValue('parts');
+            
+            // Existing Parts Allocation
+            updatedParts[props.modalSelectedPartIndex].fulfilledBy = form.getFieldsValue().partsAllocationExisting;
+
+            // New Parts Allocation
+            if (form.getFieldsValue().partsAllocationNew) {
+                form.getFieldsValue().partsAllocationNew.map(partAllocation => {
+                    const [purchaseOrderObjID, purchaseOrderNumber] = partAllocation.purchaseOrderNumber.split('||');
+                    updatedParts[props.modalSelectedPartIndex].fulfilledBy.push({
+                        ...partAllocation,
+                        purchaseOrder: purchaseOrderObjID,
+                        purchaseOrderNumber
+                    })
+                });
+            }
+            props.parentForm.setFieldsValue({parts: updatedParts});
+            props.closeModal();
+        }
+
         form.validateFields()
             .then(_ => {
-
+                // Only send request if form is validated
+                updatedParentFormData();
             }).catch(_ => {
                 // Do nothing. UI displays error message.
             })
-
-        // // TODO: Perform processing to get the data into the accepted format in parent form
-        // // TODO: Update docs: Update Parent Form values directly
-        // let updatedParts = props.parentForm.getFieldValue('parts');
-        // // Existing Parts Allocation
-        // updatedParts[props.modalSelectedPartIndex].fulfilledBy = form.getFieldsValue().partsAllocationExisting;
-        // // New Parts Allocation
-        // if (form.getFieldsValue().partsAllocationNew) {
-        //     form.getFieldsValue().partsAllocationNew.map(partAllocation => {
-        //         // TODO: Might not need the || divider any more
-        //         const purchaseOrderObjID = partAllocation.purchaseOrderNumber.split('||')[0];
-        //         const purchaseOrderNumber = partAllocation.purchaseOrderNumber.split('||')[1]; // TODO: Use array destructuring syntax instead
-        //         updatedParts[props.modalSelectedPartIndex].fulfilledBy.push({
-        //             ...partAllocation,
-        //             purchaseOrder: purchaseOrderObjID,
-        //             purchaseOrderNumber
-        //         })
-        //     });
-        // }
-        // console.log(updatedParts);
-        // props.parentForm.setFieldsValue({parts: updatedParts});
-
-        // // TODO: Perform validation
-        // // console.log(form.getFieldsValue());
-        // // form.resetFields();
-        // props.closeModal();
     }
 
     const onModalCancel = () => {
@@ -119,7 +132,7 @@ export default function ModalForm(props) {
         // Obtain Purchase Order's State (for Fulfillment Information)
         bax.get(`/api/v1/purchaseOrder/${purchaseOrderObjID}/state/latest?${query}`)
             .then(res => {
-                const partBeingAllocated = props.parentForm.getFieldsValue().parts[props.modalSelectedPartIndex].part;
+                // const partBeingAllocated = props.parentForm.getFieldsValue().parts[props.modalSelectedPartIndex].part;
                 
                 // Index of part being allocated in purchase order
                 const partIndex = res.data.parts.findIndex(partInfo => partInfo.part === partBeingAllocated);
@@ -130,14 +143,14 @@ export default function ModalForm(props) {
                     })
                 }
 
-                // Max quantity that user may enter in <InputNumber/>
-                const quantityAvailable = res.data.parts[partIndex].quantity - quantityAlreadyAllocated;
+                // // Max quantity that user may enter in <InputNumber/>
+                // const quantityAvailable = res.data.parts[partIndex].quantity - quantityAlreadyAllocated;
                 
-                // Update purchaseOrderSearches with maximum quantity
-                // available for allocation. This affects <InputNumber/>
-                const updatedPurchaseOrderSearches = [...purchaseOrderSearches];
-                updatedPurchaseOrderSearches[purchaseOrderSearchIndex].max = quantityAvailable;
-                setPurchaseOrderSearches(updatedPurchaseOrderSearches);
+                // // Update purchaseOrderSearches with maximum quantity
+                // // available for allocation. This affects <InputNumber/>
+                // const updatedPurchaseOrderSearches = [...purchaseOrderSearches];
+                // updatedPurchaseOrderSearches[purchaseOrderSearchIndex].max = quantityAvailable;
+                // setPurchaseOrderSearches(updatedPurchaseOrderSearches);
             }).catch(err => {
                 redirectToErrorPage(history, err);
             })
