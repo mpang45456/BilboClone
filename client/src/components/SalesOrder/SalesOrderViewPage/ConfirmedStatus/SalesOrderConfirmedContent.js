@@ -18,34 +18,63 @@ import queryString from 'query-string';
 
 /**
  * React Component to render content for Sales Orders
- * that have `SO_STATES.QUOTATION` status.
- * // TODO: Update docs
+ * that have `SO_STATES.CONFIRMED` status.
  * 
- * Management of state for fulfilledBy is in a separate
- * react state
+ * Note: Management of state for `salesOrderStateData`'s
+ * `additionalInfo` field is in a separate react 
+ * state and not managed by the <Form/> component
+ * directly. 
+ * 
+ * Note: The <Form/> Component here is relatively dumb. It is
+ * merely used as a store of data meant for submission. 
+ * The manipulation of form data (for parts allocation 
+ * to purchase orders) is done in the <ModalForm />,
+ * which has its own form state, but manipulates the
+ * this <Form/> Component's data directly upon submission
+ * of the modal form. 
+ * 
+ * Note: The <Form/> Component here is responsible for
+ * making API calls, not the form in the <ModalForm/>
+ * 
+ * Note: It is imperative for the <ModalForm/> component
+ * to be mounted/unmounted every time it is displayed/closed.
+ * This ensures that the form state within the <ModalForm/>
+ * is refreshed every time the `Allocate` button is clicked
+ * on. This mounting/unmounting is achieved by the `isModalVisible`
+ * state. If `isModalVisible` is truthy, then <ModalForm/>
+ * is mounted. 
+ * 
+ * // TODO: Update docs
  */
 export default function SalesOrderConfirmedContent(props) {
+    // Pre-process `salesOrderStateData` into format usable by <Form/>
+    let salesOrderStateData = {...props.salesOrderStateData};
+    salesOrderStateData.parts = salesOrderStateData.parts.map(partInfo => {
+        return {
+            ...partInfo,
+            fulfilledBy: partInfo.fulfilledBy.map(fulfilledByTarget => {
+                return {
+                    ...fulfilledByTarget,
+                    purchaseOrder: fulfilledByTarget.purchaseOrder._id,
+                    purchaseOrderNumber: fulfilledByTarget.purchaseOrder.orderNumber,
+                }
+            })
+        }
+    })
+
     const [form] = Form.useForm();
     const history = useHistory();
-    const [partsFulfilledBy, setPartsFulfilledBy] = useState(
-        props.salesOrderStateData.parts.map(partInfo => {
-            return partInfo.fulfilledBy;
-        })
-    )
-
-    const [modalSelectedPurchaseOrderIndex, setSelectedModalPurchaseOrderIndex] = useState(0);
+    // The index of the part (wrt `salesOrderStateData.parts`) to be allocated
+    const [modalSelectedPartIndex, setModalSelectedPartIndex] = useState(0);
+    // Determines whether to display the modal (will also cause modal to mount/unmount)
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [saveChangesLoading, setSaveChangesLoading] = useState(false);
     const [proceedNextStatusLoading, setProceedNextStatusLoading] = useState(false);
-    const [stateAdditionalInfo, setStateAdditionalInfo] = useState(props.salesOrderStateData.additionalInfo); // Managed differently from the form
+    const [stateAdditionalInfo, setStateAdditionalInfo] = useState(salesOrderStateData.additionalInfo); // Managed differently from the form
 
     const allocatePart = (index) => {
-        setSelectedModalPurchaseOrderIndex(index);
+        setModalSelectedPartIndex(index);
         setIsModalVisible(true);
-    }
-
-    const closeModal = () => {
-        setIsModalVisible(false);
     }
 
     // Handler when either `Save Changes` or `Confirm and Proceed`
@@ -64,8 +93,6 @@ export default function SalesOrderConfirmedContent(props) {
                 fulfilledBy: partInfo.fulfilledBy,
             })
         })
-
-        console.log(reqBody);
 
         if (submissionType === 'saveChanges') {
             reqBody.status = SO_STATES.CONFIRMED;
@@ -101,24 +128,20 @@ export default function SalesOrderConfirmedContent(props) {
         }
     }
 
-    // Handler when Cancel Button is Clicked
-    const onCancel = () => { history.push(CONFIG.SALES_ORDER_URL)};
-
-
     return (
         <>
             <Form name='confirmedStatusForm'
                   form={form}
                   initialValues={{
-                      parts: props.salesOrderStateData.parts
+                      parts: salesOrderStateData.parts
                   }}
                   autoComplete='off'
-                  >
+            >
                 <Form.List name='parts'>
-                    {(fields, { add, remove }) => {
+                    {(fields) => {
                         return (
                         <div>
-                            {fields.map((field, index) => (
+                            {fields.map((field) => (
                             <Row key={field.key} style={{ width: '100%' }} >
                                 <Form.Item
                                     {...field}
@@ -187,26 +210,34 @@ export default function SalesOrderConfirmedContent(props) {
                 <Row justify='end'>
                     <Space direction='vertical' style={{display: 'block', width: '20%'}}>
                         <Row style={{ display: 'flex', alignContent: 'space-between' }}>
-                            <Button style={{flexGrow: 1}} type="default" onClick={onCancel}>
+                            <Button style={{flexGrow: 1}} type="default" 
+                                    onClick={() => history.push(CONFIG.SALES_ORDER_URL)}>
                                 Cancel
                             </Button>
-                            <Button style={{flexGrow: 1}} type="default" loading={saveChangesLoading} onClick={() => submitForm('saveChanges')}>
+                            <Button style={{flexGrow: 1}} type="default" 
+                                    loading={saveChangesLoading} 
+                                    onClick={() => submitForm('saveChanges')}>
                                 Save Changes
                             </Button>
                         </Row>
                         
-                        <Button style={{width: '100%'}} type="primary" loading={proceedNextStatusLoading} onClick={() => submitForm('proceedNextStatus')}>
+                        <Button style={{width: '100%'}} type="primary" 
+                                loading={proceedNextStatusLoading} 
+                                onClick={() => submitForm('proceedNextStatus')}>
                             Confirm and Proceed
                         </Button>
                     </Space>
                 </Row>
             </Form>
 
+            {/* Ensures that a fresh <ModalForm/> is mounted everytime
+                the `Allocate` button is clicked on
+             */}
             { 
                 isModalVisible 
-                ? <ModalForm salesOrderStateData={props.salesOrderStateData}
-                             modalSelectedPurchaseOrderIndex={modalSelectedPurchaseOrderIndex}
-                             closeModal={closeModal}
+                ? <ModalForm salesOrderStateData={salesOrderStateData}
+                             modalSelectedPartIndex={modalSelectedPartIndex}
+                             closeModal={() => {setIsModalVisible(false)}}
                              parentForm={form} />
                 : null                           
             }
@@ -232,7 +263,7 @@ SalesOrderConfirmedContent.propTypes = {
 // TODO: Update docs: Mount a new ModalForm everytime modal is made visible
 function ModalForm(props) {
     const [form] = Form.useForm();
-    let existingAllocation = props.salesOrderStateData.parts[props.modalSelectedPurchaseOrderIndex].fulfilledBy;
+    let existingAllocation = props.salesOrderStateData.parts[props.modalSelectedPartIndex].fulfilledBy;
     const [purchaseOrderSearches, setPurchaseOrderSearches] = useState([]);
 
     // Function for retrieving purchase orders that fit search description
@@ -271,14 +302,14 @@ function ModalForm(props) {
         // TODO: Update docs: Update Parent Form values directly
         let updatedParts = props.parentForm.getFieldValue('parts');
         // Existing Parts Allocation
-        updatedParts[props.modalSelectedPurchaseOrderIndex].fulfilledBy = form.getFieldsValue().partsAllocationExisting;
+        updatedParts[props.modalSelectedPartIndex].fulfilledBy = form.getFieldsValue().partsAllocationExisting;
         // New Parts Allocation
         if (form.getFieldsValue().partsAllocationNew) {
             form.getFieldsValue().partsAllocationNew.map(partAllocation => {
                 // TODO: Might not need the || divider any more
                 const purchaseOrderObjID = partAllocation.purchaseOrderNumber.split('||')[0];
                 const purchaseOrderNumber = partAllocation.purchaseOrderNumber.split('||')[1]; // TODO: Use array destructuring syntax instead
-                updatedParts[props.modalSelectedPurchaseOrderIndex].fulfilledBy.push({
+                updatedParts[props.modalSelectedPartIndex].fulfilledBy.push({
                     ...partAllocation,
                     purchaseOrder: purchaseOrderObjID,
                     purchaseOrderNumber
@@ -456,7 +487,7 @@ function ModalForm(props) {
     )
 }
 ModalForm.propTypes = {
-    modalSelectedPurchaseOrderIndex: PropTypes.number.isRequired,
+    modalSelectedPartIndex: PropTypes.number.isRequired,
     salesOrderStateData: PropTypes.object.isRequired, // TODO: Marked for removal
     closeModal: PropTypes.func.isRequired,
     parentForm: PropTypes.object.isRequired,
