@@ -47,10 +47,14 @@ import ModalForm from './ModalForm';
  * state. If `isModalVisible` is truthy, then <ModalForm/>
  * is mounted. 
  * 
- * // TODO: Update docs
+ * Note: the `Confirm and Proceed` button will only 
+ * successfully change the status of the sales order if 
+ * all parts have been allocated to at least one PO.
+ * // TODO: The set of checks can be made more robust
+ * // e.g. Check for minimum part allocation
  * 
- * // TODO: Proceed Next Status Button should only be allowed if 
- * // if all parts have been allocated
+ * // TODO: Create all other information components
+ * // TODO: Make tags colourful. Change css
  */
 export default function SalesOrderConfirmedContent(props) {
     // Pre-process `salesOrderStateData` into format usable by <Form/>

@@ -52,17 +52,17 @@ export default function ModalForm(props) {
         // parentForm's data will be updated directly. 
         const updateParentFormData = () => {
             // Parent Form's state
-            let updatedParts = props.parentForm.getFieldValue('parts');
+            let updatedParts = JSON.parse(JSON.stringify(props.parentForm.getFieldValue('parts')));
             
             // Existing Parts Allocation (make a copy)
-            updatedParts[props.modalSelectedPartIndex].fulfilledBy = form.getFieldsValue().partsAllocationExisting;
+            updatedParts[props.modalSelectedPartIndex].fulfilledBy = JSON.parse(JSON.stringify(form.getFieldsValue().partsAllocationExisting));
 
             // New Parts Allocation
             if (form.getFieldsValue().partsAllocationNew) {
                 form.getFieldsValue().partsAllocationNew.map(partAllocation => {
                     const [purchaseOrderObjID, purchaseOrderNumber] = partAllocation.purchaseOrderNumber.split('||');
                     updatedParts[props.modalSelectedPartIndex].fulfilledBy.push({
-                        ...partAllocation,
+                        quantity: partAllocation.quantity,
                         purchaseOrder: purchaseOrderObjID,
                         purchaseOrderNumber
                     })
@@ -83,7 +83,7 @@ export default function ModalForm(props) {
 
         form.validateFields()
             .then(_ => {
-                // Only send request if form is validated
+                // Only update parent form if form is validated
                 updateParentFormData();
             }).catch(_ => {
                 // Do nothing. UI displays error message.
@@ -97,6 +97,7 @@ export default function ModalForm(props) {
             <Modal visible={true}
                    onOk={onModalOk}
                    onCancel={props.closeModal}
+                   title={'Allocate Part to Purchase Orders'}
                    >
                 <Form name='modalPartAllocationForm'
                       form={form}

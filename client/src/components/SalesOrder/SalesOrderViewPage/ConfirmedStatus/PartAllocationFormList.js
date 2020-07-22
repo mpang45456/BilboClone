@@ -60,8 +60,9 @@ export default function PartAllocationFormList(props) {
                         <div>
                             {props.form.getFieldValue(['parts', field.fieldKey, 'fulfilledBy']).map((fulfilledByTarget, index) => {
                                 return (
-                                    <Tag style={{display: 'block'}} 
-                                            key={`${field.fieldKey}-${index}`}>
+                                    <Tag color='cyan'
+                                         style={{display: 'block'}} 
+                                         key={`${field.fieldKey}-${index}`}>
                                         {`${fulfilledByTarget.purchaseOrderNumber}: ${fulfilledByTarget.quantity}`}
                                     </Tag>
                                 )
@@ -69,6 +70,7 @@ export default function PartAllocationFormList(props) {
                         </div>
 
                         <DarkInvertedStyledButton
+                            style={{position: 'absolute', right: '0%'}}
                             onClick={() => {props.onAllocateButtonClick(field.fieldKey)}}>
                             Allocate
                         </DarkInvertedStyledButton>

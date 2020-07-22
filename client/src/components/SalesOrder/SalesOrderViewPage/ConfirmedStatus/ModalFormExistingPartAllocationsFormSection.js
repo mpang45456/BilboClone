@@ -49,14 +49,14 @@ export default function ModalFormExistingPartAllocationsFormSection(props) {
                             name={[field.name, 'purchaseOrderNumber']}
                             fieldKey={[field.fieldKey, 'purchaseOrderNumber']}
                             key={`${field.fieldKey}-purchaseOrderNumber`}
-                            style={{width: '20%', marginRight: '5px'}}
+                            style={{width: '55%', marginRight: '5px'}}
                             rules={[{ required: true, message: 'Missing Purchase Order Number' }]}
                         >
                             <Input disabled={true}></Input>
                         </Form.Item>
                         <Form.Item
                             {...field}
-                            style={{width: '15%', marginRight: '5px'}}
+                            style={{width: '30%', marginRight: '5px'}}
                             name={[field.name, 'quantity']}
                             fieldKey={[field.fieldKey, 'quantity']}
                             key={`${field.fieldKey}-quantity`}
