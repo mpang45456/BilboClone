@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ShowMoreButton, 
+         BilboTabs,
          BilboPageHeader, 
          BilboDivider, 
          BilboDisplayOnlySteps } from '../../UtilComponents';
-import { Menu, Modal, Table, Steps, Popover, Spin, message } from 'antd';
+import { Menu, Modal, Tabs, Steps, Popover, Spin, message } from 'antd';
+const { TabPane } = Tabs;
 const { confirm } = Modal;
 import { StopOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import PropTypes from 'prop-types';
@@ -19,6 +21,7 @@ import SalesOrderReceivedContent from './ReceivedStatus/SalesOrderReceivedConten
 import SalesOrderFulfilledContent from './FulfilledStatus/SalesOrderFulfilledContent';
 import queryString from 'query-string';
 import { isEmpty } from 'lodash';
+import styled from 'styled-components';
 
 /**
  * React Component to display the details of a
@@ -136,10 +139,16 @@ export default function SalesOrderViewPage(props) {
                             salesOrderMetaData={salesOrderMetaData}
                             />
             default:
-                return <span>LOADING</span>
+                return <Spin>Loading</Spin>
         }
     }
 
+
+    const BilboTabs = styled(Tabs)`
+        & .ant-tabs-nav-wrap {
+            border-bottom: 1px solid ${props => props.theme.colors.lightGrey };;
+        }
+    `;
     return (
         <div>
             <Spin spinning={isLoadingSalesOrderDetails}> 
@@ -156,14 +165,21 @@ export default function SalesOrderViewPage(props) {
                     ]}
                 />
                 <BilboDivider />
-                <BilboDisplayOnlySteps 
-                    activeStepIndex={CONFIG.SALES_ORDER_STEPS.findIndex(statusObj => statusObj.status === salesOrderStateData.status)}
-                    allStatusAndTitle={CONFIG.SALES_ORDER_STEPS} />
-                { 
-                    !isEmpty(salesOrderMetaData) &&
-                    !isEmpty(salesOrderStateData) &&
-                    renderSwitcher(salesOrderMetaData.latestStatus) 
-                }
+                <BilboTabs type='card'>
+                    <TabPane tab='Details' key='1'>
+                        <BilboDisplayOnlySteps 
+                            activeStepIndex={CONFIG.SALES_ORDER_STEPS.findIndex(statusObj => statusObj.status === salesOrderStateData.status)}
+                            allStatusAndTitle={CONFIG.SALES_ORDER_STEPS} />
+                        { 
+                            !isEmpty(salesOrderMetaData) &&
+                            !isEmpty(salesOrderStateData) &&
+                            renderSwitcher(salesOrderMetaData.latestStatus) 
+                        }
+                    </TabPane>
+                    <TabPane tab='Edit History' key='2'>
+                        <h1>Edit History here pls</h1>
+                    </TabPane>
+                </BilboTabs>
             </Spin>
         </div>
     );

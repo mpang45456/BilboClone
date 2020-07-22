@@ -3,7 +3,7 @@ import { NavLink, useHistory } from 'react-router-dom';
 import { PageHeader, Row, Dropdown, 
          Button, Spin, Descriptions, 
          Divider, Input, Select, Tag,
-         Timeline, Steps } from 'antd';
+         Timeline, Steps, Tabs } from 'antd';
 const { Step } = Steps;
 const { Option } = Select;
 import { EllipsisOutlined, 
@@ -581,3 +581,13 @@ BilboDisplayOnlySteps.propTypes = {
     activeStepIndex: PropTypes.number.isRequired,
     allStatusAndTitle: PropTypes.array.isRequired,
 }
+
+/**
+ * <Tab/> with customised color for the line beneath
+ * the tabs.
+ */
+export const BilboTabs = styled(Tabs)`
+    & .ant-tabs-nav-wrap {
+        border-bottom: 1px solid ${props => props.theme.colors.lightGrey };;
+    }
+`;
