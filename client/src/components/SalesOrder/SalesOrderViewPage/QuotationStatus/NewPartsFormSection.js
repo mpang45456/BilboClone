@@ -14,15 +14,17 @@ import { theme } from '../../../Theme';
  * Allows users to dynamically add parts. 
  */
 export default function NewPartsFormSection(props) {
-    // Keeps track of the searches (for part number) for each
-    // dynamically added field. Only `partNumber` can be searched
-    // for (`quantity` and `additionalInfo` cannot). It has the form:
-    // [
-    //    {
-    //      partsData: [],
-    //      isGettingPartData: bool,
-    //    }
-    // ]
+    /* 
+    Keeps track of the searches (for part number) for each
+    dynamically added field. Only `partNumber` can be searched
+    for (`quantity` and `additionalInfo` cannot). It has the form:
+        [
+            {
+                partsData: [],
+                isGettingPartData: bool,
+            }
+        ]
+    */
     const [partSearches, setPartSearches] = useState([]);
 
     // Function for retrieving parts that fit search description

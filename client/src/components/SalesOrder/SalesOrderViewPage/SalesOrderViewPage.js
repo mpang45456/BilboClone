@@ -3,20 +3,17 @@ import { useHistory } from 'react-router-dom';
 import { ShowMoreButton, 
          BilboPageHeader, 
          BilboDivider, 
-         BilboSearchTable, 
-         BilboDisplayOnlySteps,
-         BilboNavLink } from '../../UtilComponents';
+         BilboDisplayOnlySteps } from '../../UtilComponents';
 import { Menu, Modal, Table, Steps, Popover, Spin, message } from 'antd';
 const { confirm } = Modal;
-const { Step } = Steps;
-import { PlusOutlined, StopOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import { StopOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import PropTypes from 'prop-types';
 import { bax, useAuth, PERMS, redirectToErrorPage } from '../../../context/AuthContext';
 import CONFIG from '../../../config';
 import { SO_STATES } from '../../../../../server/data/databaseEnum';
-import { escapeRegex } from '../../../utils';
 import SalesOrderQuotationContent from './QuotationStatus/SalesOrderQuotationContent';
 import SalesOrderConfirmedContent from './ConfirmedStatus/SalesOrderConfirmedContent';
+import SalesOrderPreparingContent from './PreparingStatus/SalesOrderPreparingContent';
 import queryString from 'query-string';
 import { isEmpty } from 'lodash';
 
@@ -88,12 +85,6 @@ export default function SalesOrderViewPage(props) {
                              part.partNumber = `${res.data.partNumber} (${res.data.supplier.name})`;
                          })
             })).then(_ => {
-                // FIXME: DEBUG
-                // TODO: Populate with purchase order number
-                // stateData.parts.map((partInfo, index) => {
-                //     partInfo.fulfilledBy = [{purchaseOrderNumber: `PO-test1-${index}`, purchaseOrder: '182397123789171239', quantity: 100}, 
-                //                             {purchaseOrderNumber: `PO-test2-${index}`, purchaseOrder: '12039120-3912-3901', quantity: 50}];
-                // })
                 setSalesOrderStateData(stateData);
                 setIsLoadingSalesOrderDetails(false);
             }).catch(err => {
@@ -122,7 +113,10 @@ export default function SalesOrderViewPage(props) {
                             salesOrderMetaData={salesOrderMetaData}
                             />
             case 'PREPARING':
-                return <span>PREPARING</span>
+                return <SalesOrderPreparingContent 
+                            salesOrderStateData={salesOrderStateData} 
+                            salesOrderMetaData={salesOrderMetaData}
+                            />
             case 'IN_DELIVERY':
                 return <span>IN_DELIVERY</span>
             case 'RECEIVED':
