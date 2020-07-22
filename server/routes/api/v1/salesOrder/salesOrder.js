@@ -429,6 +429,10 @@ function performAllocations(partInfos, salesOrderObjID) {
  * Returns latest sales order state data for the sales
  * order identified by `:salesOrderObjID`
  * 
+ * Query parameters can specify: 
+ * 1. Whether to populate the `fulfilledBy` path array
+ *    - ?populateFulfilledBy=true
+ * 
  * Note: Authorization is performed in the following order:
  * 1. User has `PERMS.SALES_ORDER_READ`
  * 2. Sales order associated with `:salesOrderObjID` was
@@ -439,6 +443,11 @@ router.get('/:salesOrderObjID/state/latest',
            setUserHierarchy,
            async function(req, res) {
     try {
+        // Query Parameters
+        let {
+            populateFulfilledBy = 'false',
+        } = req.query;
+
         let salesOrderDoc = await SalesOrderModel.findOne({ _id: req.params.salesOrderObjID });
         if (!salesOrderDoc) { return res.status(400).send('Invalid Sales Order ID'); }
         
@@ -448,6 +457,10 @@ router.get('/:salesOrderObjID/state/latest',
         }
 
         const latestSOStateDoc = await SalesOrderStateModel.findOne({ _id: salesOrderDoc.orders[salesOrderDoc.orders.length - 1]});
+        if (populateFulfilledBy === 'true') {
+            await latestSOStateDoc.populate('parts.fulfilledBy.purchaseOrder').execPopulate();
+        }
+
         return res.status(200).json(latestSOStateDoc);
     } catch(err) {
         logger.error(`GET /salesOrder/:salesOrderObjID/state/latest: Could not get latest sales order state: ${err}`);
@@ -464,6 +477,10 @@ router.get('/:salesOrderObjID/state/latest',
  * Returns sales order state data at `:index` for the sales
  * order identified by `:salesOrderObjID`
  * 
+ * Query parameters can specify: 
+ * 1. Whether to populate the `fulfilledBy` path array
+ *    - ?populateFulfilledBy=true
+ * 
  * Note: Authorization is performed in the following order:
  * 1. User has `PERMS.SALES_ORDER_READ`
  * 2. Sales order associated with `:salesOrderObjID` was
@@ -478,6 +495,11 @@ router.get('/:salesOrderObjID/state/:salesOrderStateIndex',
            setUserHierarchy,
            async function(req, res) {
     try {
+        // Query Parameters
+        let {
+            populateFulfilledBy = 'false',
+        } = req.query;
+
         let salesOrderDoc = await SalesOrderModel.findOne({ _id: req.params.salesOrderObjID });
         if (!salesOrderDoc) { return res.status(400).send('Invalid Sales Order ID'); }
         
@@ -487,6 +509,10 @@ router.get('/:salesOrderObjID/state/:salesOrderStateIndex',
         }
 
         const soStateDoc = await SalesOrderStateModel.findOne({ _id: salesOrderDoc.orders[Number(req.params.salesOrderStateIndex)] });
+        if (populateFulfilledBy === 'true') {
+            await latestSOStateDoc.populate('parts.fulfilledBy.purchaseOrder').execPopulate();
+        }
+        
         return res.status(200).json(soStateDoc);
     } catch(err) {
         logger.error(`GET /:salesOrderObjID/state/:salesOrderStateObjID: Could not get sales order state: ${err}`);

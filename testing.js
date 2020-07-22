@@ -15,7 +15,7 @@ const { SO_STATES, PO_STATES } = require('./server/data/databaseEnum');
 
     let soDoc = await SalesOrderModel.findOne({ orderNumber: 'SO-000001' });
     let soStateDoc = await SalesOrderStateModel.findOne({ _id: soDoc.orders[soDoc.orders.length - 1]._id });
-    await soStateDoc.populate('orders').execPopulate();
+    // await soStateDoc.populate('orders').execPopulate();
     await soStateDoc.populate('parts.fulfilledBy.purchaseOrder').execPopulate();
     console.log(JSON.stringify(soStateDoc, null, 2));
 

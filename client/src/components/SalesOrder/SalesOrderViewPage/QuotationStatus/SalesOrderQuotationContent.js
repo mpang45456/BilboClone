@@ -56,7 +56,7 @@ export default function SalesOrderQuotationContent(props) {
                     part: partInfo.part,
                     quantity: partInfo.quantity,
                     additionalInfo: partInfo.additionalInfo,
-                    fulfilledBy: partInfo.fulfilledBy,
+                    fulfilledBy: [],
                 })
             })
             // Prepare newly added parts
@@ -141,10 +141,10 @@ export default function SalesOrderQuotationContent(props) {
                 <Row justify='end'>
                     <Space direction='vertical' style={{display: 'block', width: '20%'}}>
                         <Row style={{ display: 'flex', alignContent: 'space-between' }}>
-                            <Button style={{marginRight: '5px'}} type="default" onClick={onCancel}>
+                            <Button style={{flexGrow: 1}} type="default" onClick={onCancel}>
                                 Cancel
                             </Button>
-                            <Button style={{flexGrow: 2}} type="default" loading={saveChangesLoading} onClick={() => submitForm('saveChanges')}>
+                            <Button style={{flexGrow: 1}} type="default" loading={saveChangesLoading} onClick={() => submitForm('saveChanges')}>
                                 Save Changes
                             </Button>
                         </Row>

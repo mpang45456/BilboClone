@@ -26,6 +26,7 @@ import queryString from 'query-string';
  */
 export default function SalesOrderConfirmedContent(props) {
     const [form] = Form.useForm();
+    const history = useHistory();
     const [partsFulfilledBy, setPartsFulfilledBy] = useState(
         props.salesOrderStateData.parts.map(partInfo => {
             return partInfo.fulfilledBy;
@@ -34,6 +35,9 @@ export default function SalesOrderConfirmedContent(props) {
 
     const [modalSelectedPurchaseOrderIndex, setSelectedModalPurchaseOrderIndex] = useState(0);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [saveChangesLoading, setSaveChangesLoading] = useState(false);
+    const [proceedNextStatusLoading, setProceedNextStatusLoading] = useState(false);
+    const [stateAdditionalInfo, setStateAdditionalInfo] = useState(props.salesOrderStateData.additionalInfo); // Managed differently from the form
 
     const allocatePart = (index) => {
         setSelectedModalPurchaseOrderIndex(index);
@@ -43,6 +47,62 @@ export default function SalesOrderConfirmedContent(props) {
     const closeModal = () => {
         setIsModalVisible(false);
     }
+
+    // Handler when either `Save Changes` or `Confirm and Proceed`
+    // buttons are clicked
+    const submitForm = async (submissionType) => {
+        // Prepare request body
+        let reqBody = { additionalInfo: stateAdditionalInfo, 
+                        parts: [] };
+        // Prepare parts data (esp. `fulfilledBy`)
+        let formData = form.getFieldsValue();
+        formData.parts && formData.parts.map(partInfo => {
+            reqBody.parts.push({
+                part: partInfo.part,
+                quantity: partInfo.quantity,
+                additionalInfo: partInfo.additionalInfo,
+                fulfilledBy: partInfo.fulfilledBy,
+            })
+        })
+
+        console.log(reqBody);
+
+        if (submissionType === 'saveChanges') {
+            reqBody.status = SO_STATES.CONFIRMED;
+            setSaveChangesLoading(true);
+            bax.post(`/api/v1/salesOrder/${props.salesOrderMetaData._id}/state`, reqBody)
+                .then(res => {
+                    if (res.status === 200) {
+                        history.push(CONFIG.SALES_ORDER_URL);
+                        message.success('Successfully updated sales order!')
+                    }
+                }).catch(err => {
+                    redirectToErrorPage(err, history);
+                })
+        } else if (submissionType === 'proceedNextStatus') {
+            confirm({
+                icon: <ExclamationCircleOutlined />,
+                content: 'Are you sure you wish to move this sales order to the next status? This is NOT reversible.',
+                onOk: () => {
+                    reqBody.status = SO_STATES.PREPARING;
+                    setProceedNextStatusLoading(true);
+                    bax.post(`/api/v1/salesOrder/${props.salesOrderMetaData._id}/state`, reqBody)
+                        .then(res => {
+                            if (res.status === 200) {
+                                history.push(CONFIG.SALES_ORDER_URL);
+                                message.success('Successfully moved sales order to next status!')
+                            }
+                        }).catch(err => {
+                            redirectToErrorPage(err, history);
+                        })
+                },
+                okText: 'Confirm'
+            })
+        }
+    }
+
+    // Handler when Cancel Button is Clicked
+    const onCancel = () => { history.push(CONFIG.SALES_ORDER_URL)};
 
 
     return (
@@ -111,8 +171,8 @@ export default function SalesOrderConfirmedContent(props) {
                 
                                 <Form.Item
                                     {...field}
-                                    name={[field.name, '_id']}
-                                    fieldKey={[field.fieldKey, '_id']}
+                                    name={[field.name, 'part']}
+                                    fieldKey={[field.fieldKey, 'part']}
                                     key={`${field.fieldKey}-part`}
                                 >
                                     <Input style={{ display: 'none'}} />
@@ -123,6 +183,23 @@ export default function SalesOrderConfirmedContent(props) {
                         );
                     }}
                 </Form.List>
+
+                <Row justify='end'>
+                    <Space direction='vertical' style={{display: 'block', width: '20%'}}>
+                        <Row style={{ display: 'flex', alignContent: 'space-between' }}>
+                            <Button style={{flexGrow: 1}} type="default" onClick={onCancel}>
+                                Cancel
+                            </Button>
+                            <Button style={{flexGrow: 1}} type="default" loading={saveChangesLoading} onClick={() => submitForm('saveChanges')}>
+                                Save Changes
+                            </Button>
+                        </Row>
+                        
+                        <Button style={{width: '100%'}} type="primary" loading={proceedNextStatusLoading} onClick={() => submitForm('proceedNextStatus')}>
+                            Confirm and Proceed
+                        </Button>
+                    </Space>
+                </Row>
             </Form>
 
             { 

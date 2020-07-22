@@ -70,7 +70,8 @@ export default function SalesOrderViewPage(props) {
     
             // Get State Data
             let stateData = null;
-            await bax.get(`/api/v1/salesOrder/${props.match.params.salesOrderID}/state/latest`)
+            const query = queryString.stringify({ populateFulfilledBy: true });
+            await bax.get(`/api/v1/salesOrder/${props.match.params.salesOrderID}/state/latest?${query}`)
                 .then(res => {
                     if (res.status === 200) {
                         stateData = res.data;
@@ -89,10 +90,10 @@ export default function SalesOrderViewPage(props) {
             })).then(_ => {
                 // FIXME: DEBUG
                 // TODO: Populate with purchase order number
-                stateData.parts.map((partInfo, index) => {
-                    partInfo.fulfilledBy = [{purchaseOrderNumber: `PO-test1-${index}`, purchaseOrder: '182397123789171239', quantity: 100}, 
-                                            {purchaseOrderNumber: `PO-test2-${index}`, purchaseOrder: '12039120-3912-3901', quantity: 50}];
-                })
+                // stateData.parts.map((partInfo, index) => {
+                //     partInfo.fulfilledBy = [{purchaseOrderNumber: `PO-test1-${index}`, purchaseOrder: '182397123789171239', quantity: 100}, 
+                //                             {purchaseOrderNumber: `PO-test2-${index}`, purchaseOrder: '12039120-3912-3901', quantity: 50}];
+                // })
                 setSalesOrderStateData(stateData);
                 setIsLoadingSalesOrderDetails(false);
             }).catch(err => {
