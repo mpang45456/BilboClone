@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { BilboDividerWithText, BilboDivider } from '../../../UtilComponents';
-import { Row, Button, Space } from 'antd';
 import PropTypes from 'prop-types';
 import { SO_STATES } from '../../../../../../server/data/databaseEnum';
 import CollapsibleSalesOrderDataDisplay from '../CollapsibleSalesOrderDataDisplay';
-import { setSalesOrderToNextStatus } from '../../../../utils';
+import ConfirmAndProceedButton from '../ConfirmAndProceedButton';
 // TODO: Clean Up Import Statements
 
 /**
@@ -32,21 +31,10 @@ export default function SalesOrderPreparingContent(props) {
 
             {/* TODO: Marked for removal (not supposed to be accessible by sales user) */}
             <BilboDivider />
-            <Row justify='end'>
-                <Space direction='vertical' style={{display: 'block', width: '20%'}}>
-                    <Button style={{width: '100%'}} type="primary" 
-                            loading={proceedNextStatusLoading} 
-                            onClick={() => {setSalesOrderToNextStatus(SO_STATES.IN_DELIVERY,
-                                                                      props.salesOrderStateData,
-                                                                      props.salesOrderMetaData,
-                                                                      history,
-                                                                      setProceedNextStatusLoading
-                                                                    )}}
-                    >
-                        Confirm and Proceed
-                    </Button>
-                </Space>
-            </Row>
+            <ConfirmAndProceedButton nextState={SO_STATES,RECEIVED}
+                                     salesOrderMetaData={props.salesOrderMetaData}
+                                     salesOrderStateData={props.salesOrderStateData}
+            />
         </>
     )
 }

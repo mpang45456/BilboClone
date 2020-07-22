@@ -14,6 +14,7 @@ import { SO_STATES } from '../../../../../server/data/databaseEnum';
 import SalesOrderQuotationContent from './QuotationStatus/SalesOrderQuotationContent';
 import SalesOrderConfirmedContent from './ConfirmedStatus/SalesOrderConfirmedContent';
 import SalesOrderPreparingContent from './PreparingStatus/SalesOrderPreparingContent';
+import SalesOrderInDeliveryContent from './InDeliveryStatus/SalesOrderInDeliveryContent';
 import queryString from 'query-string';
 import { isEmpty } from 'lodash';
 
@@ -118,7 +119,10 @@ export default function SalesOrderViewPage(props) {
                             salesOrderMetaData={salesOrderMetaData}
                             />
             case 'IN_DELIVERY':
-                return <span>IN_DELIVERY</span>
+                return <SalesOrderInDeliveryContent 
+                            salesOrderStateData={salesOrderStateData} 
+                            salesOrderMetaData={salesOrderMetaData}
+                            />
             case 'RECEIVED':
                 return <span>RECEIVED</span>
             case 'FULFILLED':
