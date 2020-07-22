@@ -44,6 +44,7 @@ export default function SalesOrderConfirmedContent(props) {
         setIsModalVisible(false);
     }
 
+
     return (
         <>
             <Form name='confirmedStatusForm'
@@ -124,12 +125,14 @@ export default function SalesOrderConfirmedContent(props) {
                 </Form.List>
             </Form>
 
-            <ModalForm visible={isModalVisible}
-                       salesOrderStateData={props.salesOrderStateData}
-                       modalSelectedPurchaseOrderIndex={modalSelectedPurchaseOrderIndex}
-                       closeModal={closeModal}
-                       parentForm={form}
-            />
+            { 
+                isModalVisible 
+                ? <ModalForm salesOrderStateData={props.salesOrderStateData}
+                             modalSelectedPurchaseOrderIndex={modalSelectedPurchaseOrderIndex}
+                             closeModal={closeModal}
+                             parentForm={form} />
+                : null                           
+            }
         </>
     )
 }
@@ -147,18 +150,11 @@ SalesOrderConfirmedContent.propTypes = {
 
 
 
-
-
-
 // TODO: Perform checks that PO is allowed for allocation (sufficient parts, has the part etc.)
 // TODO: Pass parent form down to setFieldValue for the 
 function ModalForm(props) {
     const [form] = Form.useForm();
-
-    // let existingAllocation = props.salesOrderStateData.parts[props.modalSelectedPurchaseOrderIndex].fulfilledBy;
-    let existingAllocation = props.parentForm.getFieldValue(['parts', props.modalSelectedPurchaseOrderIndex, 'fulfilledBy'])
-    console.log(`Existing Allocation: ${props.modalSelectedPurchaseOrderIndex} ${JSON.stringify(existingAllocation, null, 2)}`);
-
+    let existingAllocation = props.salesOrderStateData.parts[props.modalSelectedPurchaseOrderIndex].fulfilledBy;
     const [purchaseOrderSearches, setPurchaseOrderSearches] = useState(
         existingAllocation.map(_ => {
             return {
@@ -166,7 +162,7 @@ function ModalForm(props) {
                 isGettingPurchaseOrderData: false,
             }
         })
-    )
+    );
 
     // Function for retrieving purchase orders that fit search description
     let lastFetchID = 0;
@@ -220,28 +216,42 @@ function ModalForm(props) {
 
         // TODO: Perform validation
         console.log(form.getFieldsValue());
-        form.resetFields();
+        // form.resetFields();
         props.closeModal();
     }
 
     const onModalCancel = () => {
-        form.resetFields();
+        // form.resetFields();
         props.closeModal();
     }
 
-    useEffect(() => {
-        form.resetFields();
-        form.setFieldsValue({partsAllocation: existingAllocation});
-    }, [props.visible])
+    // let existingAllocation = props.parentForm.getFieldValue(['parts', props.modalSelectedPurchaseOrderIndex, 'fulfilledBy'])
+    // useEffect(() => {
+    //     setPurchaseOrderSearches(
+    //         existingAllocation.map(_ => {
+    //             return {
+    //                 purchaseOrderData: [],
+    //                 isGettingPurchaseOrderData: false,
+    //             }
+    //         })
+    //     )
+    //     // form.resetFields();
+    //     // form.setFieldsValue({partsAllocation: existingAllocation});
+    // }, [props.visible])
 
     return(
         <>
-            <Modal visible={props.visible} 
+            <Modal visible={true}
                    onOk={onModalOk}
                    onCancel={props.closeModal}
                    >
                 <Form name='modalPartAllocationForm'
-                      form={form}>
+                      form={form}
+                      initialValues={{
+                          partsAllocation: existingAllocation
+                      }}
+                      autoComplete='off'
+                      >
                     <Form.List name="partsAllocation">
                     {(fields, { add, remove }) => {
                         return (
@@ -328,7 +338,6 @@ function ModalForm(props) {
     )
 }
 ModalForm.propTypes = {
-    visible: PropTypes.bool.isRequired,
     modalSelectedPurchaseOrderIndex: PropTypes.number.isRequired,
     salesOrderStateData: PropTypes.object.isRequired, // TODO: Marked for removal
     closeModal: PropTypes.func.isRequired,
