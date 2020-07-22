@@ -88,8 +88,10 @@ export default function SalesOrderViewPage(props) {
                          })
             })).then(_ => {
                 // FIXME: DEBUG
+                // TODO: Populate with purchase order number
                 stateData.parts.map((partInfo, index) => {
-                    partInfo.fulfilledBy = [{purchaseOrder: `PO-test1-${index}`, quantity: 100}, {purchaseOrder: `PO-test2-${index}`, quantity: 50}];
+                    partInfo.fulfilledBy = [{purchaseOrderNumber: `PO-test1-${index}`, purchaseOrder: '182397123789171239', quantity: 100}, 
+                                            {purchaseOrderNumber: `PO-test2-${index}`, purchaseOrder: '12039120-3912-3901', quantity: 50}];
                 })
                 setSalesOrderStateData(stateData);
                 setIsLoadingSalesOrderDetails(false);

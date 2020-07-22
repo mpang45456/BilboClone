@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { BilboDividerWithText, 
          BilboHoverableIconButton,
@@ -97,7 +97,7 @@ export default function SalesOrderConfirmedContent(props) {
                                         return (
                                             <Tag style={{display: 'block'}} 
                                                  key={`${field.fieldKey}-${index}`}>
-                                                {`${fulfilledByTarget.purchaseOrder}: ${fulfilledByTarget.quantity}`}
+                                                {`${fulfilledByTarget.purchaseOrderNumber}: ${fulfilledByTarget.quantity}`}
                                             </Tag>
                                         )
                                     })}
@@ -138,12 +138,25 @@ SalesOrderConfirmedContent.propTypes = {
     salesOrderMetaData: PropTypes.object.isRequired,
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
 // TODO: Perform checks that PO is allowed for allocation (sufficient parts, has the part etc.)
 // TODO: Pass parent form down to setFieldValue for the 
 function ModalForm(props) {
     const [form] = Form.useForm();
 
-    let existingAllocation = props.salesOrderStateData.parts[props.modalSelectedPurchaseOrderIndex].fulfilledBy;
+    // let existingAllocation = props.salesOrderStateData.parts[props.modalSelectedPurchaseOrderIndex].fulfilledBy;
+    let existingAllocation = props.parentForm.getFieldValue(['parts', props.modalSelectedPurchaseOrderIndex, 'fulfilledBy'])
     console.log(`Existing Allocation: ${props.modalSelectedPurchaseOrderIndex} ${JSON.stringify(existingAllocation, null, 2)}`);
 
     const [purchaseOrderSearches, setPurchaseOrderSearches] = useState(
@@ -187,11 +200,25 @@ function ModalForm(props) {
     }, CONFIG.DEBOUNCE_LIMIT);
 
     const onModalOk = () => {
+        // TODO: Perform processing to get the data into the accepted format in parent form
         let updatedParts = props.parentForm.getFieldValue('parts');
-        updatedParts[props.modalSelectedPurchaseOrderIndex].fulfilledBy = form.getFieldsValue().partsAllocation;
+        // updatedParts[props.modalSelectedPurchaseOrderIndex].fulfilledBy = form.getFieldsValue().partsAllocation
+        updatedParts[props.modalSelectedPurchaseOrderIndex].fulfilledBy = form.getFieldsValue().partsAllocation.map(partAllocation => {
+            if (partAllocation.purchaseOrderNumber.includes('||')) {
+                const purchaseOrderObjID = partAllocation.purchaseOrderNumber.split('||')[0];
+                const purchaseOrderNumber = partAllocation.purchaseOrderNumber.split('||')[1]; // TODO: Use array destructuring syntax instead
+                return {
+                    ...partAllocation,
+                    purchaseOrder: purchaseOrderObjID,
+                    purchaseOrderNumber
+                }
+            } else {
+                return partAllocation;
+            }
+        });
         props.parentForm.setFieldsValue({parts: updatedParts});
 
-        // Perform validation
+        // TODO: Perform validation
         console.log(form.getFieldsValue());
         form.resetFields();
         props.closeModal();
@@ -202,6 +229,11 @@ function ModalForm(props) {
         props.closeModal();
     }
 
+    useEffect(() => {
+        form.resetFields();
+        form.setFieldsValue({partsAllocation: existingAllocation});
+    }, [props.visible])
+
     return(
         <>
             <Modal visible={props.visible} 
@@ -209,9 +241,6 @@ function ModalForm(props) {
                    onCancel={props.closeModal}
                    >
                 <Form name='modalPartAllocationForm'
-                      initialValues={{
-                          partsAllocation: existingAllocation
-                      }}
                       form={form}>
                     <Form.List name="partsAllocation">
                     {(fields, { add, remove }) => {
@@ -221,9 +250,9 @@ function ModalForm(props) {
                             <Row key={field.key} style={{ width: '100%' }} >
                                 <Form.Item
                                     {...field}
-                                    name={[field.name, 'purchaseOrder']}
-                                    fieldKey={[field.fieldKey, 'purchaseOrder']}
-                                    key={`${field.fieldKey}-purchaseOrder`}
+                                    name={[field.name, 'purchaseOrderNumber']}
+                                    fieldKey={[field.fieldKey, 'purchaseOrderNumber']}
+                                    key={`${field.fieldKey}-purchaseOrderNumber`}
                                     style={{width: '20%', marginRight: '5px'}}
                                     rules={[{ required: true, message: 'Missing purchase order' }]}
                                 >
@@ -236,8 +265,8 @@ function ModalForm(props) {
                                             purchaseOrderSearches[index].purchaseOrderData.map(purchaseOrderInfo => {
                                                 return (
                                                     <Option key={purchaseOrderInfo._id}
-                                                            value={purchaseOrderInfo._id} >
-                                                        {`${purchaseOrderInfo._id}`}
+                                                            value={`${purchaseOrderInfo._id}||${purchaseOrderInfo.orderNumber}`} >
+                                                        {`${purchaseOrderInfo.orderNumber}`}
                                                     </Option>
                                                 )
                                             })
@@ -262,8 +291,10 @@ function ModalForm(props) {
                                     onClick={() => { 
                                         // TODO: Remove from purchaseOrderSearches
                                         const updatedPurchaseOrderSearches = [...purchaseOrderSearches];
-                                        updatedPurchaseOrderSearches.splice(field.name, 1);
+                                        updatedPurchaseOrderSearches.splice(field.fieldKey, 1);
                                         setPurchaseOrderSearches(updatedPurchaseOrderSearches);
+                                        console.log(field.fieldKey)
+                                        console.log(updatedPurchaseOrderSearches)
                                         remove(field.fieldKey); 
                                     }} >
                                     <MinusCircleOutlined />
@@ -299,7 +330,7 @@ function ModalForm(props) {
 ModalForm.propTypes = {
     visible: PropTypes.bool.isRequired,
     modalSelectedPurchaseOrderIndex: PropTypes.number.isRequired,
-    salesOrderStateData: PropTypes.object.isRequired,
+    salesOrderStateData: PropTypes.object.isRequired, // TODO: Marked for removal
     closeModal: PropTypes.func.isRequired,
     parentForm: PropTypes.object.isRequired,
 }
