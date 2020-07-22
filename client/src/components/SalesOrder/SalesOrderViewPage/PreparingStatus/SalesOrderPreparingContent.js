@@ -1,7 +1,12 @@
-import React from 'react';
-import { BilboDividerWithText } from '../../../UtilComponents';
+import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { BilboDividerWithText, BilboDivider } from '../../../UtilComponents';
+import { Row, Button, Space } from 'antd';
 import PropTypes from 'prop-types';
+import { SO_STATES } from '../../../../../../server/data/databaseEnum';
 import CollapsibleSalesOrderDataDisplay from '../CollapsibleSalesOrderDataDisplay';
+import { setSalesOrderToNextStatus } from '../../../../utils';
+// TODO: Clean Up Import Statements
 
 /**
  * React Component to render content for Sales Orders
@@ -13,6 +18,9 @@ import CollapsibleSalesOrderDataDisplay from '../CollapsibleSalesOrderDataDispla
  * displays text and the current sales order data.
  */
 export default function SalesOrderPreparingContent(props) {
+    const [proceedNextStatusLoading, setProceedNextStatusLoading] = useState(false);
+    const history = useHistory();
+
     return (
         <> 
             <BilboDividerWithText orientation='left'>Information</BilboDividerWithText>
@@ -21,6 +29,24 @@ export default function SalesOrderPreparingContent(props) {
                 salesOrderMetaData={props.salesOrderMetaData} 
                 salesOrderStateData={props.salesOrderStateData} 
             />
+
+            {/* TODO: Marked for removal (not supposed to be accessible by sales user) */}
+            <BilboDivider />
+            <Row justify='end'>
+                <Space direction='vertical' style={{display: 'block', width: '20%'}}>
+                    <Button style={{width: '100%'}} type="primary" 
+                            loading={proceedNextStatusLoading} 
+                            onClick={() => {setSalesOrderToNextStatus(SO_STATES.IN_DELIVERY,
+                                                                      props.salesOrderStateData,
+                                                                      props.salesOrderMetaData,
+                                                                      history,
+                                                                      setProceedNextStatusLoading
+                                                                    )}}
+                    >
+                        Confirm and Proceed
+                    </Button>
+                </Space>
+            </Row>
         </>
     )
 }
