@@ -20,6 +20,14 @@ import queryString from 'query-string';
  * React Component that allows user to dynamically
  * add part allocations (i.e. map a part to a particular
  * purchase order and specify the quantity).
+ * 
+ * Note: A check is performed to ensure that the quantity
+ * of a part allocated to a certain purchase order does not
+ * exceed the quantity available for allocation. However, 
+ * an error message does not show this. Instead, the 
+ * <InputNumber/> field simply updates itself automatically
+ * to the maximum available quantity. This is the in-built
+ * behaviour of <InputNumber/>
  */
 export default function ModalFormNewPartAllocationsFormSection(props) {
     /* Stores the search results for each purchase order search bar
@@ -170,7 +178,7 @@ export default function ModalFormNewPartAllocationsFormSection(props) {
                                 const updatedPurchaseOrderSearches = [...purchaseOrderSearches];
                                 updatedPurchaseOrderSearches.splice(field.fieldKey, 1);
                                 setPurchaseOrderSearches(updatedPurchaseOrderSearches);
-                                remove(field.fieldKey); 
+                                remove(field.name); 
                             }} >
                             <MinusCircleOutlined />
                         </BilboHoverableIconButton>

@@ -24,35 +24,37 @@ import ModalFormNewPartAllocationsFormSection from './ModalFormNewPartAllocation
 
 
 // TODO: Perform checks that PO is allowed for allocation (sufficient parts, has the part etc.)
-// TODO: Update docs: Mount a new ModalForm everytime modal is made visible
 // TODO: Perform duplicate PO allocation checks
 // Allows you to add allocations to multiple purchase orders
+/**
+ * React Component that displays a Modal containing
+ * a Form that performs part allocation for a specific
+ * part (as determined by `props.modalSelectedPartIndex`)
+ * 
+ * The <ModalForm/> is a separate form from `props.parentForm`.
+ * It keeps track of the part allocations, and will manipulate
+ * `props.parentForm`'s data upon submission (when the Ok
+ * button is clicked on)
+ * 
+ * The <ModalForm/> allows one part to be allocated to
+ * multiple Purchase Orders. It checks for max quantity
+ * available for allocation per purchase order (see 
+ * <ModalFormNewPartAllocationsFormSection/>), and also
+ * checks for duplicate purchase order allocations.
+ */
 export default function ModalForm(props) {
-    const history = useHistory();
     const [form] = Form.useForm();
     const partBeingAllocated = props.parentForm.getFieldsValue().parts[props.modalSelectedPartIndex].part;
-
-    /* Stores the search results for each purchase order number search bar
-       Has format: 
-       {
-            isGettingPurchaseOrderData: bool, 
-            purchaseOrderData: []
-            min: Number
-            max: Number
-       }
-    */
-    let existingAllocation = props.parentForm.getFieldsValue().parts[props.modalSelectedPartIndex].fulfilledBy;
-
-    
+    const partsAllocationExisting = props.parentForm.getFieldsValue().parts[props.modalSelectedPartIndex].fulfilledBy;
 
     const onModalOk = () => {
         // Upon submission of the modal form (by clicking on Ok button),
         // parentForm's data will be updated directly. 
-        const updatedParentFormData = () => {
+        const updateParentFormData = () => {
             // Parent Form's state
             let updatedParts = props.parentForm.getFieldValue('parts');
             
-            // Existing Parts Allocation
+            // Existing Parts Allocation (make a copy)
             updatedParts[props.modalSelectedPartIndex].fulfilledBy = form.getFieldsValue().partsAllocationExisting;
 
             // New Parts Allocation
@@ -66,14 +68,23 @@ export default function ModalForm(props) {
                     })
                 });
             }
-            props.parentForm.setFieldsValue({parts: updatedParts});
-            props.closeModal();
+
+            // Check for duplicate purchase orders
+            const POs = updatedParts[props.modalSelectedPartIndex].fulfilledBy.map(_ => _.purchaseOrder);
+            const numOfPOs = POs.length;
+            const numOfUniquePOs = Array.from(new Set(POs)).length;
+            if (numOfPOs !== numOfUniquePOs) {
+                message.error('There are duplicate Purchase Orders!');
+            } else {
+                props.parentForm.setFieldsValue({parts: updatedParts});
+                props.closeModal();
+            }
         }
 
         form.validateFields()
             .then(_ => {
                 // Only send request if form is validated
-                updatedParentFormData();
+                updateParentFormData();
             }).catch(_ => {
                 // Do nothing. UI displays error message.
             })
@@ -90,7 +101,7 @@ export default function ModalForm(props) {
                 <Form name='modalPartAllocationForm'
                       form={form}
                       initialValues={{
-                          partsAllocationExisting: existingAllocation
+                          partsAllocationExisting
                       }}
                       autoComplete='off'
                       >
@@ -98,14 +109,6 @@ export default function ModalForm(props) {
                     <ModalFormNewPartAllocationsFormSection 
                         partBeingAllocated={partBeingAllocated}
                     />
-
-
-
-
-
-
-
-                    
                 </Form>
             </Modal>
         </>
@@ -113,7 +116,6 @@ export default function ModalForm(props) {
 }
 ModalForm.propTypes = {
     modalSelectedPartIndex: PropTypes.number.isRequired,
-    salesOrderStateData: PropTypes.object.isRequired, // TODO: Marked for removal
     closeModal: PropTypes.func.isRequired,
     parentForm: PropTypes.object.isRequired,
 }
