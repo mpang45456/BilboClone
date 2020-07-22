@@ -1,17 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { BilboHoverableIconButton } from '../../../UtilComponents';
 import { useHistory } from 'react-router-dom';
-import { BilboDividerWithText, 
-         BilboHoverableIconButton,
-         DarkInvertedStyledButton,
-         BilboDivider } from '../../../UtilComponents';
-import { Space, Modal, Row, message, Select, Tag, Form, Button, Input, InputNumber } from 'antd';
-const { confirm } = Modal;
+import { Row, Select, Form, Button, InputNumber } from 'antd';
 const { Option } = Select;
-import { ExclamationCircleOutlined, MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import PropTypes from 'prop-types';
 import { bax, redirectToErrorPage } from '../../../../context/AuthContext';
 import CONFIG from '../../../../config';
-import { SO_STATES } from '../../../../../../server/data/databaseEnum';
 import { theme } from '../../../Theme';
 import { debounce } from 'lodash';
 import queryString from 'query-string';
@@ -40,6 +35,7 @@ export default function ModalFormNewPartAllocationsFormSection(props) {
        }
     */
     const [purchaseOrderSearches, setPurchaseOrderSearches] = useState([]);
+    const history = useHistory();
 
     // Function for retrieving Purchase Orders that fit search description
     let lastFetchID = 0;
