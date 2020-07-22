@@ -48,6 +48,9 @@ import ModalForm from './ModalForm';
  * is mounted. 
  * 
  * // TODO: Update docs
+ * 
+ * // TODO: Proceed Next Status Button should only be allowed if 
+ * // if all parts have been allocated
  */
 export default function SalesOrderConfirmedContent(props) {
     // Pre-process `salesOrderStateData` into format usable by <Form/>
