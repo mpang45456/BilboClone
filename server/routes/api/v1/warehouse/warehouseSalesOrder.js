@@ -93,9 +93,13 @@ router.get('/:salesOrderObjID',
            isAuthorized(PERMS.WAREHOUSE_READ),
            async function(req, res) {
     try {
-        let salesOrderDoc = await SalesOrderModel.findOne({ _id: req.params.salesOrderObjID });
-        let salesOrderStateDoc = await SalesOrderStateModel.findOne({ _id: salesOrderDoc.orders[salesOrderDoc.orders.length - 1]});
-        
+        let salesOrderDoc = await SalesOrderModel.findOne({ _id: req.params.salesOrderObjID })
+                                                 .populate('customer');
+        let salesOrderStateDoc = await SalesOrderStateModel.findOne({ _id: salesOrderDoc.orders[salesOrderDoc.orders.length - 1]})
+                                                           .populate('parts.part')
+                                                           .populate('parts.fulfilledBy.purchaseOrder');
+        await salesOrderStateDoc.populate('parts.part.supplier').execPopulate();
+
         if (!salesOrderDoc) { return res.status(400).send('Invalid Sales Order ID'); }
 
         // This endpoint only allows access to sales order meta-data that have PREPARING status
@@ -119,7 +123,7 @@ router.get('/:salesOrderObjID',
 /**
  * Mounted on /api/v1/warehouse/salesOrder/:salesOrderObjID
  * 
- * Updates the status of the sales order from SO_STATES.CONFIRMEd
+ * Updates the status of the sales order from SO_STATES.CONFIRMED
  * to SO_STATES.IN_DELIVERY. No other updates are allowed. 
  * 
  * Note: the sales order meta data's `latestStatus` is updated,
