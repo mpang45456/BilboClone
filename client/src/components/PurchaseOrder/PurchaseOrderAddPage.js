@@ -14,10 +14,10 @@ import CONFIG from '../../config';
  * 
  * Note: The API calls made by this front-end
  * component will create a new purchase order
- * meta-data and set the latest status to `QUOTATION`, but
- * no purchase order state data is made. Once a new
- * purchase order is made via the front-end, it will
- * show up in the `PurchaseOrderPage` under the 
+ * (both meta and state data are created on
+ * the back end) and set the latest status to `QUOTATION`. 
+ * Once a new purchase order is made via the front-end, 
+ * it will show up in the `PurchaseOrderPage` under the 
  * `Quotation` status.
  * 
  * No client-side validation is performed 

@@ -14,10 +14,10 @@ import CONFIG from '../../config';
  * 
  * Note: The API calls made by this front-end
  * component will create a new sales order
- * meta-data and set the latest status to `QUOTATION`, but
- * no sales order state data is made. Once a new
- * sales order is made via the front-end, it will
- * show up in the `SalesOrderPage` under the 
+ * (both meta and state data are created on
+ * the back end) and set the latest status to `QUOTATION`. 
+ * Once a new sales order is made via the front-end, 
+ * it will show up in the `SalesOrderPage` under the 
  * `Quotation` status.
  * 
  * No client-side validation is performed 
