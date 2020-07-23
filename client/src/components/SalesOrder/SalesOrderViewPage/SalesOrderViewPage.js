@@ -19,6 +19,7 @@ import SalesOrderPreparingContent from './PreparingStatus/SalesOrderPreparingCon
 import SalesOrderInDeliveryContent from './InDeliveryStatus/SalesOrderInDeliveryContent';
 import SalesOrderReceivedContent from './ReceivedStatus/SalesOrderReceivedContent';
 import SalesOrderFulfilledContent from './FulfilledStatus/SalesOrderFulfilledContent';
+import SalesOrderCancelledContent from './CancelledStatus/SalesOrderCancelledContent';
 import EditHistory from './EditHistory/EditHistory';
 import queryString from 'query-string';
 import { isEmpty } from 'lodash';
@@ -135,6 +136,11 @@ export default function SalesOrderViewPage(props) {
                             />
             case 'FULFILLED':
                 return <SalesOrderFulfilledContent 
+                            salesOrderStateData={salesOrderStateData} 
+                            salesOrderMetaData={salesOrderMetaData}
+                            />
+            case 'CANCELLED':
+                return <SalesOrderCancelledContent 
                             salesOrderStateData={salesOrderStateData} 
                             salesOrderMetaData={salesOrderMetaData}
                             />
