@@ -53,3 +53,40 @@ export function setSalesOrderToNextStatus(newStatus, stateData, metaData, histor
         okText: 'Confirm'
     })
 }
+
+/**
+ * Convenience function to make API call and move 
+ * purchase order to a new status (without any changes
+ * to the state data). This means that the only
+ * meta/state data change will be the `latestStatus`
+ * and `status` fields.
+ * 
+ * @param {String} newStatus: one of `PO_STATES`
+ * @param {object} stateData: `purchaseOrderStateData`
+ * @param {object} metaData: `purchaseOrderMetaData`
+ * @param {object} history: for use by `redirectToErrorPage`
+ * @param {func} setLoading: set the loading status of the 
+ *                           `Confirm and Proceed` button
+ */
+export function setPurchaseOrderToNextStatus(newStatus, stateData, metaData, history, setLoading) {
+    const reqBody = {...stateData};
+        
+    confirm({
+        icon: <ExclamationCircleOutlined />,
+        content: 'Are you sure you wish to move this purchase order to the next status? This is NOT reversible.',
+        onOk: () => {
+            reqBody.status = newStatus;
+            setLoading(true);
+            bax.post(`/api/v1/purchaseOrder/${metaData._id}/state`, reqBody)
+                .then(res => {
+                    if (res.status === 200) {
+                        history.push(CONFIG.PURCHASE_ORDER_URL);
+                        message.success('Successfully moved purchase order to next status!')
+                    }
+                }).catch(err => {
+                    redirectToErrorPage(err, history);
+                })
+        },
+        okText: 'Confirm'
+    })
+}

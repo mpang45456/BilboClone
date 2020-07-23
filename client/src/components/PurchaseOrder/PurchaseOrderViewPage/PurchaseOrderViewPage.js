@@ -73,7 +73,7 @@ export default function PurchaseOrderViewPage(props) {
     
             // Get State Data
             let stateData = null;
-            const query = queryString.stringify({ populateFulfilledBy: true });
+            const query = queryString.stringify({ populateFulfilledFor: true });
             await bax.get(`/api/v1/purchaseOrder/${props.match.params.purchaseOrderID}/state/latest?${query}`)
                 .then(res => {
                     if (res.status === 200) {

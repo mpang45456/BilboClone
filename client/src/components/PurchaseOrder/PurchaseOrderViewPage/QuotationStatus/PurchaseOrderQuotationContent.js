@@ -56,14 +56,14 @@ export default function PurchaseOrderQuotationContent(props) {
                     part: partInfo.part,
                     quantity: partInfo.quantity,
                     additionalInfo: partInfo.additionalInfo,
-                    fulfilledBy: [],
+                    fulfilledFor: [],
                 })
             })
             // Prepare newly added parts
             formParts.partsNew && formParts.partsNew.map(partInfo => {
                 reqBody.parts.push({
                     ...partInfo,
-                    fulfilledBy: [],
+                    fulfilledFor: [],
                 })
             })
     
