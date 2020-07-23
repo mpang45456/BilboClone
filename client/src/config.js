@@ -78,6 +78,30 @@ CONFIG.SALES_ORDER_STEPS = [
     },
 ]
 
+// Purchase Order Steps
+CONFIG.PURCHASE_ORDER_STEPS = [
+    {
+        status: 'QUOTATION',
+        title: 'Quotation',
+    },
+    {
+        status: 'CONFIRMED',
+        title: 'Confirmed',
+    },
+    {
+        status: 'RECEIVED',
+        title: 'Received',
+    },
+    {
+        status: 'FULFILLED',
+        title: 'Fulfilled',
+    },
+    {
+        status: 'CANCELLED',
+        title: 'Cancelled',
+    },
+]
+
 // Miscellaneous
 CONFIG.DEFAULT_PAGE_SIZE = 10;
 CONFIG.DEBOUNCE_LIMIT = 300; // in ms
