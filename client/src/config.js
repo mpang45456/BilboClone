@@ -12,6 +12,8 @@ CONFIG.PARTS_URL = '/parts';
 CONFIG.SUPPLIER_URL = '/suppliers';
 CONFIG.CUSTOMER_URL = '/customers';
 CONFIG.USER_URL = '/users';
+CONFIG.WAREHOUSE_SALES_ORDER_URL = '/warehouseSalesOrders';
+CONFIG.WAREHOUSE_PURCHASE_ORDER_URL = '/warehousePurchaseOrders';
 
 // Non-Menu URLS
 CONFIG.SETTINGS_URL = '/settings';
@@ -41,6 +43,7 @@ CONFIG.ERROR_500_URL = '/error500'; // Internal Server Error
 
 // Sub-Menu Keys
 CONFIG.DATA_SUB_MENU_KEY = 'dataSM';
+CONFIG.WAREHOUSE_SUB_MENU_KEY = 'warehouseSM';
 
 // Tag Colours
 CONFIG.ACTIVE_TAG_COLOR = 'green';

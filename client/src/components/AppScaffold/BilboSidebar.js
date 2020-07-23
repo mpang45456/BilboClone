@@ -6,7 +6,8 @@ import {
     DollarOutlined,
     BarChartOutlined,
     ShoppingCartOutlined,
-    UserOutlined
+    UserOutlined,
+    TagsOutlined,
 } from '@ant-design/icons';
 const { Sider } = Layout;
 const { SubMenu } = Menu;
@@ -113,6 +114,20 @@ class Sidebar extends React.Component {
                   <Menu.Item key={this.__getMenuKeyFromURL(CONFIG.CUSTOMER_URL)} >
                     <NavLink to={CONFIG.CUSTOMER_URL}>
                         Customers
+                    </NavLink>
+                  </Menu.Item>
+                </SubMenu>
+                <SubMenu key={CONFIG.WAREHOUSE_SUB_MENU_KEY} 
+                         icon={<TagsOutlined />} 
+                         title="Warehouse">
+                  <Menu.Item key={this.__getMenuKeyFromURL(CONFIG.WAREHOUSE_SALES_ORDER_URL)} >
+                    <NavLink to={CONFIG.WAREHOUSE_SALES_ORDER_URL}>
+                        Sales Orders
+                    </NavLink>
+                  </Menu.Item>
+                  <Menu.Item key={this.__getMenuKeyFromURL(CONFIG.WAREHOUSE_PURCHASE_ORDER_URL)} >
+                    <NavLink to={CONFIG.WAREHOUSE_PURCHASE_ORDER_URL}>
+                        Purchase Orders
                     </NavLink>
                   </Menu.Item>
                 </SubMenu>
