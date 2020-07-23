@@ -5,13 +5,12 @@ import { ShowMoreButton,
          BilboDivider, 
          BilboSearchTable, 
          BilboNavLink } from '../UtilComponents';
-import { Menu, Table, Steps, Popover } from 'antd';
+import { Menu, Table, Steps } from 'antd';
 const { Step } = Steps;
 import { PlusOutlined, StopOutlined } from "@ant-design/icons";
 import PropTypes from 'prop-types';
 import { bax, useAuth, PERMS, redirectToErrorPage } from '../../context/AuthContext';
 import CONFIG from '../../config';
-import { SO_STATES } from '../../../../server/data/databaseEnum';
 import { escapeRegex } from '../../utils';
 import queryString from 'query-string';
 

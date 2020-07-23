@@ -10,27 +10,27 @@ import { BilboPageHeader, BilboDivider } from '../UtilComponents';
 import CONFIG from '../../config';
 
 /**
- * Component for adding a sales order. 
+ * Component for adding a purchase order. 
  * 
  * Note: The API calls made by this front-end
- * component will create a new sales order
+ * component will create a new purchase order
  * meta-data and set the latest status to `QUOTATION`, but
- * no sales order state data is made. Once a new
- * sales order is made via the front-end, it will
- * show up in the `SalesOrderPage` under the 
+ * no purchase order state data is made. Once a new
+ * purchase order is made via the front-end, it will
+ * show up in the `PurchaseOrderPage` under the 
  * `Quotation` status.
  * 
  * No client-side validation is performed 
  * (apart from checking for presence of the 
- * customer name field).
+ * supplier name field).
  * 
- * Note: The displayed customer name is actually
- * submitted via the form, and not the customerObjID.
+ * Note: The displayed supplier name is actually
+ * submitted via the form, and not the supplierObjID.
  */
-export default function SalesOrderAddPage(props) {
+export default function PurchaseOrderAddPage(props) {
     // Check for authorization, otherwise redirect
     const { permissionsList } = useAuth();
-    if (!permissionsList.includes(PERMS.SALES_ORDER_WRITE)) {
+    if (!permissionsList.includes(PERMS.PURCHASE_ORDER_WRITE)) {
         return <Redirect to={CONFIG.ERROR_403_URL}/>
     }
     
@@ -38,23 +38,23 @@ export default function SalesOrderAddPage(props) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const history = useHistory();
 
-    // For populating customerObjIDs and customer's names in 
+    // For populating supplierObjIDs and supplier's names in 
     // search box
-    const [isGettingCustomerData, setIsGettingCustomerData] = useState(false);
-    const [customerData, setCustomerData] = useState([]);
+    const [isGettingSupplierData, setIsGettingSupplierData] = useState(false);
+    const [supplierData, setSupplierData] = useState([]);
     const debounceLimit = 300; //in ms
     let lastFetchID = 0;
-    const getCustomerData = debounce((searchValue) => {
+    const getSupplierData = debounce((searchValue) => {
         lastFetchID = (lastFetchID + 1) % 1000;
         const thisFetchID = lastFetchID;
-        setCustomerData([]);
-        setIsGettingCustomerData(true);
+        setSupplierData([]);
+        setIsGettingSupplierData(true);
 
         let filter = JSON.stringify({
             "name": { "$regex": searchValue, "$options": "i"},
         })
         let query = queryString.stringify({inc: 'name', filter})
-        bax.get(`/api/v1/customer?${query}`, { withCredentials: true })
+        bax.get(`/api/v1/supplier?${query}`, { withCredentials: true })
             .then(res => {
                 // Ensure correct order of callback
                 // Obsolete (slow) responses would have 
@@ -63,8 +63,8 @@ export default function SalesOrderAddPage(props) {
                 // but `lastFetchID` is a variable local to
                 // the entire React component (it keeps incrementing)
                 if (thisFetchID === lastFetchID) {
-                    setCustomerData(res.data.customers);
-                    setIsGettingCustomerData(false);
+                    setSupplierData(res.data.suppliers);
+                    setIsGettingSupplierData(false);
                 }
             }).catch(err => {
                 redirectToErrorPage(err, history);
@@ -72,13 +72,13 @@ export default function SalesOrderAddPage(props) {
     }, debounceLimit);
 
     // Handler when submit button is clicked on
-    const tryCreateNewSalesOrder = (values) => {
+    const tryCreateNewPurchaseOrder = (values) => {
         setIsSubmitting(true);
-        bax.post('/api/v1/salesOrder', values)
+        bax.post('/api/v1/purchaseOrder', values)
             .then(res => {
                 setIsSubmitting(false);
-                message.success('Successfully created new sales order!');
-                history.push(CONFIG.SALES_ORDER_URL);
+                message.success('Successfully created new purchase order!');
+                history.push(CONFIG.PURCHASE_ORDER_URL);
             }).catch(err => {
                 setIsSubmitting(false);
                 redirectToErrorPage(err, history);
@@ -87,7 +87,7 @@ export default function SalesOrderAddPage(props) {
 
     // Handler when cancel button is clicked
     const clickCancelButton = () => {
-        history.push(CONFIG.SALES_ORDER_URL);
+        history.push(CONFIG.PURCHASE_ORDER_URL);
     }
     
     // Layout of <Form> 
@@ -95,35 +95,35 @@ export default function SalesOrderAddPage(props) {
         labelCol: { span: 3 },
     };
 
-    // Note: Search box for Customer Name has value of
-    // customer's ObjID, but displays customer's name.
+    // Note: Search box for Supplier Name has value of
+    // supplier's ObjID, but displays supplier's name.
     return (
         <div>
             <BilboPageHeader 
-                title='Add a New Sales Order'
-                onBack={() => history.push(CONFIG.SALES_ORDER_URL)}
+                title='Add a New Purchase Order'
+                onBack={() => history.push(CONFIG.PURCHASE_ORDER_URL)}
             />
             <BilboDivider />
 
             <Spin spinning={isSubmitting}>
-                <Form name='createNewSalesOrderForm' 
-                      onFinish={tryCreateNewSalesOrder}
+                <Form name='createNewPurchaseOrderForm' 
+                      onFinish={tryCreateNewPurchaseOrder}
                       {...formItemLayout} >
 
-                    <Form.Item name='customerName'
-                               label='Customer Name'
-                               rules={[{ required: true, message: "Please input customer's name!" }]}>
-                        <Select placeholder='Select Customer'
-                                notFoundContent={isGettingCustomerData ? <Spin size='small'/> : null}
+                    <Form.Item name='supplierName'
+                               label='Supplier Name'
+                               rules={[{ required: true, message: "Please input supplier's name!" }]}>
+                        <Select placeholder='Select Supplier'
+                                notFoundContent={isGettingSupplierData ? <Spin size='small'/> : null}
                                 filterOption={false}
                                 showSearch={true}
-                                onSearch={getCustomerData}>
+                                onSearch={getSupplierData}>
                             {
-                                customerData.map(customer => {
+                                supplierData.map(supplier => {
                                     return (
-                                        <Option key={customer.name}
-                                                value={customer.name}>
-                                                {customer.name}
+                                        <Option key={supplier.name}
+                                                value={supplier.name}>
+                                                {supplier.name}
                                         </Option>
                                     )
                                 })

@@ -11,6 +11,7 @@ import SalesOrderPage from '../SalesOrder/SalesOrderPage';
 import SalesOrderViewPage from '../SalesOrder/SalesOrderViewPage/SalesOrderViewPage';
 import SalesOrderAddPage from '../SalesOrder/SalesOrderAddPage';
 import PurchaseOrderPage from '../PurchaseOrder/PurchaseOrderPage';
+import PurchaseOrderAddPage from '../PurchaseOrder/PurchaseOrderAddPage';
 import PartPage from '../Part/PartPage';
 import PartViewPage from '../Part/PartViewPage/PartViewPage';
 import PartAddPage from '../Part/PartAddPage';
@@ -57,6 +58,7 @@ export default class AppScaffold extends React.Component {
               <Route path={`${CONFIG.SALES_ORDER_URL}add`} component={SalesOrderAddPage} />
               <Route path={`${CONFIG.SALES_ORDER_URL}/:salesOrderID`} component={SalesOrderViewPage} />
               <Route path={CONFIG.SALES_ORDER_URL} component={SalesOrderPage} />
+              <Route path={`${CONFIG.PURCHASE_ORDER_URL}add`} component={PurchaseOrderAddPage} />
               <Route path={CONFIG.PURCHASE_ORDER_URL} component={PurchaseOrderPage} />
               <Route path={`${CONFIG.PARTS_URL}add`} component={PartAddPage} />
               <Route path={`${CONFIG.PARTS_URL}/:partID`} component={PartViewPage} />
