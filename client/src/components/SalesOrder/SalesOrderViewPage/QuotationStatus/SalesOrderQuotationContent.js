@@ -55,7 +55,7 @@ export default function SalesOrderQuotationContent(props) {
                 reqBody.parts.push({
                     part: partInfo.part,
                     quantity: partInfo.quantity,
-                    additionalInfo: partInfo.additionalInfo,
+                    additionalInfo: partInfo.additionalInfo ? partInfo.additionalInfo : '',
                     fulfilledBy: [],
                 })
             })
@@ -63,6 +63,7 @@ export default function SalesOrderQuotationContent(props) {
             formParts.partsNew && formParts.partsNew.map(partInfo => {
                 reqBody.parts.push({
                     ...partInfo,
+                    additionalInfo: partInfo.additionalInfo ? partInfo.additionalInfo : '',
                     fulfilledBy: [],
                 })
             })

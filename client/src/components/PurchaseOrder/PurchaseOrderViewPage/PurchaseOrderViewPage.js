@@ -5,7 +5,7 @@ import { ShowMoreButton,
          BilboPageHeader, 
          BilboDivider, 
          BilboDisplayOnlySteps } from '../../UtilComponents';
-import { Menu, Modal, Tabs, Steps, Popover, Spin, message } from 'antd';
+import { Menu, Modal, Tabs, Spin, message } from 'antd';
 const { TabPane } = Tabs;
 const { confirm } = Modal;
 import { StopOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
@@ -51,7 +51,6 @@ import { isEmpty } from 'lodash';
  *          quantity
  *      }]
  * }
- * // TODO: Update docs
  */
 export default function PurchaseOrderViewPage(props) {
     const { permissionsList } = useAuth();
