@@ -45,7 +45,7 @@ import { isEmpty } from 'lodash';
  *      updatedAt
  *      parts: [{
  *          additionalInfo
- *          fulfilledBy: []
+ *          fulfilledFor: []
  *          part (partObjID)
  *          partNumber (Part Number (Supplier Name))
  *          quantity
