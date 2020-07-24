@@ -26,6 +26,7 @@ import CustomerAddPage from '../Customer/CustomerAddPage';
 import WarehouseSalesOrderPage from '../WarehouseSalesOrder/WarehouseSalesOrderPage';
 import WarehouseSalesOrderViewPage from '../WarehouseSalesOrder/WarehouseSalesOrderViewPage';
 import WarehousePurchaseOrderPage from '../WarehousePurchaseOrder/WarehousePurchaseOrderPage';
+import WarehousePurchaseOrderViewPage from '../WarehousePurchaseOrder/WarehousePurchaseOrderViewPage';
 import UserPage from '../User/UserPage';
 import UserViewPage from '../User/UserViewPage';
 import UserEditPage from '../User/UserEditPage';
@@ -76,6 +77,7 @@ export default class AppScaffold extends React.Component {
               <Route path={CONFIG.CUSTOMER_URL} component={CustomerPage} />
               <Route path={`${CONFIG.WAREHOUSE_SALES_ORDER_URL}/:salesOrderID`} component={WarehouseSalesOrderViewPage} />
               <Route path={CONFIG.WAREHOUSE_SALES_ORDER_URL} component={WarehouseSalesOrderPage} />
+              <Route path={`${CONFIG.WAREHOUSE_PURCHASE_ORDER_URL}/:purchaseOrderID`} component={WarehousePurchaseOrderViewPage} />
               <Route path={CONFIG.WAREHOUSE_PURCHASE_ORDER_URL} component={WarehousePurchaseOrderPage} />
               <Route path={`${CONFIG.USER_URL}add`} component={UserAddPage} />
               <Route path={`${CONFIG.USER_URL}/:username/edit`} component={UserEditPage} />

@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { ShowMoreButton, 
-         BilboPageHeader, 
+import { BilboPageHeader, 
          BilboDivider, 
          BilboSearchTable, 
          BilboNavLink } from '../UtilComponents';
-import { Menu, Table, Steps } from 'antd';
+import { Table, Steps } from 'antd';
 const { Step } = Steps;
-import { PlusOutlined, StopOutlined } from "@ant-design/icons";
+import { StopOutlined } from "@ant-design/icons";
 import PropTypes from 'prop-types';
 import { PO_STATES } from '../../../../server/data/databaseEnum';
-import { bax, useAuth, PERMS, redirectToErrorPage } from '../../context/AuthContext';
+import { bax, redirectToErrorPage } from '../../context/AuthContext';
 import CONFIG from '../../config';
 import { escapeRegex } from '../../utils';
 import queryString from 'query-string';
@@ -181,7 +180,7 @@ function WarehousePurchaseOrderList(props) {
             key: 'action',
             width: '10%',
             render: (text, record) => (
-                <BilboNavLink to={`${CONFIG.WAREHOUSE_SALES_ORDER_URL}/${record._id}`}>
+                <BilboNavLink to={`${CONFIG.WAREHOUSE_PURCHASE_ORDER_URL}/${record._id}`}>
                     view
                 </BilboNavLink>
             ),

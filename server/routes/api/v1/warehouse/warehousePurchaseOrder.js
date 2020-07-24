@@ -93,8 +93,11 @@ router.get('/:purchaseOrderObjID',
            isAuthorized(PERMS.WAREHOUSE_READ),
            async function(req, res) {
     try {
-        let purchaseOrderDoc = await PurchaseOrderModel.findOne({ _id: req.params.purchaseOrderObjID });
-        let purchaseOrderStateDoc = await PurchaseOrderStateModel.findOne({ _id: purchaseOrderDoc.orders[purchaseOrderDoc.orders.length - 1]});
+        let purchaseOrderDoc = await PurchaseOrderModel.findOne({ _id: req.params.purchaseOrderObjID })
+                                                       .populate('supplier');
+        let purchaseOrderStateDoc = await PurchaseOrderStateModel.findOne({ _id: purchaseOrderDoc.orders[purchaseOrderDoc.orders.length - 1]})
+                                                                 .populate('parts.part')
+                                                                 .populate('parts.fulfilledFor.salesOrder');
         
         if (!purchaseOrderDoc) { return res.status(400).send('Invalid Purchase Order ID'); }
 

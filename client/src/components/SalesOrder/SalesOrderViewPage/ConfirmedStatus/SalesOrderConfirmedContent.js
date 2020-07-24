@@ -121,10 +121,17 @@ export default function SalesOrderConfirmedContent(props) {
                 icon: <ExclamationCircleOutlined />,
                 content: 'Are you sure you wish to move this sales order to the next status? This is NOT reversible.',
                 onOk: () => {
-                    reqBody.status = SO_STATES.PREPARING;
+                    // 2 API calls with separates `status` are necessary because
+                    // part allocation is only performed by the backend when the 
+                    // `status` is `SO_STATES.CONFIRMED`. The second API call
+                    // updates the `status` in the backend to `SO_STATES.PREPARING`
+                    reqBody.status = SO_STATES.CONFIRMED;
                     setProceedNextStatusLoading(true);
                     bax.post(`/api/v1/salesOrder/${props.salesOrderMetaData._id}/state`, reqBody)
                         .then(res => {
+                            reqBody.status = SO_STATES.PREPARING;
+                            return bax.post(`/api/v1/salesOrder/${props.salesOrderMetaData._id}/state`, reqBody);
+                        }).then(res => {
                             if (res.status === 200) {
                                 history.push(CONFIG.SALES_ORDER_URL);
                                 message.success('Successfully moved sales order to next status!')
