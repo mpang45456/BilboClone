@@ -17,7 +17,7 @@ import CollapsibleSalesOrderDataDisplay from '../SalesOrder/SalesOrderViewPage/C
  * button that is to be used when the sales order
  * has been packed and sent for delivery to customer. 
  */
-export default function SalesOrderInDeliveryContent(props) {
+export default function WarehouseSalesOrderViewPage(props) {
     const history = useHistory();
     const [salesOrderMetaData, setSalesOrderMetaData] = useState({});
     const [salesOrderStateData, setSalesOrderStateData] = useState({});
