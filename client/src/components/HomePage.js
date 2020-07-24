@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { BilboDividerWithText, 
-         BilboPageHeader } from './UtilComponents';
+         BilboPageHeader, 
+         BilboCard } from './UtilComponents';
 import { Statistic, Card, Col, Row, Table, DatePicker, Form, Button } from 'antd';
 const { RangePicker } = DatePicker;
 import PropTypes from 'prop-types';
@@ -107,8 +108,7 @@ function UserStatisticsCard(props) {
 
     return (
         <Col span={12}>
-            <Card title={props.userStatistics.name}
-            >
+            <BilboCard title={props.userStatistics.name} >
                 {/* Aggregate Statistics */}
                 <Row gutter={16}>
                     <Col span={12}>
@@ -150,7 +150,7 @@ function UserStatisticsCard(props) {
                 }
 
 
-            </Card>
+            </BilboCard>
         </Col>
 
     )

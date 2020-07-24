@@ -4,7 +4,7 @@ import { PageHeader, Row, Dropdown,
          Button, Spin, Descriptions, 
          Divider, Input, Select, Tag,
          Timeline, Steps, Tabs,
-         Statistic } from 'antd';
+         Statistic, Card } from 'antd';
 const { Step } = Steps;
 const { Option } = Select;
 import { EllipsisOutlined, 
@@ -589,7 +589,7 @@ BilboDisplayOnlySteps.propTypes = {
  */
 export const BilboTabs = styled(Tabs)`
     & .ant-tabs-nav-wrap {
-        border-bottom: 1px solid ${props => props.theme.colors.lightGrey };;
+        border-bottom: 1px solid ${props => props.theme.colors.lightGrey};
     }
 `;
 
@@ -614,3 +614,9 @@ export function OrderSummarySection(props) {
 OrderSummarySection.propTypes = {
     orderStateData: PropTypes.object.isRequired,
 }
+
+export const BilboCard = styled(Card)`
+    & .ant-card-head {
+        background: ${props => props.theme.colors.lightGrey};
+    }
+`;
