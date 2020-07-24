@@ -8,9 +8,10 @@ import CONFIG from '../../../config';
 import { BilboDescriptions, 
          BilboPageHeader, 
          BilboDivider, 
+         BilboDividerWithText,
          EditableItem, 
          ShowMoreButton } from '../../UtilComponents';
-import SupplierViewPageTabs from './SupplierViewPageTabs';
+import SupplierSpecificPartsList from './SupplierSpecificPartsList';
 import PropTypes from 'prop-types';
 
 /**
@@ -121,9 +122,8 @@ export default function SupplierViewPage(props) {
                 </BilboDescriptions>
             </Spin>
 
-            <BilboDivider />
-
-            <SupplierViewPageTabs supplierID={props.match.params.supplierID}/>
+            <BilboDividerWithText orientation='left'>All Parts</BilboDividerWithText>
+            <SupplierSpecificPartsList supplierID={props.match.params.supplierID} />
         </div>
     );
 }

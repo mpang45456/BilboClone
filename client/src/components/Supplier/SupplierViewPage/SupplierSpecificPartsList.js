@@ -9,27 +9,11 @@ import { escapeRegex } from '../../../utils';
 import PropTypes from 'prop-types';
 
 /**
- * Container component housing all the content
- * related to the Parts tab.
- */
-export default function PartsTabContent(props) {
-    return (
-        <>
-            <SupplierSpecificPartsList supplierID={props.supplierID}/>
-        </>
-    )
-}
-PartsTabContent.propTypes = {
-    // For <SupplierSpecificPartsList />
-    supplierID: PropTypes.string.isRequired
-}
-
-/**
  * Component displaying a table of parts
  * information associated with a particular
  * supplier (as specified by `props.supplierID`)
  */
-function SupplierSpecificPartsList(props) {
+export default function SupplierSpecificPartsList(props) {
     const [dataSource, setDataSource] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [pagination, setPagination] = useState({current: 1, 
