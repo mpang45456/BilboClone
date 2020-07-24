@@ -30,7 +30,6 @@ export default function WarehouseSalesOrderViewPage(props) {
             await bax.get(`/api/v1/warehouse/salesOrder/${props.match.params.salesOrderID}`)
                 .then(res => {
                     if (res.status === 200) {
-                        console.log(res.data);
                         // Transform partNumber to include supplier name
                         res.data.state.parts.map(partInfo => {
                             partInfo.partNumber = `${partInfo.part.partNumber} (${partInfo.part.supplier.name})`

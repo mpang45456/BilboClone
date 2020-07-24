@@ -10,7 +10,6 @@ import PropTypes from 'prop-types';
  * this component.
  */
 export default function PurchaseOrderStateDataDisplaySection(props) {
-    console.log(props.purchaseOrderStateData)
     return (
         <>
             <BilboDividerWithText orientation='left'>Administrative Details</BilboDividerWithText>
