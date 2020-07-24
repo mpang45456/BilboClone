@@ -1,6 +1,24 @@
 # Bilbo
 Business Management Platform for Industrial SMEs
 
+# Installation
+1. Clone this repo
+2. Ensure that you have `node` and `npm` installed.
+   Bilbo was developed using `node` v14.3.0 and `npm`
+   v6.14.5. It is recommended to use `nvm` for installation.
+3. Navigate to `bilbo` folder
+4. Install dependencies by running `npm install`
+5. Make folder for database store: `mkdir -p ./server/data/db`
+6. Make sure you have MongoDB installed. Refer to [this](https://docs.mongodb.com/guides/server/install/) for installation instructions. 
+7. Start MongoDB daemon: `npm run mongod`
+8. Start dev server (and reset database): `RESET_DB=true npm run start-dev`
+9. Start hot reloading react app: `npm run react-start`
+   - Alternatively, you could build the react app to get a production-ready
+     version by first running `npm run react-build`. Once this is done, 
+     the react app can be accessible at `http://localhost:3000`.
+10. Start using/developing!
+
+
 # Styling 
 ## Application-Wide Custom Theme Management:
 This is achieved by modifying the less variables in `webpack.config.js`
