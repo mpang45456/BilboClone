@@ -3,12 +3,14 @@ import { NavLink, useHistory } from 'react-router-dom';
 import { PageHeader, Row, Dropdown, 
          Button, Spin, Descriptions, 
          Divider, Input, Select, Tag,
-         Timeline } from 'antd';
+         Timeline, Steps, Tabs } from 'antd';
+const { Step } = Steps;
 const { Option } = Select;
 import { EllipsisOutlined, 
          SearchOutlined, 
          CloseCircleOutlined, 
          CheckCircleOutlined, 
+         StopOutlined,
          EditOutlined } from "@ant-design/icons";
 import { redirectToErrorPage } from '../context/AuthContext';
 import Highlighter from 'react-highlight-words';
@@ -20,7 +22,7 @@ import { theme } from './Theme';
  * Customises the regular <button> HTML element, 
  * not the antd Button.
  */
-export const DarkInvertedStyledButton = styled.button`
+export const DarkInvertedStyledButton = styled(Button)`
     color: ${props => props.theme.colors.deepRed };
     font-size: 1em;
     padding: 0.25em 1em;
@@ -33,6 +35,19 @@ export const DarkInvertedStyledButton = styled.button`
     }
 
     &.ant-btn:hover {
+        color: ${props => props.theme.colors.marble };
+        background: ${props => props.theme.colors.deepRed };
+        border: 2px solid ${props => props.theme.colors.deepRed };
+    }
+
+    &.ant-btn:active {
+        color: ${props => props.theme.colors.marble };
+        background: ${props => props.theme.colors.deepRed };
+        border: 2px solid ${props => props.theme.colors.deepRed };
+        padding: 1px;
+    }
+
+    &.ant-btn:visited {
         color: ${props => props.theme.colors.marble };
         background: ${props => props.theme.colors.deepRed };
         border: 2px solid ${props => props.theme.colors.deepRed };
@@ -93,7 +108,7 @@ export function BilboLoadingSpinner(props) {
 // Styled Descriptions
 export const BilboDescriptions = styled(Descriptions)`
     & .ant-descriptions-item-label {
-        width: 150px;
+        width: 15%;
         border-right: 2px solid ${props => props.theme.colors.deepRed };
         padding: 5px 16px;
         lineHeight: 2.0;
@@ -111,6 +126,14 @@ export const BilboDivider = styled(Divider)`
         border-top: 1px solid ${props => props.theme.colors.lightGrey };
     }
 `;
+
+// Styled Divider with Text
+export const BilboDividerWithText = styled(Divider)`
+    &.ant-divider-horizontal.ant-divider-with-text::before, &.ant-divider-horizontal.ant-divider-with-text::after {
+        border-top: 1px solid ${props => props.theme.colors.lightGrey };
+    }
+`;
+
 
 // Utilities associated with a Search Table
 export const BilboSearchTable = {
@@ -522,4 +545,49 @@ export const BilboTimelineParagraphDescription = styled.p`
     margin-bottom: 0px;
     font-size: 80%;
     max-width: 250px;
+`;
+
+/**
+ * Customised Component to display the status
+ * for SOs and POs in <Steps/>. These steps
+ * are for displaying the current status only and
+ * are not interactive.
+ * 
+ * Note: Used in SO/PO ViewPage. 
+ * 
+ * Note: Specifically checks for CANCELLED status
+ * to display with the <StopOutlined/> icon.
+ */
+export function BilboDisplayOnlySteps(props) {
+    return (
+        <>
+            <Steps type='navigation'
+                   size='small'
+                   current={props.activeStepIndex}>
+                {
+                    props.allStatusAndTitle.map(({status, title}) => {
+                        if (status === 'CANCELLED') {
+                            return <Step key={title} title={title} icon={<StopOutlined/>}/>
+                        } else {
+                            return <Step key={title} title={title} />
+                        }
+                    })
+                }
+            </Steps>
+        </>
+    )
+}
+BilboDisplayOnlySteps.propTypes = {
+    activeStepIndex: PropTypes.number.isRequired,
+    allStatusAndTitle: PropTypes.array.isRequired,
+}
+
+/**
+ * <Tab/> with customised color for the line beneath
+ * the tabs.
+ */
+export const BilboTabs = styled(Tabs)`
+    & .ant-tabs-nav-wrap {
+        border-bottom: 1px solid ${props => props.theme.colors.lightGrey };;
+    }
 `;

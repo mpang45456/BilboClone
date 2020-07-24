@@ -12,10 +12,6 @@ Instructions for adding permissions:
 // Object Property Order is preserved for non-integer keys
 // Care must be taken to ensure that the key corresponds to the value
 const PERMS = Object.freeze({
-    SALES_READ: 'SALES_READ',
-    SALES_WRITE: 'SALES_WRITE',
-    PURCHASES_READ: 'PURCHASES_READ',
-    PURCHASES_WRITE: 'PURCHASES_WRITE',
     USER_READ: 'USER_READ',
     USER_WRITE: 'USER_WRITE',
     SUPPLIER_READ: 'SUPPLIER_READ',
@@ -24,7 +20,13 @@ const PERMS = Object.freeze({
     PART_WRITE: 'PART_WRITE',
     CUSTOMER_READ: 'CUSTOMER_READ',
     CUSTOMER_WRITE: 'CUSTOMER_WRITE',
-    STATISTICS_READ: 'STATISTICS_READ'
+    STATISTICS_READ: 'STATISTICS_READ',
+    SALES_ORDER_READ: 'SALES_ORDER_READ',
+    SALES_ORDER_WRITE: 'SALES_ORDER_WRITE',
+    PURCHASE_ORDER_READ: 'PURCHASE_ORDER_READ',
+    PURCHASE_ORDER_WRITE: 'PURCHASE_ORDER_WRITE',
+    WAREHOUSE_READ: 'WAREHOUSE_READ',
+    WAREHOUSE_WRITE: 'WAREHOUSE_WRITE',
 })
 
 /**
@@ -41,7 +43,7 @@ const PERMS = Object.freeze({
  * 
  * In other words:
  * - In JWT: permissions ==> '110001;
- * - Elsewhere: permissions ==> ['SALES_READ', 'USER_READ' ...]
+ * - Elsewhere: permissions ==> ['SALES_ORDER_READ', 'USER_READ' ...]
  */
 class PermissionsTransformer {
     constructor() {
@@ -49,7 +51,7 @@ class PermissionsTransformer {
     }
 
     /**
-     * Takes an array of permissions (e.g. 'SALES_READ')
+     * Takes an array of permissions (e.g. 'SALES_ORDER_READ')
      * and converts it into a bit string (e.g. '110001')
      * @param {[String]} perms 
      */
@@ -99,7 +101,7 @@ class PermissionsTransformer {
 
     /**
      * Converts the bit string `permString` (e.g. '101001')
-     * into an array of permissions (e.g. ['SALES_READ' ...])
+     * into an array of permissions (e.g. ['SALES_ORDER_READ' ...])
      * @param {String} permString 
      */
     decode(permString) {

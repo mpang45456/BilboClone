@@ -6,12 +6,14 @@ CONFIG.SERVER_URL = 'http://localhost:3000';
 // and are not the backend API URLs
 // Menu URLs (used as keys)
 CONFIG.HOME_URL = '/';
-CONFIG.SALES_ORDERS_URL = '/sales';
-CONFIG.PURCHASE_ORDERS_URL = '/purchases';
+CONFIG.SALES_ORDER_URL = '/sales';
+CONFIG.PURCHASE_ORDER_URL = '/purchases';
 CONFIG.PARTS_URL = '/parts';
 CONFIG.SUPPLIER_URL = '/suppliers';
 CONFIG.CUSTOMER_URL = '/customers';
 CONFIG.USER_URL = '/users';
+CONFIG.WAREHOUSE_SALES_ORDER_URL = '/warehouseSalesOrders';
+CONFIG.WAREHOUSE_PURCHASE_ORDER_URL = '/warehousePurchaseOrders';
 
 // Non-Menu URLS
 CONFIG.SETTINGS_URL = '/settings';
@@ -41,12 +43,70 @@ CONFIG.ERROR_500_URL = '/error500'; // Internal Server Error
 
 // Sub-Menu Keys
 CONFIG.DATA_SUB_MENU_KEY = 'dataSM';
+CONFIG.WAREHOUSE_SUB_MENU_KEY = 'warehouseSM';
 
 // Tag Colours
 CONFIG.ACTIVE_TAG_COLOR = 'green';
 CONFIG.ARCHIVED_TAG_COLOR = 'gold';
 
+// Sales Order Steps
+CONFIG.SALES_ORDER_STEPS = [
+    {
+        status: 'QUOTATION',
+        title: 'Quotation',
+    },
+    {
+        status: 'CONFIRMED',
+        title: 'Confirmed',
+    },
+    {
+        status: 'PREPARING',
+        title: 'Preparing',
+    },
+    {
+        status: 'IN_DELIVERY',
+        title: 'In-Delivery',
+    },
+    {
+        status: 'RECEIVED',
+        title: 'Received',
+    },
+    {
+        status: 'FULFILLED',
+        title: 'Fulfilled',
+    },
+    {
+        status: 'CANCELLED',
+        title: 'Cancelled',
+    },
+]
+
+// Purchase Order Steps
+CONFIG.PURCHASE_ORDER_STEPS = [
+    {
+        status: 'QUOTATION',
+        title: 'Quotation',
+    },
+    {
+        status: 'CONFIRMED',
+        title: 'Confirmed',
+    },
+    {
+        status: 'RECEIVED',
+        title: 'Received',
+    },
+    {
+        status: 'FULFILLED',
+        title: 'Fulfilled',
+    },
+    {
+        status: 'CANCELLED',
+        title: 'Cancelled',
+    },
+]
+
 // Miscellaneous
 CONFIG.DEFAULT_PAGE_SIZE = 10;
+CONFIG.DEBOUNCE_LIMIT = 300; // in ms
 
 export default CONFIG;

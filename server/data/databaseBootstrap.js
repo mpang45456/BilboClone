@@ -1,5 +1,14 @@
 const { PERMS } = require('../routes/api/v1/auth/permissions');
+const { SO_STATES, PO_STATES } = require('./databaseEnum');
 
+/**
+ * User Hierarchy: 
+ *              admin
+ *              /    \
+ *          user1   user2
+ *          /   \
+ *      user3   user4
+ */
 const users = [
     {
         // All Permissions User
@@ -13,7 +22,7 @@ const users = [
     {
         "username": "user1",
         "password": "asd",
-        "permissions": [PERMS.SALES_READ, PERMS.SALES_WRITE],
+        "permissions": [PERMS.SALES_ORDER_READ, PERMS.SALES_ORDER_WRITE, PERMS.PURCHASE_ORDER_READ, PERMS.PURCHASE_ORDER_WRITE],
         "name": "Balin",
         "position": "Sales Representative",
         "reportsTo": "admin"
@@ -21,7 +30,7 @@ const users = [
     {
         "username": "user2",
         "password": "asd",
-        "permissions": [PERMS.USER_READ, PERMS.PURCHASES_READ, PERMS.PURCHASES_WRITE],
+        "permissions": [PERMS.USER_READ],
         "name": "Thorin",
         "position": "Customer Success Specialist",
         "reportsTo": "admin"
@@ -30,16 +39,20 @@ const users = [
         // Read Permissions User
         "username": "user3",
         "password": "asd",
-        "permissions": [PERMS.USER_READ, PERMS.SUPPLIER_READ, PERMS.PART_READ, PERMS.CUSTOMER_READ],
+        "permissions": [PERMS.USER_READ, PERMS.SUPPLIER_READ, PERMS.PART_READ, PERMS.CUSTOMER_READ, PERMS.SALES_ORDER_READ, PERMS.PURCHASE_ORDER_READ, PERMS.WAREHOUSE_READ],
         "name": "Gandalf",
         "position": "Sales Intern",
         "reportsTo": "user1"
     },
     {
-        // Full Supplier and Part API Access
+        // Full Supplier and Part API Access. Read/Write Access to Sales Order and Purchase Order APIs.
         "username": "user4",
         "password": "asd",
-        "permissions": [PERMS.PART_READ, PERMS.PART_WRITE, PERMS.SUPPLIER_READ, PERMS.SUPPLIER_WRITE],
+        "permissions": [PERMS.PART_READ, PERMS.PART_WRITE, 
+                        PERMS.SUPPLIER_READ, PERMS.SUPPLIER_WRITE,
+                        PERMS.CUSTOMER_READ, PERMS.CUSTOMER_WRITE, 
+                        PERMS.SALES_ORDER_READ, PERMS.SALES_ORDER_WRITE,
+                        PERMS.PURCHASE_ORDER_READ, PERMS.PURCHASE_ORDER_WRITE],
         "name": "Gandalf",
         "position": "Sales Intern",
         "reportsTo": "user1"
@@ -81,7 +94,7 @@ const suppliers = [
         address: 'Blk 321B Lorong Chuan Industrial Drive',
         parts: [
             {
-                partNumber: 'PN121',
+                partNumber: 'PN121-BX-N',
                 priceHistory: [],
                 description: 'A nail',
                 status: 'ACTIVE',
@@ -229,8 +242,326 @@ for (let i = 0; i < numCustomerDataFillers; i++) {
     customers.push(customer);
 }
 
+/*
+Note: The `fulfilledBy` data is not provided. It must be manually 
+incorporated into the database during testing/development.
+*/
+const salesOrders = [
+    {
+        createdBy: users[3].username,
+        latestStatus: SO_STATES.CONFIRMED,
+        customer: customers[0].name,        // Must be translated into Customer ObjID
+        orderNumber: 'SO-000001',           // This field is not used by `DatabaseInteractor`
+                                            // `SalesOrderSchema.setOrderNumber()` used instead
+                                            // Just for documentation purposes. 
+        additionalInfo: 'First Ever Sales Order!',
+        orders: [
+            {
+                status: SO_STATES.QUOTATION,
+                additionalInfo: 'Made a draft first. Pending confirmation with customer.',
+                updatedBy: users[3].username,
+                parts: [
+                    {
+                        partNumber: 'BA2132-21Z', // Must be translated into Part ObjID,
+                        quantity: 1000,
+                        additionalInfo: 'Urgent need for this part',
+                        fulfilledBy: []
+                    },
+                    {
+                        partNumber: 'BA9871-21Z', // Must be translated into Part ObjID,
+                        quantity: 800,
+                        additionalInfo: 'Not so urgent need for this part',
+                        fulfilledBy: []
+                    }
+                ]
+            },
+            {
+                status: SO_STATES.CONFIRMED,
+                additionalInfo: 'Customer has confirmed part requirements',
+                updatedBy: users[3].username,
+                parts: [
+                    {
+                        partNumber: 'BA2132-21Z', // Must be translated into Part ObjID,
+                        quantity: 1000,
+                        additionalInfo: 'Urgent need for this part',
+                        fulfilledBy: []
+                    },
+                    {
+                        partNumber: 'BA9871-21Z', // Must be translated into Part ObjID,
+                        quantity: 800,
+                        additionalInfo: 'Not so urgent need for this part',
+                        fulfilledBy: []
+                    },
+                    {
+                        // This part was not present during QUOTATION phase
+                        partNumber: 'PN121-BX-N', // Must be translated into Part ObjID,
+                        quantity: 950,
+                        additionalInfo: 'Not present during QUOTATION phase.',
+                        fulfilledBy: []
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        createdBy: users[1].username,
+        latestStatus: SO_STATES.CONFIRMED,
+        customer: customers[1].name,        // Must be translated into Customer ObjID
+        orderNumber: 'SO-000002',           // This field is not used by `DatabaseInteractor`
+                                            // `SalesOrderSchema.setOrderNumber()` used instead
+                                            // Just for documentation purposes. 
+        additionalInfo: 'Second Sales Order',
+        orders: [
+            {
+                status: SO_STATES.QUOTATION,
+                additionalInfo: 'Customer will confirm details by 8th August.',
+                updatedBy: users[1].username,
+                parts: [
+                    {
+                        partNumber: 'BA2132-21Z', // Must be translated into Part ObjID,
+                        quantity: 2500,
+                        additionalInfo: 'Urgent need for this part',
+                        fulfilledBy: []
+                    },
+                    {
+                        partNumber: 'BA2133-21Z', // Must be translated into Part ObjID,
+                        quantity: 300,
+                        additionalInfo: 'Not so urgent need for this part',
+                        fulfilledBy: []
+                    }
+                ]
+            },
+            {
+                status: SO_STATES.CONFIRMED,
+                additionalInfo: 'Customer has confirmed part requirements',
+                updatedBy: users[1].username,
+                parts: [
+                    {
+                        partNumber: 'BA2132-21Z', // Must be translated into Part ObjID,
+                        quantity: 2500,
+                        additionalInfo: 'Can there be sample pieces as well?',
+                        fulfilledBy: []
+                    },
+                    {
+                        partNumber: 'BA2133-21Z', // Must be translated into Part ObjID,
+                        quantity: 300,
+                        additionalInfo: 'Can it come in different colours?',
+                        fulfilledBy: []
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        createdBy: users[3].username,
+        latestStatus: SO_STATES.QUOTATION,
+        customer: customers[2].name,        // Must be translated into Customer ObjID
+        orderNumber: 'SO-000003',           // This field is not used by `DatabaseInteractor`
+                                            // `SalesOrderSchema.setOrderNumber()` used instead
+                                            // Just for documentation purposes. 
+        additionalInfo: 'Third Sales Order.',
+        orders: [
+            {
+                status: SO_STATES.QUOTATION,
+                additionalInfo: 'Yet another draft.',
+                updatedBy: users[3].username,
+                parts: [
+                    {
+                        partNumber: 'PN121', // Must be translated into Part ObjID,
+                        quantity: 1000,
+                        additionalInfo: 'Blue in color',
+                        fulfilledBy: []
+                    }
+                ]
+            },
+        ]
+    },
+    {
+        // For testing Warehouse API
+        createdBy: users[1].username,
+        latestStatus: SO_STATES.PREPARING,
+        customer: customers[3].name,        // Must be translated into Customer ObjID
+        orderNumber: 'SO-000004',           // This field is not used by `DatabaseInteractor`
+                                            // `SalesOrderSchema.setOrderNumber()` used instead
+                                            // Just for documentation purposes. 
+        additionalInfo: 'Fourth Sales Order.',
+        orders: [
+            {
+                status: SO_STATES.QUOTATION,
+                additionalInfo: 'Yet another draft.',
+                updatedBy: users[1].username,
+                parts: [
+                    {
+                        partNumber: 'PN101', // Must be translated into Part ObjID,
+                        quantity: 5000,
+                        additionalInfo: 'One of many',
+                        fulfilledBy: []
+                    }
+                ]
+            },
+            {
+                status: SO_STATES.CONFIRMED,
+                additionalInfo: 'Has been confirmed.',
+                updatedBy: users[1].username,
+                parts: [
+                    {
+                        partNumber: 'PN101', // Must be translated into Part ObjID,
+                        quantity: 5000,
+                        additionalInfo: 'One of many',
+                        fulfilledBy: []
+                    }
+                ]
+            },
+            {
+                status: SO_STATES.PREPARING,
+                additionalInfo: 'Awaiting warehouse reception and preparation.',
+                updatedBy: users[1].username,
+                parts: [
+                    {
+                        partNumber: 'PN101', // Must be translated into Part ObjID,
+                        quantity: 5000,
+                        additionalInfo: 'One of many',
+                        fulfilledBy: []
+                    }
+                ]
+            },
+        ]
+    },
+]
+
+/*
+Note: The `fulfilledFor` data is not provided. It must be manually 
+incorporated into the database during testing/development.
+*/
+const purchaseOrders = [
+    {
+        createdBy: users[3].username,
+        latestStatus: PO_STATES.CONFIRMED,
+        supplier: suppliers[3].name,        // Must be translated into Supplier ObjID
+        orderNumber: 'PO-000001',           // This field is not used by `DatabaseInteractor`
+                                            // `SalesOrderSchema.setOrderNumber()` used instead
+                                            // Just for documentation purposes. 
+        additionalInfo: 'First Purchase Order',
+        orders: [
+            {
+                status: PO_STATES.QUOTATION,
+                additionalInfo: 'Supplier should be able to deliver everything by 10th August',
+                updatedBy: users[3].username,
+                parts: [
+                    {
+                        partNumber: 'BA2132-21Z', // Must be translated into Part ObjID,
+                        quantity: 3500,
+                        additionalInfo: 'Request for this part is more urgent',
+                        fulfilledFor: []
+                    },
+                    {
+                        partNumber: 'BA2133-21Z', // Must be translated into Part ObjID,
+                        quantity: 300,
+                        additionalInfo: '',
+                        fulfilledFor: []
+                    },
+                    {
+                        partNumber: 'BA9871-21Z', // Must be translated into Part ObjID,
+                        quantity: 800,
+                        additionalInfo: '',
+                        fulfilledFor: []
+                    }
+                ]
+            },
+            {
+                status: PO_STATES.CONFIRMED,
+                additionalInfo: 'Supplier has guaranteed that everything can be delivered by 9th August',
+                updatedBy: users[3].username,
+                parts: [
+                    {
+                        partNumber: 'BA2132-21Z', // Must be translated into Part ObjID,
+                        quantity: 3500,
+                        additionalInfo: 'Request for this part is more urgent',
+                        fulfilledFor: []
+                    },
+                    {
+                        partNumber: 'BA2133-21Z', // Must be translated into Part ObjID,
+                        quantity: 300,
+                        additionalInfo: '',
+                        fulfilledFor: []
+                    },
+                    {
+                        partNumber: 'BA9871-21Z', // Must be translated into Part ObjID,
+                        quantity: 800,
+                        additionalInfo: '',
+                        fulfilledFor: []
+                    }
+                ]
+            },
+        ]
+    },
+    {
+        createdBy: users[3].username,
+        latestStatus: PO_STATES.CONFIRMED,
+        supplier: suppliers[1].name,        // Must be translated into Supplier ObjID
+        orderNumber: 'PO-000002',           // This field is not used by `DatabaseInteractor`
+                                            // `SalesOrderSchema.setOrderNumber()` used instead
+                                            // Just for documentation purposes. 
+        additionalInfo: 'Second Purchase Order',
+        orders: [
+            {
+                status: PO_STATES.QUOTATION,
+                additionalInfo: 'No delivery date promises',
+                updatedBy: users[3].username,
+                parts: [
+                    {
+                        partNumber: 'PN121-BX-N', // Must be translated into Part ObjID,
+                        quantity: 950,
+                        additionalInfo: 'Many-many relationship between SO and PO',
+                        fulfilledFor: []
+                    },
+                ]
+            },
+            {
+                status: PO_STATES.CONFIRMED,
+                additionalInfo: 'Delivery on 21st September',
+                updatedBy: users[3].username,
+                parts: [
+                    {
+                        partNumber: 'PN121-BX-N', // Must be translated into Part ObjID,
+                        quantity: 950,
+                        additionalInfo: 'Many-many relationship between SO and PO.',
+                        fulfilledFor: []
+                    },
+                ]
+            },
+        ]
+    },
+    {
+        createdBy: users[0].username,
+        latestStatus: PO_STATES.QUOTATION,
+        supplier: suppliers[3].name,        // Must be translated into Supplier ObjID
+        orderNumber: 'PO-000003',           // This field is not used by `DatabaseInteractor`
+                                            // `SalesOrderSchema.setOrderNumber()` used instead
+                                            // Just for documentation purposes. 
+        additionalInfo: 'Third Purchase Order',
+        orders: [
+            {
+                status: PO_STATES.QUOTATION,
+                additionalInfo: 'Just a draft.',
+                updatedBy: users[0].username,
+                parts: [
+                    {
+                        partNumber: 'PN101', // Must be translated into Part ObjID,
+                        quantity: 10,
+                        additionalInfo: 'Testing',
+                        fulfilledFor: []
+                    },
+                ]
+            },
+        ]
+    },
+]
+
 module.exports = {
     users,
     suppliers,
     customers,
+    salesOrders,
+    purchaseOrders,
 }

@@ -3,6 +3,56 @@ const { Schema } = mongoose;
 
 const CONFIG = require('../config');
 const logger = require('../utils');
+const { SO_STATES, PO_STATES } = require('./databaseEnum');
+
+/**
+ * ----------------------
+ * ORDER NUMBER GENERATOR
+ * ----------------------
+ */
+const CounterSchema = new Schema({
+    counterName: { type: String, required: true },
+    sequenceValue: { type: Number, required: true }
+})
+const CounterModel = mongoose.model('Counter', CounterSchema);
+
+/**
+ * Generates and returns next order number.
+ * 
+ * 1. Obtains the sequence value for order number using 
+ * `Counter` collection, and updates the sequence value
+ * in-place. 
+ * 2. Adds prefix `SO-` (for sales orders) or 
+ * `PO-` (for purchase orders)
+ * 3. Pads with leading zeros (6 digits total)
+ * 
+ * Returns order number of this form: `SO-000123`
+ * 
+ * @param {String} counterName : one of ['salesOrder', 'purchaseOrder']
+ */
+async function getNextOrderNumber(counterName) {
+    const filter = { counterName };
+    const update = { $inc: { sequenceValue: 1 } };
+    const options = { new: true }; // returns doc AFTER `update` is applied
+    const counterDoc = await CounterModel.findOneAndUpdate(filter, update, options);
+    
+    let prefix = null;
+    switch (counterName) {
+        case 'salesOrder':
+            prefix = 'SO-';
+            break;
+        case 'purchaseOrder':
+            prefix = 'PO-';
+            break;
+        default:
+            throw new Error(`Invalid counterName: ${counterName}`);
+    }
+    
+    // Pad with leading zeros (6 digits in total)
+    // FIXME: This means that there is an upper-bound of 999999 number of orders
+    const suffix = ('000000' + counterDoc.sequenceValue).slice(-6);
+    return prefix + suffix;
+}
 
 /**
  * -----------
@@ -100,6 +150,99 @@ const CustomerSchema = new Schema({
 
 const CustomerModel = mongoose.model('Customer', CustomerSchema);
 
+/**
+ * ------------------
+ * SALES ORDER SCHEMA
+ * ------------------
+ * 
+ * // TODO: Update docs on how SalesOrderSchema uses populate,
+ * but the rest are just subdocuments
+ */
+const SalesOrderPartFulfillmentSchema = new Schema({
+    purchaseOrder: { type: Schema.Types.ObjectId, 
+                     ref: 'PurchaseOrder', 
+                     required: true },
+    quantity: { type: Number, required: true }
+})
+const SalesOrderPartInfoSchema = new Schema({
+    part: { type: Schema.Types.ObjectId, 
+            ref: 'Part', 
+            required: true},
+    quantity: { type: Number, required: true },
+    additionalInfo: { type: String, default: true },
+    fulfilledBy: [SalesOrderPartFulfillmentSchema]
+})
+const SalesOrderStateSchema = new Schema({
+    status: { type: String, 
+              required: true,
+              enum: Object.keys(SO_STATES) },
+    additionalInfo: { type: String, default: '' },
+    parts: [SalesOrderPartInfoSchema],
+    updatedBy: { type: String, required: true }, // User.username
+}, { timestamps: true })
+const SalesOrderSchema = new Schema({
+    createdBy: { type: String, required: true, index: true }, // User.username
+    orderNumber: { type: String, required: true, unique: true, index: true },
+    latestStatus: { type: String, 
+                    required: true,
+                    enum: Object.keys(SO_STATES) },
+    customer: { type: Schema.Types.ObjectId, ref: 'Customer', required: true },
+    additionalInfo: { type: String, default: '' },
+    orders: [{ type: Schema.Types.ObjectId, ref: 'SalesOrderState' }]
+}, { timestamps: true })
+// Used in dev/prod env. Test env will set orderNumber manually.
+SalesOrderSchema.methods.setOrderNumber = async function() {
+    this.orderNumber = await getNextOrderNumber('salesOrder');
+}
+
+const SalesOrderStateModel = mongoose.model('SalesOrderState', SalesOrderStateSchema);
+const SalesOrderModel = mongoose.model('SalesOrder', SalesOrderSchema);
+
+/**
+ * ---------------------
+ * PURCHASE ORDER SCHEMA
+ * ---------------------
+ */
+const PurchaseOrderPartFulfillmentSchema = new Schema({
+    salesOrder: { type: Schema.Types.ObjectId,
+                  ref: 'SalesOrder', 
+                  required: true },
+    quantity: { type: Number, required: true }
+})
+const PurchaseOrderPartInfoSchema = new Schema({
+    part: { type: Schema.Types.ObjectId,
+            ref: 'Part',
+            required: true },
+    quantity: { type: Number, required: true },
+    additionalInfo: { type: String, default: true },
+    fulfilledFor: [PurchaseOrderPartFulfillmentSchema]
+})
+const PurchaseOrderStateSchema = new Schema({
+    status: { type: String, 
+              required: true,
+              enum: Object.keys(PO_STATES)},
+    additionalInfo: { type: String, default: '' },
+    parts: [PurchaseOrderPartInfoSchema],
+    updatedBy: { type: String, required: true }, // User.username
+}, { timestamps: true })
+const PurchaseOrderSchema = new Schema({
+    createdBy: { type: String, required: true, index: true }, // User.username
+    orderNumber: { type: String, required: true, unique: true, index: true },
+    latestStatus: { type: String, 
+                    required: true,
+                    enum: Object.keys(PO_STATES) },
+    supplier: { type: Schema.Types.ObjectId, ref: 'Supplier', required: true },
+    additionalInfo: { type: String, default: '' },
+    orders: [{ type: Schema.Types.ObjectId, ref: 'PurchaseOrderState' }]
+}, { timestamps: true })
+// Used in dev/prod env. Test env will set orderNumber manually.
+PurchaseOrderSchema.methods.setOrderNumber = async function() {
+    this.orderNumber = await getNextOrderNumber('purchaseOrder');
+}
+
+const PurchaseOrderStateModel = mongoose.model('PurchaseOrderState', PurchaseOrderStateSchema);
+const PurchaseOrderModel = mongoose.model('PurchaseOrder', PurchaseOrderSchema);
+
 /*
 This code uses the `export model pattern`, as per the Mongoose docs. 
 This is acceptable as long as the code uses one connection (in this
@@ -112,4 +255,10 @@ module.exports = {
     SupplierModel,
     PartModel,
     CustomerModel,
+    SalesOrderStateModel,
+    SalesOrderModel,
+    PurchaseOrderStateModel, 
+    PurchaseOrderModel,
+    CounterModel,
+    getNextOrderNumber,
 }

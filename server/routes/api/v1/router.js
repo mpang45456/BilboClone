@@ -16,6 +16,15 @@ router.use('/part', partRouter);
 const { customerRouter } = require('./customer/customer');
 router.use('/customer', customerRouter);
 
+const { salesOrderRouter } = require('./salesOrder/salesOrder');
+router.use('/salesOrder', salesOrderRouter);
+
+const { purchaseOrderRouter } = require('./purchaseOrder/purchaseOrder');
+router.use('/purchaseOrder', purchaseOrderRouter);
+
+const { warehouseRouter } = require('./warehouse/warehouse');
+router.use('/warehouse', warehouseRouter);
+
 module.exports = {
     apiV1Router: router
 }

@@ -7,8 +7,12 @@ import BilboHeader from './BilboHeader';
 import BilboContent from './BilboContent';
 
 import HomePage from '../HomePage';
-import SalesPage from '../SalesPage';
-import PurchasePage from '../PurchasePage';
+import SalesOrderPage from '../SalesOrder/SalesOrderPage';
+import SalesOrderViewPage from '../SalesOrder/SalesOrderViewPage/SalesOrderViewPage';
+import SalesOrderAddPage from '../SalesOrder/SalesOrderAddPage';
+import PurchaseOrderPage from '../PurchaseOrder/PurchaseOrderPage';
+import PurchaseOrderViewPage from '../PurchaseOrder/PurchaseOrderViewPage/PurchaseOrderViewPage';
+import PurchaseOrderAddPage from '../PurchaseOrder/PurchaseOrderAddPage';
 import PartPage from '../Part/PartPage';
 import PartViewPage from '../Part/PartViewPage/PartViewPage';
 import PartAddPage from '../Part/PartAddPage';
@@ -19,6 +23,10 @@ import SettingsPage from '../SettingsPage';
 import CustomerPage from '../Customer/CustomerPage';
 import CustomerViewPage from '../Customer/CustomerViewPage';
 import CustomerAddPage from '../Customer/CustomerAddPage';
+import WarehouseSalesOrderPage from '../WarehouseSalesOrder/WarehouseSalesOrderPage';
+import WarehouseSalesOrderViewPage from '../WarehouseSalesOrder/WarehouseSalesOrderViewPage';
+import WarehousePurchaseOrderPage from '../WarehousePurchaseOrder/WarehousePurchaseOrderPage';
+import WarehousePurchaseOrderViewPage from '../WarehousePurchaseOrder/WarehousePurchaseOrderViewPage';
 import UserPage from '../User/UserPage';
 import UserViewPage from '../User/UserViewPage';
 import UserEditPage from '../User/UserEditPage';
@@ -52,8 +60,12 @@ export default class AppScaffold extends React.Component {
           <BilboContent>
             <Switch>
               <Route exact path={CONFIG.HOME_URL} component={HomePage} />
-              <Route path={CONFIG.SALES_ORDERS_URL} component={SalesPage} />
-              <Route path={CONFIG.PURCHASE_ORDERS_URL} component={PurchasePage} />
+              <Route path={`${CONFIG.SALES_ORDER_URL}add`} component={SalesOrderAddPage} />
+              <Route path={`${CONFIG.SALES_ORDER_URL}/:salesOrderID`} component={SalesOrderViewPage} />
+              <Route path={CONFIG.SALES_ORDER_URL} component={SalesOrderPage} />
+              <Route path={`${CONFIG.PURCHASE_ORDER_URL}add`} component={PurchaseOrderAddPage} />
+              <Route path={`${CONFIG.PURCHASE_ORDER_URL}/:purchaseOrderID`} component={PurchaseOrderViewPage} />
+              <Route path={CONFIG.PURCHASE_ORDER_URL} component={PurchaseOrderPage} />
               <Route path={`${CONFIG.PARTS_URL}add`} component={PartAddPage} />
               <Route path={`${CONFIG.PARTS_URL}/:partID`} component={PartViewPage} />
               <Route path={CONFIG.PARTS_URL} component={PartPage} />
@@ -63,6 +75,10 @@ export default class AppScaffold extends React.Component {
               <Route path={`${CONFIG.CUSTOMER_URL}add`} component={CustomerAddPage} />
               <Route path={`${CONFIG.CUSTOMER_URL}/:customerID`} component={CustomerViewPage} />
               <Route path={CONFIG.CUSTOMER_URL} component={CustomerPage} />
+              <Route path={`${CONFIG.WAREHOUSE_SALES_ORDER_URL}/:salesOrderID`} component={WarehouseSalesOrderViewPage} />
+              <Route path={CONFIG.WAREHOUSE_SALES_ORDER_URL} component={WarehouseSalesOrderPage} />
+              <Route path={`${CONFIG.WAREHOUSE_PURCHASE_ORDER_URL}/:purchaseOrderID`} component={WarehousePurchaseOrderViewPage} />
+              <Route path={CONFIG.WAREHOUSE_PURCHASE_ORDER_URL} component={WarehousePurchaseOrderPage} />
               <Route path={`${CONFIG.USER_URL}add`} component={UserAddPage} />
               <Route path={`${CONFIG.USER_URL}/:username/edit`} component={UserEditPage} />
               <Route path={`${CONFIG.USER_URL}/:username`} component={UserViewPage} />
