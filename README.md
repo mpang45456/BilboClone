@@ -102,9 +102,11 @@ application: `npm run react-build`, then run the Dev Server.
 
 ## Resetting Development Database
 While developing, there may be an occasion where a reset of the database
-to a pre-defined state is necessary.
+to a pre-defined state is necessary. The pre-defined state is as defined 
+in `server/data/databaseBootstrap`, which defines the seed values for
+the database.
 
-If so, set the `RESET_DB=true` environment variable, like so:
+If resetting, set the `RESET_DB=true` environment variable, like so:
 `RESET_DB=true npm run start-dev`
 
 ## Development Practices
@@ -130,14 +132,3 @@ are all siloed)
 `RESET_DB_ALL`: Resets all collections in the `test` database (because `NODE_ENV` is set to `test` in the npm script, see `package.json`)
 `RESET_DB_USERS`: Resets user collection
 ... and so on
-
-
-
-
-
-
-## Rules for Sales Order/Purchase Order States
-- Can only go forward, cannot go backwards
-- Can stay in the same state and persist changes
-- Can only make allocations from the sales orders side
-- Can only make allocations to purchase orders that have CONFIRMED status
