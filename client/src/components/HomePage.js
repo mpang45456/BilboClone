@@ -23,19 +23,22 @@ import queryString from 'query-string';
  * the sales/purchase orders are compiled. The
  * statistics for each user are displayed in a 
  * separate <UserStatisticsCard/>
+ * 
+ * The default date range on first render is one 
+ * month before the current date.
  */
 export default function HomePage(props) {
     const history = useHistory();
     const [statistics, setStatistics] = useState({});
+
+    // Default Date Range: 1 month before current date
+    const defaultTimeStart = moment().set({hour: 0, minute: 0, second: 0, millsecond: 0})
+                                     .add(-1, 'months');
+    const defaultTimeEnd = moment().set({hour: 23, minute: 59, second: 59, millsecond: 999});
     
     useEffect(() => {
-        const timeStart = moment().set({hour: 0, minute: 0, second: 0, millsecond: 0})
-                                  .add(-1, 'months')
-                                  .toISOString();
-        const timeEnd = moment().set({hour: 0, minute: 0, second: 0, millsecond: 0})
-                                .add(1, 'days')
-                                .toISOString();
-        getStatistics(timeStart, timeEnd);
+        getStatistics(defaultTimeStart.toISOString(), 
+                      defaultTimeEnd.toISOString());
     }, []);
 
     const getStatistics = (timeStart, timeEnd) => {
@@ -53,7 +56,7 @@ export default function HomePage(props) {
                                 .set({hour: 0, minute: 0, second: 0, millsecond: 0})
                                 .toISOString();
         const timeEnd = values.dateRange[1]
-                              .set({hour: 0, minute: 0, second: 0, millsecond: 0})
+                              .set({hour: 23, minute: 59, second: 59, millsecond: 999})
                               .toISOString();
         getStatistics(timeStart, timeEnd);
     }
@@ -70,7 +73,7 @@ export default function HomePage(props) {
             <Form onFinish={onFinish}>
                 <Row>
                     <Form.Item name='dateRange' label='Pick a date range'>
-                        <RangePicker />
+                        <RangePicker defaultValue={[defaultTimeStart, defaultTimeEnd]}/>
                     </Form.Item>
                     <Form.Item>
                         <Button htmlType='submit'>
