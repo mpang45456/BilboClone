@@ -2,6 +2,7 @@ import React from 'react';
 import { Collapse } from 'antd';
 const { Panel } = Collapse;
 import PropTypes from 'prop-types';
+import { OrderSummarySection } from '../../UtilComponents';
 import PurchaseOrderMetaDataDisplaySection from './PurchaseOrderMetaDataDisplaySection';
 import PurchaseOrderStateDataDisplaySection from './PurchaseOrderStateDataDisplaySection';
 
@@ -20,6 +21,10 @@ export default function CollapsiblePurchaseOrderDataDisplay(props) {
 
                     <PurchaseOrderStateDataDisplaySection
                         purchaseOrderStateData={props.purchaseOrderStateData} 
+                    />
+
+                    <OrderSummarySection 
+                        orderStateData={props.purchaseOrderStateData}
                     />
                 </Panel>
             </Collapse>

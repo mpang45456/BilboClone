@@ -125,7 +125,7 @@ export default function SalesOrderQuotationContent(props) {
         const allFormValues = form.getFieldsValue();
         let totalValue = 0;
         // Find total value for existing parts
-        allFormValues.partsExisting.map(partInfo => {
+        allFormValues.partsExisting && allFormValues.partsExisting.map(partInfo => {
             if (partInfo.quantity && 
                 typeof partInfo.quantity === 'number' &&
                 partInfo.latestPrice &&
@@ -134,7 +134,7 @@ export default function SalesOrderQuotationContent(props) {
             }
         })
         // Find total value for new parts
-        allFormValues.partsNew.map(partInfo => {
+        allFormValues.partsNew && allFormValues.partsNew.map(partInfo => {
             if (partInfo &&
                 partInfo.quantity && 
                 typeof partInfo.quantity === 'number' &&

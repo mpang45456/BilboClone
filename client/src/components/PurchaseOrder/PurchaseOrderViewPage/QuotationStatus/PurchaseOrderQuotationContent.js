@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { BilboDividerWithText, 
          BilboDivider } from '../../../UtilComponents';
-import { Space, Modal, Row, message, Form, Button } from 'antd';
+import { Space, Modal, Row, message, Form, Button, Statistic } from 'antd';
 const { confirm } = Modal;
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import PropTypes from 'prop-types';
@@ -41,6 +41,10 @@ export default function PurchaseOrderQuotationContent(props) {
     const [saveChangesLoading, setSaveChangesLoading] = useState(false);
     const [proceedNextStatusLoading, setProceedNextStatusLoading] = useState(false);
     const [stateAdditionalInfo, setStateAdditionalInfo] = useState(props.purchaseOrderStateData.additionalInfo);
+
+    // Computing Total Purchase Order Value
+    const reducer = (acc, currVal) => acc + currVal.quantity * currVal.latestPrice;
+    const [totalPurchaseOrderValue, setTotalPurchaseOrderValue] = useState(props.purchaseOrderStateData.parts.reduce(reducer, 0));
 
     // Handler when either `Save Changes` or `Confirm and Proceed`
     // buttons are clicked
@@ -114,6 +118,35 @@ export default function PurchaseOrderQuotationContent(props) {
     // Handler when cancel button is clicked
     const onCancel = () => { history.push(CONFIG.PURCHASE_ORDER_URL); }
 
+    // Handler when form values change in response to user
+    // input. This is used to calculate the total purchase order
+    // value and update the <Statistic/> component.
+    const onFormValuesChange = (changedFields, allFields) => {
+        const allFormValues = form.getFieldsValue();
+        let totalValue = 0;
+        // Find total value for existing parts
+        allFormValues.partsExisting && allFormValues.partsExisting.map(partInfo => {
+            if (partInfo.quantity && 
+                typeof partInfo.quantity === 'number' &&
+                partInfo.latestPrice &&
+                typeof partInfo.latestPrice === 'number') {
+                totalValue += partInfo.latestPrice * partInfo.quantity;
+            }
+        })
+        // Find total value for new parts
+        allFormValues.partsNew && allFormValues.partsNew.map(partInfo => {
+            if (partInfo &&
+                partInfo.quantity && 
+                typeof partInfo.quantity === 'number' &&
+                partInfo.latestPrice &&
+                typeof partInfo.latestPrice === 'number') {
+                totalValue += partInfo.latestPrice * partInfo.quantity;
+            }
+        })
+
+        setTotalPurchaseOrderValue(totalValue);
+    }
+
     return (
         <>
             <PurchaseOrderMetaDataDisplaySection 
@@ -132,12 +165,19 @@ export default function PurchaseOrderQuotationContent(props) {
                         // existing parts data (from purchase order state)
                         partsExisting: props.purchaseOrderStateData.parts
                     }}
+                    onValuesChange={onFormValuesChange}
                     autoComplete="off">
 
                 <BilboDividerWithText orientation='left'>Part Details</BilboDividerWithText>
                 <ExistingPartsFormSection />
-                <NewPartsFormSection />
+                <NewPartsFormSection form={form}/>
         
+                <BilboDividerWithText orientation='left'>Order Summary</BilboDividerWithText>
+                <Statistic title='Total Purchase Order Value'
+                           value={totalPurchaseOrderValue}
+                           precision={2}
+                           prefix='$'
+                />
                 <BilboDivider />
                 <Row justify='end'>
                     <Space direction='vertical' style={{display: 'block', width: '20%'}}>
