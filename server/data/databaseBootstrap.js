@@ -95,7 +95,15 @@ const suppliers = [
         parts: [
             {
                 partNumber: 'PN121-BX-N',
-                priceHistory: [],
+                priceHistory: [{
+                    createdBy: `${users[0].username}`,
+                    unitPrice: 0.0001,
+                    additionalInfo: 'Cheap Product'
+                }, {
+                    createdBy: `${users[0].username}`,
+                    unitPrice: 0.0002,
+                    additionalInfo: 'Product price double owing to supply constraints'
+                }],
                 description: 'A nail',
                 status: 'ACTIVE',
                 additionalInfo: 'Supplier will stop manufacturing this part on 30/8/2020'
