@@ -15,7 +15,6 @@ import { bax, useAuth } from '../../context/AuthContext';
 import styled from 'styled-components';
 
 // Utility (Styling) Component: Customised div to contain icons
-// TODO: Add custom css on click (down and up)
 const IconContainer = styled.div`
   color: ${props => props.theme.colors.salmon};
   background: ${props => props.theme.colors.darkerRed};

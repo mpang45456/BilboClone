@@ -333,7 +333,7 @@ export function EditableItem(props) {
         props.update(editItemValue)
              .then(res => setIsEditing(false))
              .catch(err => {
-                 redirectToErrorPage(err, history) // TODO: Update with proper UI error handling (wrt <Input />)
+                 redirectToErrorPage(err, history);
              })
     }
     

@@ -132,7 +132,6 @@ const SupplierSchema = new Schema({
 
 const SupplierModel = mongoose.model('Supplier', SupplierSchema);
 
-// TODO: Update DatabaseInteractor and databaseBootstrap.js for CustomerSchema
 /**
  * ---------------
  * CUSTOMER SCHEMA
@@ -154,9 +153,6 @@ const CustomerModel = mongoose.model('Customer', CustomerSchema);
  * ------------------
  * SALES ORDER SCHEMA
  * ------------------
- * 
- * // TODO: Update docs on how SalesOrderSchema uses populate,
- * but the rest are just subdocuments
  */
 const SalesOrderPartFulfillmentSchema = new Schema({
     purchaseOrder: { type: Schema.Types.ObjectId, 

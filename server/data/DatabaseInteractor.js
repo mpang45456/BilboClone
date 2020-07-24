@@ -81,7 +81,8 @@ class DatabaseInteractor {
      * Note: Seeding is only for dev and test
      * environments
      * 
-     * // TODO: This method must be updated to reflect new Schemas
+     * Note: This method must be updated to reflect
+     * new Schemas.
      */
     async __resetAndSeedDatabase() {
         // Initialise Counters (For Sales and Purchase Orders)

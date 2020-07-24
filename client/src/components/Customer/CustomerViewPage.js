@@ -127,10 +127,6 @@ export default function CustomerViewPage(props) {
                     </Descriptions.Item>
                 </BilboDescriptions>
             </Spin>
-
-            <BilboDivider />
-
-            <SalesOrderSection />
         </div>
     );
 }
@@ -188,14 +184,4 @@ function DeleteCustomerShowMoreButton(props) {
 DeleteCustomerShowMoreButton.propTypes = {
     customerID: PropTypes.string.isRequired,
     disabled: PropTypes.bool.isRequired
-}
-
-function SalesOrderSection(props) {
-    // TODO: To be Implemented
-    return (
-        <>
-            <h3>Sales Orders</h3>
-            <p>To Be Implemented</p>
-        </>
-    )
 }

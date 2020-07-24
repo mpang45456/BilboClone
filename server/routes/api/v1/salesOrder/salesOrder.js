@@ -413,7 +413,7 @@ function performAllocations(partInfos, salesOrderObjID) {
             let poLatestStateDoc = await PurchaseOrderStateModel.findOne({ _id: poDoc.orders[poDoc.orders.length - 1] });
             let index = poLatestStateDoc.parts.findIndex(poPartInfo => {
                 return String(poPartInfo.part) === String(soPartInfo.part);
-            }) // TODO: check not undefined
+            })
             poLatestStateDoc.parts[index].fulfilledFor.push({
                 salesOrder: salesOrderObjID,
                 quantity: fulfilledByTarget.quantity,
