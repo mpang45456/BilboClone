@@ -2,6 +2,7 @@ import React from 'react';
 import { Collapse } from 'antd';
 const { Panel } = Collapse;
 import PropTypes from 'prop-types';
+import { OrderSummarySection } from '../../UtilComponents';
 import SalesOrderMetaDataDisplaySection from './SalesOrderMetaDataDisplaySection';
 import SalesOrderStateDataDisplaySection from './SalesOrderStateDataDisplaySection';
 
@@ -20,6 +21,10 @@ export default function CollapsibleSalesOrderDataDisplay(props) {
 
                     <SalesOrderStateDataDisplaySection
                         salesOrderStateData={props.salesOrderStateData} 
+                    />
+
+                    <OrderSummarySection 
+                        orderStateData={props.salesOrderStateData}
                     />
                 </Panel>
             </Collapse>

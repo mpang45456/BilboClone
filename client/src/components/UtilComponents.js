@@ -3,7 +3,8 @@ import { NavLink, useHistory } from 'react-router-dom';
 import { PageHeader, Row, Dropdown, 
          Button, Spin, Descriptions, 
          Divider, Input, Select, Tag,
-         Timeline, Steps, Tabs } from 'antd';
+         Timeline, Steps, Tabs,
+         Statistic } from 'antd';
 const { Step } = Steps;
 const { Option } = Select;
 import { EllipsisOutlined, 
@@ -591,3 +592,25 @@ export const BilboTabs = styled(Tabs)`
         border-bottom: 1px solid ${props => props.theme.colors.lightGrey };;
     }
 `;
+
+/**
+ * React Component that renders the total 
+ * value of a sales/purchase order.
+ */
+export function OrderSummarySection(props) {
+    const reducer = (acc, currVal) => acc + currVal.quantity * currVal.latestPrice;
+    const totalOrderValue = props.orderStateData.parts.reduce(reducer, 0);
+    return (
+        <>
+            <BilboDividerWithText orientation='left'>Order Summary</BilboDividerWithText>
+            <Statistic title='Total Order Value'
+                       value={totalOrderValue}
+                       precision={2}
+                       prefix='$'
+            />
+        </>
+    )
+}
+OrderSummarySection.propTypes = {
+    orderStateData: PropTypes.object.isRequired,
+}

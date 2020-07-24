@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { BilboDividerWithText, 
-         BilboDivider } from '../../../UtilComponents';
+         BilboDivider,
+         OrderSummarySection } from '../../../UtilComponents';
 import { Space, Modal, Row, message, Form, Button } from 'antd';
 const { confirm } = Modal;
 import { ExclamationCircleOutlined } from "@ant-design/icons";
@@ -169,6 +170,7 @@ export default function SalesOrderConfirmedContent(props) {
                     onAllocateButtonClick={onAllocateButtonClick}
                 />
 
+                <OrderSummarySection orderStateData={props.salesOrderStateData} />
                 <BilboDivider />
                 <Row justify='end'>
                     <Space direction='vertical' style={{display: 'block', width: '20%'}}>
