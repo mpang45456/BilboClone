@@ -98,7 +98,8 @@ router.get('/:purchaseOrderObjID',
         let purchaseOrderStateDoc = await PurchaseOrderStateModel.findOne({ _id: purchaseOrderDoc.orders[purchaseOrderDoc.orders.length - 1]})
                                                                  .populate('parts.part')
                                                                  .populate('parts.fulfilledFor.salesOrder');
-        
+        await purchaseOrderStateDoc.populate('parts.part.supplier').execPopulate();
+
         if (!purchaseOrderDoc) { return res.status(400).send('Invalid Purchase Order ID'); }
 
         // This endpoint only allows access to purchase order meta-data that have CONFIRMED status
