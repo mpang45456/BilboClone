@@ -7,7 +7,7 @@ import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { Spin, Row, Space, Button, message, Modal } from 'antd';
 const { confirm } = Modal;
 import { bax, redirectToErrorPage } from '../../context/AuthContext';
-import { SO_STATES } from '../../../../server/data/databaseEnum';
+import { PO_STATES } from '../../../../server/data/databaseEnum';
 import CONFIG from '../../config';
 import CollapsiblePurchaseOrderDataDisplay from '../PurchaseOrder/PurchaseOrderViewPage/CollapsiblePurchaseOrderDataDisplay';
 
@@ -56,7 +56,7 @@ export default function WarehousePurchaseOrderViewPage(props) {
             onOk: () => {
                 setProceedNextStatusLoading(true);
                 bax.patch(`/api/v1/warehouse/purchaseOrder/${props.match.params.purchaseOrderID}`,
-                        { newStatus: SO_STATES.IN_DELIVERY }
+                        { newStatus: PO_STATES.RECEIVED }
                     ).then(res => {
                         if (res.status === 200) {
                             setProceedNextStatusLoading(false);
@@ -81,7 +81,7 @@ export default function WarehousePurchaseOrderViewPage(props) {
 
             <Spin spinning={isLoadingPurchaseOrderDetails}>
                 <BilboDividerWithText orientation='left'>Information</BilboDividerWithText>
-                <p>When Purchase Order has been packed and sent for delivery, click on the 'Confirm and Proceed' button.</p>
+                <p>When Purchase Order shipment has been received, click on the 'Confirm and Proceed' button.</p>
                 <CollapsiblePurchaseOrderDataDisplay 
                     purchaseOrderMetaData={purchaseOrderMetaData} 
                     purchaseOrderStateData={purchaseOrderStateData} 

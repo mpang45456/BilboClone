@@ -140,10 +140,11 @@ router.patch('/:purchaseOrderObjID',
         let purchaseOrderDoc = await PurchaseOrderModel.findOne({ _id: req.params.purchaseOrderObjID });
         let purchaseOrderStateDoc = await PurchaseOrderStateModel.findOne({ _id: purchaseOrderDoc.orders[purchaseOrderDoc.orders.length - 1]});
     
-        // Make a copy of the latest state and change status
+        // Make a copy of the latest state, change `status` and `updatedBy`
         purchaseOrderStateDoc._doc._id = mongoose.Types.ObjectId();
         purchaseOrderStateDoc.isNew = true;
         purchaseOrderStateDoc.status = newStatus;
+        purchaseOrderStateDoc.updatedBy = req.user.username;
         // Update meta-data
         purchaseOrderDoc.latestStatus = newStatus;
         purchaseOrderDoc.orders.push(purchaseOrderStateDoc);

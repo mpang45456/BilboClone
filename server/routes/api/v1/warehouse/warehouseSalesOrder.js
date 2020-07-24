@@ -145,6 +145,7 @@ router.patch('/:salesOrderObjID',
         salesOrderStateDoc._doc._id = mongoose.Types.ObjectId();
         salesOrderStateDoc.isNew = true;
         salesOrderStateDoc.status = newStatus;
+        salesOrderStateDoc.updatedBy = req.user.username;
         // Update meta-data
         salesOrderDoc.latestStatus = newStatus;
         salesOrderDoc.orders.push(salesOrderStateDoc);
