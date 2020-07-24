@@ -1,20 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { BilboDividerWithText } from './UtilComponents';
-import { Statistic, Card, Col, Row, Table } from 'antd';
+import { BilboDividerWithText, 
+         BilboPageHeader } from './UtilComponents';
+import { Statistic, Card, Col, Row, Table, DatePicker, Form, Button } from 'antd';
+const { RangePicker } = DatePicker;
 import PropTypes from 'prop-types';
 import { bax, redirectToErrorPage } from '../context/AuthContext';
+import moment from 'moment';
+import queryString from 'query-string';
 
+/**
+ * React Component that Renders the welcome page 
+ * of the application. 
+ * 
+ * This page is also responsible for displaying
+ * all sales and purchase order statistics associated
+ * with a particular user and his/her user hierarchy. 
+ * 
+ * A Date <RangePicker /> enables users to specify
+ * a range of dates for which the statistics for
+ * the sales/purchase orders are compiled. The
+ * statistics for each user are displayed in a 
+ * separate <UserStatisticsCard/>
+ */
 export default function HomePage(props) {
     const history = useHistory();
     const [statistics, setStatistics] = useState({});
     
     useEffect(() => {
-        getStatistics();
+        const timeStart = moment().set({hour: 0, minute: 0, second: 0, millsecond: 0})
+                                  .add(-1, 'months')
+                                  .toISOString();
+        const timeEnd = moment().set({hour: 0, minute: 0, second: 0, millsecond: 0})
+                                .add(1, 'days')
+                                .toISOString();
+        getStatistics(timeStart, timeEnd);
     }, []);
 
-    const getStatistics = () => {
-        bax.get(`/api/v1/statistic`)
+    const getStatistics = (timeStart, timeEnd) => {
+        const query = queryString.stringify({timeStart, timeEnd})
+        bax.get(`/api/v1/statistic?${query}`)
             .then(res => {
                 setStatistics(res.data);
             }).catch(err => {
@@ -22,11 +47,39 @@ export default function HomePage(props) {
             })
     }
 
+    const onFinish = (values) => {
+        const timeStart = values.dateRange[0]
+                                .set({hour: 0, minute: 0, second: 0, millsecond: 0})
+                                .toISOString();
+        const timeEnd = values.dateRange[1]
+                              .set({hour: 0, minute: 0, second: 0, millsecond: 0})
+                              .toISOString();
+        getStatistics(timeStart, timeEnd);
+    }
+
     return (
         <>
-            <h1>Welcome To Bilbo</h1>
+            <BilboPageHeader 
+                title='Home Page'
+            />
             
             <BilboDividerWithText orientation='left'>User Statistics</BilboDividerWithText>
+            
+            {/* Data Range Picker */}
+            <Form onFinish={onFinish}>
+                <Row>
+                    <Form.Item name='dateRange' label='Pick a date range'>
+                        <RangePicker />
+                    </Form.Item>
+                    <Form.Item>
+                        <Button htmlType='submit'>
+                            Submit
+                        </Button> 
+                    </Form.Item>
+                </Row>
+            </Form>
+            
+            {/* User Statistics Cards */}
             <div>
                 <Row>
                     {
@@ -119,9 +172,10 @@ function OrderBreakDown(props) {
             key: 'orderNumber',
         },
         {
-            title: 'Value',
+            title: 'Value ($)',
             dataIndex: 'totalValue',
             key: 'totalValue',
+            render: value => value.toFixed(2) //Set 2 decimal places
         }
     ]
     return (
