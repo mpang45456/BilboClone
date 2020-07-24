@@ -29,7 +29,6 @@ import queryString from 'query-string';
  *      `SO_STATES.PREPARING` status
  */
 export default function WarehouseSalesOrderPage(props) {
-    const { permissionsList } = useAuth();
     return (
         <div>
             <BilboPageHeader
