@@ -85,6 +85,15 @@ export default function ExistingPartsFormSection(props) {
                     >
                         <Input style={{ display: 'none'}} />
                     </Form.Item>
+                    {/* Ensures that latest price info is available for total order value calculation */}
+                    <Form.Item
+                        {...field}
+                        name={[field.name, 'latestPrice']}
+                        fieldKey={[field.fieldKey, 'latestPrice']}
+                        key={`${field.fieldKey}-latestPrice`}
+                    >
+                        <Input style={{ display: 'none'}}></Input>
+                    </Form.Item>
                 </Row>
                 ))}
             </div>

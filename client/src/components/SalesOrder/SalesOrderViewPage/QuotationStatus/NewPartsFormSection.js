@@ -7,6 +7,7 @@ import { bax, redirectToErrorPage } from '../../../../context/AuthContext';
 import CONFIG from '../../../../config';
 import debounce from 'lodash/debounce';
 import queryString from 'query-string';
+import PropTypes from 'prop-types';
 import { theme } from '../../../Theme';
 
 /**
@@ -37,7 +38,7 @@ export default function NewPartsFormSection(props) {
         let filter = JSON.stringify({
             "partNumber": { "$regex": searchValue, "$options": "i"},
         })
-        let query = queryString.stringify({inc: 'partNumber', supplierPopulate: 'name', filter})
+        let query = queryString.stringify({inc: ['partNumber', 'priceHistory'], supplierPopulate: 'name', filter})
         bax.get(`/api/v1/part?${query}`, { withCredentials: true })
             .then(res => {
                 // Ensure correct order of callback
@@ -55,6 +56,24 @@ export default function NewPartsFormSection(props) {
                 redirectToErrorPage(err, history);
             })
     }, CONFIG.DEBOUNCE_LIMIT)
+
+    // Adds latest price to the form
+    // Handler when <Option/> in <Select/> component
+    // is selected. Helps set `latestPrice` field for
+    // a part in the `props.form` state. This is required
+    // for computing the total order value.
+    // Note: `index` is the index of the dynamically added field
+    const onSelect = (index, option) => {
+        // Find selected part and its latest price
+        const selectedPartIndex = partSearches[index].partsData.findIndex(data => data._id === option.key);
+        const priceHistory = partSearches[index].partsData[selectedPartIndex].priceHistory;
+        const selectedPartLatestPrice = priceHistory[priceHistory.length - 1].unitPrice;
+
+        // Set latest price in form's state
+        const newPartsFormValues = props.form.getFieldsValue().partsNew;
+        newPartsFormValues[index].latestPrice = selectedPartLatestPrice;
+        props.form.setFieldsValue({'partsNew': newPartsFormValues});
+    }
 
     return (
         <Form.List name="partsNew">
@@ -75,6 +94,7 @@ export default function NewPartsFormSection(props) {
                                 notFoundContent={partSearches[index].isGettingPartData ? <Spin size='small'/>: null}
                                 filterOption={false}
                                 showSearch={true}
+                                onSelect={(_, option) => onSelect(index, option)}
                                 onSearch={(searchValue) => getPartData(searchValue, index)} >
                             {
                                 partSearches[index].partsData.map(partData => {
@@ -141,4 +161,7 @@ export default function NewPartsFormSection(props) {
         }}
         </Form.List>
     )
+}
+NewPartsFormSection.propTypes = {
+    form: PropTypes.object.isRequired,
 }
