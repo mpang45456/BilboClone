@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { BilboDividerWithText, 
+         BilboDivider,
          BilboPageHeader, 
+         BilboCollapse,
          BilboCard } from './UtilComponents';
-import { Statistic, Card, Col, Row, Table, DatePicker, Form, Button } from 'antd';
+import { Statistic, Collapse, Col, Row, Table, DatePicker, Form, Button } from 'antd';
+const { Panel } = Collapse;
 const { RangePicker } = DatePicker;
 import PropTypes from 'prop-types';
 import { bax, redirectToErrorPage } from '../context/AuthContext';
@@ -129,30 +132,17 @@ function UserStatisticsCard(props) {
                         />
                     </Col>
                 </Row>
-                {/* Statistics Breakdown (Sales Order) */}
-                {
-                    props.userStatistics.salesOrders.length !== 0
-                    ? <div>
-                        <BilboDividerWithText orientation='left'>
-                            Sales Order Breakdown
-                        </BilboDividerWithText>
+
+                {/* Statistics Breakdown (Sales and Purchase Orders) */}
+                <BilboDivider />
+                <BilboCollapse ghost={true} style={{}}>
+                    <Panel header='Sales Order Breakdown'> 
                         <OrderBreakDown allOrders={props.userStatistics.salesOrders} />
-                    </div>
-                    : null
-                }
-                {/* Statistics Breakdown (Purchase Order) */}
-                {
-                    props.userStatistics.purchaseOrders.length !== 0
-                    ? <div>
-                        <BilboDividerWithText orientation='left'>
-                            Purchase Order Breakdown
-                        </BilboDividerWithText>
+                    </Panel>
+                    <Panel header='Purchase Order Breakdown'> 
                         <OrderBreakDown allOrders={props.userStatistics.purchaseOrders} />
-                    </div>
-                    : null
-                }
-
-
+                    </Panel>
+                </BilboCollapse>
             </BilboCard>
         </Col>
 

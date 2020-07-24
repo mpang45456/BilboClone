@@ -4,7 +4,7 @@ import { PageHeader, Row, Dropdown,
          Button, Spin, Descriptions, 
          Divider, Input, Select, Tag,
          Timeline, Steps, Tabs,
-         Statistic, Card } from 'antd';
+         Statistic, Card, Collapse } from 'antd';
 const { Step } = Steps;
 const { Option } = Select;
 import { EllipsisOutlined, 
@@ -620,3 +620,14 @@ export const BilboCard = styled(Card)`
         background: ${props => props.theme.colors.lightGrey};
     }
 `;
+
+export const BilboCollapse = styled(Collapse)`
+    &.ant-collapse {
+        background: none;
+        border: none;
+    }
+
+    &.ant-collapse .ant-collapse-item {
+        border: none;
+    }
+`
