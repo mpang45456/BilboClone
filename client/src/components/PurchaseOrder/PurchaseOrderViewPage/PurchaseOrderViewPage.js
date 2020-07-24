@@ -84,10 +84,11 @@ export default function PurchaseOrderViewPage(props) {
 
             // Populate State Data with Part's Part Number and Supplier Name
             await Promise.all(stateData.parts.map(async part => {
-                const query = queryString.stringify({inc: ['partNumber'], supplierPopulate: ['name']});
+                const query = queryString.stringify({inc: ['partNumber', 'priceHistory'], supplierPopulate: ['name']});
                 await bax.get(`/api/v1/part/${part.part}?${query}`)
                          .then(res => {
                              part.partNumber = `${res.data.partNumber} (${res.data.supplier.name})`;
+                             part.latestPrice = res.data.priceHistory[res.data.priceHistory.length - 1].unitPrice;
                          })
             })).then(_ => {
                 setPurchaseOrderStateData(stateData);

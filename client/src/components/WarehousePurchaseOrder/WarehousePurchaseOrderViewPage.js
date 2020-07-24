@@ -30,10 +30,10 @@ export default function WarehousePurchaseOrderViewPage(props) {
             await bax.get(`/api/v1/warehouse/purchaseOrder/${props.match.params.purchaseOrderID}`)
                 .then(res => {
                     if (res.status === 200) {
-                        console.log(res.data);
                         // Transform partNumber to include supplier name
                         res.data.state.parts.map(partInfo => {
                             partInfo.partNumber = `${partInfo.part.partNumber} (${partInfo.part.supplier.name})`
+                            partInfo.latestPrice = partInfo.part.priceHistory[partInfo.part.priceHistory.length - 1].unitPrice;
                         })
                         setPurchaseOrderStateData(res.data.state);
                         const metaData = JSON.parse(JSON.stringify(res.data));

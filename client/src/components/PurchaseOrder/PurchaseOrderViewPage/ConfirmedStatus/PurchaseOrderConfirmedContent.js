@@ -1,10 +1,7 @@
 import React from 'react';
-import { BilboDividerWithText,
-         BilboDivider } from '../../../UtilComponents';
+import { BilboDividerWithText } from '../../../UtilComponents';
 import PropTypes from 'prop-types';
 import CollapsiblePurchaseOrderDataDisplay from '../CollapsiblePurchaseOrderDataDisplay';
-import { PO_STATES } from '../../../../../../server/data/databaseEnum';
-import ConfirmAndProceedButton from '../ConfirmAndProceedButton';
 
 /**
  * React Component to render content for Purchase Orders
@@ -18,13 +15,6 @@ export default function PurchaseOrderConfirmedContent(props) {
             <CollapsiblePurchaseOrderDataDisplay 
                 purchaseOrderMetaData={props.purchaseOrderMetaData} 
                 purchaseOrderStateData={props.purchaseOrderStateData} 
-            />
-            
-            {/* TODO: Remove this after debugging. This is meant for warehouse user only */}
-            <BilboDivider />
-            <ConfirmAndProceedButton nextState={PO_STATES.RECEIVED}
-                                     purchaseOrderMetaData={props.purchaseOrderMetaData}
-                                     purchaseOrderStateData={props.purchaseOrderStateData}
             />
         </>
     )
