@@ -3,8 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 
 const logger = require('../../../../utils');
-const { PartModel, 
-        CustomerModel, 
+const { UserModel,
         SalesOrderModel, 
         SalesOrderStateModel, 
         PurchaseOrderModel, 
@@ -13,7 +12,6 @@ const { SO_STATES, PO_STATES } = require('../../../../data/databaseEnum');
 const { isAuthenticated, isAuthorized } = require('../auth/auth');
 const { setUserHierarchy } = require('../user/hierarachy');
 const { PERMS } = require('../auth/permissions');
-const CONFIG = require('../../../../config');
 
 // Router Set-Up
 router.use(isAuthenticated);
@@ -61,6 +59,7 @@ router.use(isAuthenticated);
  *              orderNumber: String
  *              totalValue: Number
  *          }],
+ *          name: String (actual name of user)
  *      }
  * }
  */
@@ -125,6 +124,10 @@ router.get('/',
             poStatistic.purchaseOrders.push(statistic);
         }))
         resBody[username].purchaseOrders = poStatistic.purchaseOrders;
+
+        // Prepare actual name of user
+        const userDoc = await UserModel.findOne({ username });
+        resBody[username].name = userDoc.name;
     }));
     
     res.send(resBody);
