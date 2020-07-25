@@ -53,7 +53,7 @@ const users = [
                         PERMS.CUSTOMER_READ, PERMS.CUSTOMER_WRITE, 
                         PERMS.SALES_ORDER_READ, PERMS.SALES_ORDER_WRITE,
                         PERMS.PURCHASE_ORDER_READ, PERMS.PURCHASE_ORDER_WRITE],
-        "name": "Gandalf",
+        "name": "Legolas",
         "position": "Sales Intern",
         "reportsTo": "user1"
     },
