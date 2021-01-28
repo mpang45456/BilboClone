@@ -3,12 +3,12 @@ const router = express.Router();
 const mongoose = require('mongoose');
 
 const logger = require('../../../../utils');
-const { PartModel, 
-        CustomerModel, 
-        SalesOrderModel, 
-        SalesOrderStateModel, 
-        PurchaseOrderModel, 
-        PurchaseOrderStateModel } = require('../../../../data/database');
+const { PartModel,
+    CustomerModel,
+    SalesOrderModel,
+    SalesOrderStateModel,
+    PurchaseOrderModel,
+    PurchaseOrderStateModel } = require('../../../../data/database');
 const { SO_STATES } = require('../../../../data/databaseEnum');
 const { isAuthenticated, isAuthorized } = require('../auth/auth');
 const { setUserHierarchy } = require('../user/hierarachy');
@@ -65,58 +65,58 @@ router.use(isAuthenticated);
  * Note: response includes `salesOrders`, `totalPages` and
  * `currentPage`.
  */
-router.get('/', 
-           isAuthorized(PERMS.SALES_ORDER_READ),
-           setUserHierarchy, 
-           async function(req, res) {
-    let {
-        page = 1, 
-        limit = CONFIG.DEFAULT_PAGE_LIMIT, 
-        inc = ['createdBy', 'orderNumber', 'latestStatus', 'customer', 'additionalInfo', 'orders'],
-        sort = ['latestStatus', 'orderNumber'],
-        filter = {} // FIXME: Using the req params directly as the filter to the Mongoose query might pose a significant security risk
-    } = req.query;
+router.get('/',
+    isAuthorized(PERMS.SALES_ORDER_READ),
+    setUserHierarchy,
+    async function (req, res) {
+        let {
+            page = 1,
+            limit = CONFIG.DEFAULT_PAGE_LIMIT,
+            inc = ['createdBy', 'orderNumber', 'latestStatus', 'customer', 'additionalInfo', 'orders'],
+            sort = ['latestStatus', 'orderNumber'],
+            filter = {} // FIXME: Using the req params directly as the filter to the Mongoose query might pose a significant security risk
+        } = req.query;
 
-    // Convert `inc`/`sort` to array if only a single field is specified
-    if (!Array.isArray(inc)) { inc = [inc]; }
-    if (!Array.isArray(sort)) { sort = [sort]; }
+        // Convert `inc`/`sort` to array if only a single field is specified
+        if (!Array.isArray(inc)) { inc = [inc]; }
+        if (!Array.isArray(sort)) { sort = [sort]; }
 
-    // Convert filter to object
-    if (typeof filter === 'string') {
-        filter = JSON.parse(filter);
-    }
-
-    // Add UserHierarchy to Filter
-    if (!filter.createdBy) {
-        filter.createdBy = { "$in": req.userHierarchy };
-    } else {
-        filter.createdBy["$in"] = req.userHierarchy;
-    }
-
-    // Convert to Number
-    limit = Number(limit);
-    page = Number(page);
-
-    try {
-        const options = {
-            limit,  
-            skip: (page - 1) * limit,
-            sort: sort.join(' '),
+        // Convert filter to object
+        if (typeof filter === 'string') {
+            filter = JSON.parse(filter);
         }
-        let salesOrders = await SalesOrderModel.find(filter, inc.join(' '), options)
-                                               .populate('customer', 'name');
 
-        const totalNumSalesOrders = await SalesOrderModel.countDocuments(filter);
-        return res.status(200).json({
-            salesOrders,
-            totalPages: Math.ceil(totalNumSalesOrders / limit),
-            currentPage: page
-        });
-    } catch(err) {
-        logger.error(`GET /salesOrder: Could not get sales order meta-data: ${err}`);
-        return res.sendStatus(400);
-    }
-})
+        // Add UserHierarchy to Filter
+        if (!filter.createdBy) {
+            filter.createdBy = { "$in": req.userHierarchy };
+        } else {
+            filter.createdBy["$in"] = req.userHierarchy;
+        }
+
+        // Convert to Number
+        limit = Number(limit);
+        page = Number(page);
+
+        try {
+            const options = {
+                limit,
+                skip: (page - 1) * limit,
+                sort: sort.join(' '),
+            }
+            let salesOrders = await SalesOrderModel.find(filter, inc.join(' '), options)
+                .populate('customer', 'name');
+
+            const totalNumSalesOrders = await SalesOrderModel.countDocuments(filter);
+            return res.status(200).json({
+                salesOrders,
+                totalPages: Math.ceil(totalNumSalesOrders / limit),
+                currentPage: page
+            });
+        } catch (err) {
+            logger.error(`GET /salesOrder: Could not get sales order meta-data: ${err}`);
+            return res.sendStatus(400);
+        }
+    })
 
 /**
  * Mounted on /api/v1/salesOrder
@@ -145,36 +145,40 @@ router.get('/',
  * the `ref` in the database. 
  */
 router.post('/',
-            isAuthorized(PERMS.SALES_ORDER_WRITE),
-            async function(req, res) {
-    const { customerName, additionalInfo } = req.body;
-    try {
-        const customerDoc = await CustomerModel.findOne({ name: customerName });
-        if (!customerDoc) { return res.status(400).send('Customer not found'); }
+    isAuthorized(PERMS.SALES_ORDER_WRITE),
+    async function (req, res) {
+        const { customerName, additionalInfo } = req.body;
+        try {
+            const customerDoc = await CustomerModel.findOne({ name: customerName });
+            if (!customerDoc) { return res.status(400).send('Customer not found'); }
 
-        const newSalesOrder = new SalesOrderModel({ createdBy: req.user.username,
-                                                    latestStatus: SO_STATES.QUOTATION, 
-                                                    customer: customerDoc.id,
-                                                    additionalInfo,
-                                                    orders: [] })
-        const newSalesOrderState = new SalesOrderStateModel({ status: SO_STATES.QUOTATION,
-                                                              additionalInfo: '',
-                                                              parts: [],
-                                                              updatedBy: req.user.username });
-        
-        await newSalesOrderState.save();
-        newSalesOrder.orders.push(newSalesOrderState);
-        await newSalesOrder.setOrderNumber()
-        await newSalesOrder.save();
-        
-        return res.status(200).json(newSalesOrder);
-    } catch(err) {
-        // No checks for duplicate order number because they are 
-        // generated by the system and guaranteed to be unique
-        logger.error(`POST /salesOrder: Could not create new salesOrder: ${err}`);
-        return res.status(400).send('Unable to create new salesOrder');
-    }
-})
+            const newSalesOrder = new SalesOrderModel({
+                createdBy: req.user.username,
+                latestStatus: SO_STATES.QUOTATION,
+                customer: customerDoc.id,
+                additionalInfo,
+                orders: []
+            })
+            const newSalesOrderState = new SalesOrderStateModel({
+                status: SO_STATES.QUOTATION,
+                additionalInfo: '',
+                parts: [],
+                updatedBy: req.user.username
+            });
+
+            await newSalesOrderState.save();
+            newSalesOrder.orders.push(newSalesOrderState);
+            await newSalesOrder.setOrderNumber()
+            await newSalesOrder.save();
+
+            return res.status(200).json(newSalesOrder);
+        } catch (err) {
+            // No checks for duplicate order number because they are 
+            // generated by the system and guaranteed to be unique
+            logger.error(`POST /salesOrder: Could not create new salesOrder: ${err}`);
+            return res.status(400).send('Unable to create new salesOrder');
+        }
+    })
 
 /**
  * Mounted on /api/v1/salesOrder/:salesOrderObjID
@@ -193,28 +197,28 @@ router.post('/',
  * in every response.
  */
 router.get('/:salesOrderObjID',
-           isAuthorized(PERMS.SALES_ORDER_READ),
-           setUserHierarchy, 
-           async function(req, res) {
-    try {
-        let salesOrderDoc = await SalesOrderModel.findOne({ _id: req.params.salesOrderObjID })
-                                                 .populate('customer', 'name');
-        if (!salesOrderDoc) { 
-            return res.status(400).send('Invalid Sales Order ID'); 
-        }
-        if (!req.userHierarchy.includes(salesOrderDoc.createdBy)) { 
-            return res.sendStatus(403); 
-        }
+    isAuthorized(PERMS.SALES_ORDER_READ),
+    setUserHierarchy,
+    async function (req, res) {
+        try {
+            let salesOrderDoc = await SalesOrderModel.findOne({ _id: req.params.salesOrderObjID })
+                .populate('customer', 'name');
+            if (!salesOrderDoc) {
+                return res.status(400).send('Invalid Sales Order ID');
+            }
+            if (!req.userHierarchy.includes(salesOrderDoc.createdBy)) {
+                return res.sendStatus(403);
+            }
 
-        return res.status(200).json(salesOrderDoc);
-    } catch(err) {
-        logger.error(`GET /salesOrder/:salesOrderObjID: Could not get sales order: ${err}`);
-        if (err instanceof mongoose.Error.CastError) {
-            return res.status(400).send('Invalid Sales Order ID');
+            return res.status(200).json(salesOrderDoc);
+        } catch (err) {
+            logger.error(`GET /salesOrder/:salesOrderObjID: Could not get sales order: ${err}`);
+            if (err instanceof mongoose.Error.CastError) {
+                return res.status(400).send('Invalid Sales Order ID');
+            }
+            return res.sendStatus(500);
         }
-        return res.sendStatus(500);
-    }
-})
+    })
 
 /**
  * Mounted on '/api/v1/salesOrder/:salesOrderObjID/state
@@ -242,34 +246,34 @@ router.get('/:salesOrderObjID',
  * 2. User hierarchy checks
  */
 router.get('/:salesOrderObjID/state',
-           isAuthorized(PERMS.SALES_ORDER_READ),
-           setUserHierarchy,
-           async function(req, res) {
-    try {
-        let salesOrderDoc = await SalesOrderModel.findOne({ _id: req.params.salesOrderObjID });
-        // Check if user is within user hierarchy for sales order
-        if (!req.userHierarchy.includes(salesOrderDoc.createdBy)) { 
-            return res.status(403).send('Unauthorized: User Hierarchy'); 
-        }
+    isAuthorized(PERMS.SALES_ORDER_READ),
+    setUserHierarchy,
+    async function (req, res) {
+        try {
+            let salesOrderDoc = await SalesOrderModel.findOne({ _id: req.params.salesOrderObjID });
+            // Check if user is within user hierarchy for sales order
+            if (!req.userHierarchy.includes(salesOrderDoc.createdBy)) {
+                return res.status(403).send('Unauthorized: User Hierarchy');
+            }
 
-        // Query Parameters
-        let {
-            inc = ['status', 'additionalInfo', 'parts', 'updatedBy'],
-        } = req.query;
-    
-        // Convert `inc` to array if only a single field is specified
-        if (!Array.isArray(inc)) { inc = [inc]; }
-    
-        await salesOrderDoc.populate('orders', inc.join(' ')).execPopulate();
-        return res.status(200).json(salesOrderDoc.orders);
-    } catch (err) {
-        logger.error(`GET /salesOrder/:salesOrderObjID/state: Could not get sales order states: ${err}`);
-        if (err instanceof mongoose.Error.CastError) {
-            return res.status(400).send('Invalid Sales Order ID');
+            // Query Parameters
+            let {
+                inc = ['status', 'additionalInfo', 'parts', 'updatedBy'],
+            } = req.query;
+
+            // Convert `inc` to array if only a single field is specified
+            if (!Array.isArray(inc)) { inc = [inc]; }
+
+            await salesOrderDoc.populate('orders', inc.join(' ')).execPopulate();
+            return res.status(200).json(salesOrderDoc.orders);
+        } catch (err) {
+            logger.error(`GET /salesOrder/:salesOrderObjID/state: Could not get sales order states: ${err}`);
+            if (err instanceof mongoose.Error.CastError) {
+                return res.status(400).send('Invalid Sales Order ID');
+            }
+            return res.sendStatus(500);
         }
-        return res.sendStatus(500);
-    }
-})
+    })
 
 /**
  * Creates a new state for the sales order identified
@@ -308,62 +312,75 @@ router.get('/:salesOrderObjID/state',
  * - status can only move forward.
  */
 router.post('/:salesOrderObjID/state',
-            isAuthorized(PERMS.SALES_ORDER_WRITE),
-            setUserHierarchy,
-            async function(req, res) {
-    try {
-        // Check for valid Sales Order document
-        let salesOrderDoc = await SalesOrderModel.findOne({ _id: req.params.salesOrderObjID });
-        if (!salesOrderDoc) { 
-            return res.status(400).send('Invalid Sales Order ID'); 
-        }
-        
-        // Check if user is within user hierarchy for sales order
-        if (!req.userHierarchy.includes(salesOrderDoc.createdBy)) { 
-            return res.status(403).send('Unauthorized: User Hierarchy'); 
-        }
-
-        let { status, additionalInfo, parts } = req.body;
-        const newSOStateDoc = new SalesOrderStateModel({ status: status || salesOrderDoc.latestStatus, 
-                                                         additionalInfo, 
-                                                         parts,
-                                                         updatedBy: req.user.username });
-        
-        // Check that partObjID is valid and corresponds to an actual part
-        for (let part of parts) {
-            const partDoc = await PartModel.findOne({ _id: part.part });
-            if (!partDoc) { return res.status(400).send('Invalid Part ID'); }
-        }
-
-        // Perform Allocation of Parts to Purchase Orders
-        if (status === SO_STATES.CONFIRMED) {
-            // Allocation is only performed if the new state status is CONFIRMED
-            const latestSOStateDoc = await SalesOrderStateModel.findOne({ _id: salesOrderDoc.orders[salesOrderDoc.orders.length - 1]});
-            
-            // Reversion is only necessary if the previous state also had CONFIRMED status
-            // Because allocation is only performed if status is CONFIRMED
-            if (latestSOStateDoc.status === SO_STATES.CONFIRMED) {
-                await revertAllocations(latestSOStateDoc, salesOrderDoc._id);
+    isAuthorized(PERMS.SALES_ORDER_WRITE),
+    setUserHierarchy,
+    async function (req, res) {
+        try {
+            // Check for valid Sales Order document
+            let salesOrderDoc = await SalesOrderModel.findOne({ _id: req.params.salesOrderObjID });
+            if (!salesOrderDoc) {
+                return res.status(400).send('Invalid Sales Order ID');
             }
-    
-            performAllocations(parts, salesOrderDoc._id);
-        }
-                                                        
-        // Update Sales Order Meta Data
-        salesOrderDoc.latestStatus = status;
-        salesOrderDoc.orders.push(newSOStateDoc);
-        await salesOrderDoc.save();
-        await newSOStateDoc.save();
 
-        return res.status(200).json(newSOStateDoc);
-    } catch (err) {
-        logger.error(`POST /salesOrder/:salesOrderObjID/state: Could not create new sales order state: ${err}`);
-        if (err instanceof mongoose.Error.CastError) {
-            return res.status(400).send('Invalid Sales Order ID');
+            // Check if user is within user hierarchy for sales order
+            if (!req.userHierarchy.includes(salesOrderDoc.createdBy)) {
+                return res.status(403).send('Unauthorized: User Hierarchy');
+            }
+
+            let { status, additionalInfo, parts } = req.body;
+            const newSOStateDoc = new SalesOrderStateModel({
+                status: status || salesOrderDoc.latestStatus,
+                additionalInfo,
+                parts,
+                updatedBy: req.user.username
+            });
+            // Check that partObjID is valid and corresponds to an actual part
+            for (let part of parts) {
+                const partDoc = await PartModel.findOne({ _id: part.part });
+                if (!partDoc) { return res.status(400).send('Invalid Part ID'); }
+                let data = await PartModel.findOneAndUpdate({ _id: part.part }, {
+                    "$push": {
+                        priceHistory: {
+                            createdBy: req.user.username,
+                            unitPrice: partDoc.priceHistory[partDoc.priceHistory.length - 1].unitPrice,
+                            unitPurchasePrice: partDoc.priceHistory[partDoc.priceHistory.length - 1].unitPurchasePrice,
+                            unitSellingPrice: part.unitSellingPrice,
+                            additionalInfo: "Sales order Price Update"
+                        }
+                    }
+                },{new:true})
+                console.log(data)
+            }
+
+            // Perform Allocation of Parts to Purchase Orders
+            if (status === SO_STATES.CONFIRMED) {
+                // Allocation is only performed if the new state status is CONFIRMED
+                const latestSOStateDoc = await SalesOrderStateModel.findOne({ _id: salesOrderDoc.orders[salesOrderDoc.orders.length - 1] });
+
+                // Reversion is only necessary if the previous state also had CONFIRMED status
+                // Because allocation is only performed if status is CONFIRMED
+                if (latestSOStateDoc.status === SO_STATES.CONFIRMED) {
+                    await revertAllocations(latestSOStateDoc, salesOrderDoc._id);
+                }
+
+                performAllocations(parts, salesOrderDoc._id);
+            }
+
+            // Update Sales Order Meta Data
+            salesOrderDoc.latestStatus = status;
+            salesOrderDoc.orders.push(newSOStateDoc);
+            await salesOrderDoc.save();
+            await newSOStateDoc.save();
+
+            return res.status(200).json(newSOStateDoc);
+        } catch (err) {
+            logger.error(`POST /salesOrder/:salesOrderObjID/state: Could not create new sales order state: ${err}`);
+            if (err instanceof mongoose.Error.CastError) {
+                return res.status(400).send('Invalid Sales Order ID');
+            }
+            return res.sendStatus(500);
         }
-        return res.sendStatus(500);
-    }
-})
+    })
 
 /**
  * Revert the allocations stated in `soStateDoc`.
@@ -385,7 +402,7 @@ async function revertAllocations(soStateDoc, salesOrderObjID) {
     // Perform reversions
     for (let poObjID of allUniquePOs) {
         let poDoc = await PurchaseOrderModel.findOne({ _id: poObjID });
-        let poLatestStateDoc = await PurchaseOrderStateModel.findOne({ _id: poDoc.orders[poDoc.orders.length - 1]});
+        let poLatestStateDoc = await PurchaseOrderStateModel.findOne({ _id: poDoc.orders[poDoc.orders.length - 1] });
         poLatestStateDoc.parts.map(partInfo => {
             // Remove the fulfillments associated with the SO
             partInfo.fulfilledFor = partInfo.fulfilledFor.filter(fulfilledForTarget => {
@@ -439,37 +456,37 @@ function performAllocations(partInfos, salesOrderObjID) {
  *    created by a user in the requesting user's user hierarchy
  */
 router.get('/:salesOrderObjID/state/latest',
-           isAuthorized(PERMS.SALES_ORDER_READ),
-           setUserHierarchy,
-           async function(req, res) {
-    try {
-        // Query Parameters
-        let {
-            populateFulfilledBy = 'false',
-        } = req.query;
+    isAuthorized(PERMS.SALES_ORDER_READ),
+    setUserHierarchy,
+    async function (req, res) {
+        try {
+            // Query Parameters
+            let {
+                populateFulfilledBy = 'false',
+            } = req.query;
 
-        let salesOrderDoc = await SalesOrderModel.findOne({ _id: req.params.salesOrderObjID });
-        if (!salesOrderDoc) { return res.status(400).send('Invalid Sales Order ID'); }
-        
-        // Check if user is within user hierarchy for sales order
-        if (!req.userHierarchy.includes(salesOrderDoc.createdBy)) { 
-            return res.status(403).send('Unauthorized: User Hierarchy'); 
-        }
+            let salesOrderDoc = await SalesOrderModel.findOne({ _id: req.params.salesOrderObjID });
+            if (!salesOrderDoc) { return res.status(400).send('Invalid Sales Order ID'); }
 
-        const latestSOStateDoc = await SalesOrderStateModel.findOne({ _id: salesOrderDoc.orders[salesOrderDoc.orders.length - 1]});
-        if (populateFulfilledBy === 'true') {
-            await latestSOStateDoc.populate('parts.fulfilledBy.purchaseOrder').execPopulate();
-        }
+            // Check if user is within user hierarchy for sales order
+            if (!req.userHierarchy.includes(salesOrderDoc.createdBy)) {
+                return res.status(403).send('Unauthorized: User Hierarchy');
+            }
 
-        return res.status(200).json(latestSOStateDoc);
-    } catch(err) {
-        logger.error(`GET /salesOrder/:salesOrderObjID/state/latest: Could not get latest sales order state: ${err}`);
-        if (err instanceof mongoose.Error.CastError) {
-            return res.status(400).send('Invalid Sales Order ID');
+            const latestSOStateDoc = await SalesOrderStateModel.findOne({ _id: salesOrderDoc.orders[salesOrderDoc.orders.length - 1] });
+            if (populateFulfilledBy === 'true') {
+                await latestSOStateDoc.populate('parts.fulfilledBy.purchaseOrder').execPopulate();
+            }
+
+            return res.status(200).json(latestSOStateDoc);
+        } catch (err) {
+            logger.error(`GET /salesOrder/:salesOrderObjID/state/latest: Could not get latest sales order state: ${err}`);
+            if (err instanceof mongoose.Error.CastError) {
+                return res.status(400).send('Invalid Sales Order ID');
+            }
+            return res.sendStatus(500);
         }
-        return res.sendStatus(500);
-    }
-})
+    })
 
 /**
  * Mounted on /api/v1/salesOrder/:salesOrderObjID/state/:index
@@ -491,37 +508,37 @@ router.get('/:salesOrderObjID/state/latest',
  * response. 
  */
 router.get('/:salesOrderObjID/state/:salesOrderStateIndex',
-           isAuthorized(PERMS.SALES_ORDER_READ),
-           setUserHierarchy,
-           async function(req, res) {
-    try {
-        // Query Parameters
-        let {
-            populateFulfilledBy = 'false',
-        } = req.query;
+    isAuthorized(PERMS.SALES_ORDER_READ),
+    setUserHierarchy,
+    async function (req, res) {
+        try {
+            // Query Parameters
+            let {
+                populateFulfilledBy = 'false',
+            } = req.query;
 
-        let salesOrderDoc = await SalesOrderModel.findOne({ _id: req.params.salesOrderObjID });
-        if (!salesOrderDoc) { return res.status(400).send('Invalid Sales Order ID'); }
-        
-        // Check if user is within user hierarchy for sales order
-        if (!req.userHierarchy.includes(salesOrderDoc.createdBy)) { 
-            return res.status(403).send('Unauthorized: User Hierarchy'); 
-        }
+            let salesOrderDoc = await SalesOrderModel.findOne({ _id: req.params.salesOrderObjID });
+            if (!salesOrderDoc) { return res.status(400).send('Invalid Sales Order ID'); }
 
-        const soStateDoc = await SalesOrderStateModel.findOne({ _id: salesOrderDoc.orders[Number(req.params.salesOrderStateIndex)] });
-        if (populateFulfilledBy === 'true') {
-            await soStateDoc.populate('parts.fulfilledBy.purchaseOrder').execPopulate();
-        }
+            // Check if user is within user hierarchy for sales order
+            if (!req.userHierarchy.includes(salesOrderDoc.createdBy)) {
+                return res.status(403).send('Unauthorized: User Hierarchy');
+            }
 
-        return res.status(200).json(soStateDoc);
-    } catch(err) {
-        logger.error(`GET /:salesOrderObjID/state/:salesOrderStateObjID: Could not get sales order state: ${err}`);
-        if (err instanceof mongoose.Error.CastError) {
-            return res.status(400).send('Invalid sales order meta-data/state ID');
+            const soStateDoc = await SalesOrderStateModel.findOne({ _id: salesOrderDoc.orders[Number(req.params.salesOrderStateIndex)] });
+            if (populateFulfilledBy === 'true') {
+                await soStateDoc.populate('parts.fulfilledBy.purchaseOrder').execPopulate();
+            }
+
+            return res.status(200).json(soStateDoc);
+        } catch (err) {
+            logger.error(`GET /:salesOrderObjID/state/:salesOrderStateObjID: Could not get sales order state: ${err}`);
+            if (err instanceof mongoose.Error.CastError) {
+                return res.status(400).send('Invalid sales order meta-data/state ID');
+            }
+            return res.sendStatus(500);
         }
-        return res.sendStatus(500);
-    }
-})
+    })
 
 module.exports = {
     salesOrderRouter: router,

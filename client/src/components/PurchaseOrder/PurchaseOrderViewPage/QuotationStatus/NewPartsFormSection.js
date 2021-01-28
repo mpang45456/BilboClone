@@ -110,7 +110,7 @@ export default function NewPartsFormSection(props) {
                     </Form.Item>
                     <Form.Item
                         {...field}
-                        style={{width: '15%', marginRight: '5px'}}
+                        style={{width: '8%', marginRight: '5px'}}
                         name={[field.name, 'quantity']}
                         fieldKey={[field.fieldKey, 'quantity']}
                         key={`${field.fieldKey}-quantity`}
@@ -118,6 +118,16 @@ export default function NewPartsFormSection(props) {
                     >
                         <InputNumber placeholder="Quantity" style={{ width: '100%' }}/>
                     </Form.Item>
+                                <Form.Item
+                                    {...field}
+                                    style={{ width: '7%', marginRight: '5px' }}
+                                    name={[field.name, 'latestPrice']}
+                                    fieldKey={[field.fieldKey, 'latestPrice']}
+                                    key={`${field.fieldKey}-latestPrice`}
+                                    rules={[{ required: true, message: 'Missing Purchase Price' }]}
+                                >
+                                    <InputNumber placeholder="Purchase Price" style={{ width: '100%' }} />
+                                </Form.Item>
                     <Form.Item
                         {...field}
                         style={{width: '55%', marginRight: '5px'}}

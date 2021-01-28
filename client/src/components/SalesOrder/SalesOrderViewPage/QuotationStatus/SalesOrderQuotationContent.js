@@ -56,8 +56,10 @@ export default function SalesOrderQuotationContent(props) {
             // Prepare existing parts
             let formParts = form.getFieldsValue();
             formParts.partsExisting && formParts.partsExisting.map(partInfo => {
+                console.log("partInfo",partInfo)
                 reqBody.parts.push({
                     part: partInfo.part,
+                    unitSellingPrice:partInfo.latestPrice,
                     quantity: partInfo.quantity,
                     additionalInfo: partInfo.additionalInfo ? partInfo.additionalInfo : '',
                     fulfilledBy: [],
@@ -67,6 +69,7 @@ export default function SalesOrderQuotationContent(props) {
             formParts.partsNew && formParts.partsNew.map(partInfo => {
                 reqBody.parts.push({
                     ...partInfo,
+                    unitSellingPrice:partInfo.latestPrice,
                     additionalInfo: partInfo.additionalInfo ? partInfo.additionalInfo : '',
                     fulfilledBy: [],
                 })
@@ -75,6 +78,7 @@ export default function SalesOrderQuotationContent(props) {
             if (submissionType === 'saveChanges') {
                 reqBody.status = SO_STATES.QUOTATION;
                 setSaveChangesLoading(true);
+                console.log("reqBody",reqBody)
                 bax.post(`/api/v1/salesOrder/${props.salesOrderMetaData._id}/state`, reqBody)
                     .then(res => {
                         if (res.status === 200) {

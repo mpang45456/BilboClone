@@ -99,6 +99,8 @@ const UserModel = mongoose.model('User', UserSchema);
 const PriceHistorySchema = new Schema({
     createdBy: { type: String, required: true }, // User.username
     unitPrice: { type: Number, required: true },
+    unitSellingPrice: { type: Number, required: true },
+    unitPurchasePrice: { type: Number, required: true },
     additionalInfo: { type: String }
 }, { timestamps: true}) // Has `createdAt` and `updatedAt` fields
 

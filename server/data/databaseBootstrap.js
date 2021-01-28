@@ -48,11 +48,11 @@ const users = [
         // Full Supplier and Part API Access. Read/Write Access to Sales Order and Purchase Order APIs.
         "username": "user4",
         "password": "asd",
-        "permissions": [PERMS.PART_READ, PERMS.PART_WRITE, 
-                        PERMS.SUPPLIER_READ, PERMS.SUPPLIER_WRITE,
-                        PERMS.CUSTOMER_READ, PERMS.CUSTOMER_WRITE, 
-                        PERMS.SALES_ORDER_READ, PERMS.SALES_ORDER_WRITE,
-                        PERMS.PURCHASE_ORDER_READ, PERMS.PURCHASE_ORDER_WRITE],
+        "permissions": [PERMS.PART_READ, PERMS.PART_WRITE,
+        PERMS.SUPPLIER_READ, PERMS.SUPPLIER_WRITE,
+        PERMS.CUSTOMER_READ, PERMS.CUSTOMER_WRITE,
+        PERMS.SALES_ORDER_READ, PERMS.SALES_ORDER_WRITE,
+        PERMS.PURCHASE_ORDER_READ, PERMS.PURCHASE_ORDER_WRITE],
         "name": "Legolas",
         "position": "Sales Intern",
         "reportsTo": "user1"
@@ -74,10 +74,14 @@ const suppliers = [
                 priceHistory: [{
                     createdBy: `${users[0].username}`,
                     unitPrice: 0.0001,
+                    unitSellingPrice: 0.0001,
+                    unitPurchasePrice: 0.0001,
                     additionalInfo: 'Cheap Product'
                 }, {
                     createdBy: `${users[0].username}`,
                     unitPrice: 0.0002,
+                    unitSellingPrice: 0.0002,
+                    unitPurchasePrice: 0.0002,
                     additionalInfo: 'Product price double owing to supply constraints'
                 }],
                 description: 'A hammer',
@@ -98,10 +102,14 @@ const suppliers = [
                 priceHistory: [{
                     createdBy: `${users[0].username}`,
                     unitPrice: 0.0001,
+                    unitSellingPrice: 0.0001,
+                    unitPurchasePrice: 0.0001,
                     additionalInfo: 'Cheap Product'
                 }, {
                     createdBy: `${users[0].username}`,
                     unitPrice: 0.0002,
+                    unitSellingPrice: 0.0002,
+                    unitPurchasePrice: 0.0002,
                     additionalInfo: 'Product price double owing to supply constraints'
                 }],
                 description: 'A nail',
@@ -132,10 +140,14 @@ const suppliers = [
                 priceHistory: [{
                     createdBy: `${users[0].username}`,
                     unitPrice: 0.00015,
+                    unitSellingPrice: 0.00015,
+                    unitPurchasePrice: 0.00015,
                     additionalInfo: 'Price stands at $15/10000 units'
                 }, {
                     createdBy: `${users[0].username}`,
                     unitPrice: 0.00001,
+                    unitSellingPrice: 0.00001,
+                    unitPurchasePrice: 0.00001,
                     additionalInfo: 'Steep discount if purchased together with part PN121'
                 }],
                 description: 'An Arduino Board',
@@ -146,9 +158,13 @@ const suppliers = [
                 priceHistory: [{
                     createdBy: `${users[0].username}`,
                     unitPrice: 0.023,
+                    unitSellingPrice: 0.023,
+                    unitPurchasePrice: 0.023,
                 }, {
                     createdBy: `${users[0].username}`,
                     unitPrice: 0.040,
+                    unitSellingPrice: 0.040,
+                    unitPurchasePrice: 0.040,
                     additionalInfo: 'Increase in price owing to disruption in supply chain'
                 }],
                 description: 'RFID receiver',
@@ -159,17 +175,25 @@ const suppliers = [
                 priceHistory: [{
                     createdBy: `${users[0].username}`,
                     unitPrice: 0.023,
+                    unitSellingPrice: 0.023,
+                    unitPurchasePrice: 0.023,
                 }, {
                     createdBy: `${users[0].username}`,
                     unitPrice: 0.020,
+                    unitSellingPrice: 0.020,
+                    unitPurchasePrice: 0.020,
                     additionalInfo: 'Slight drop in price since last quotation'
                 }, {
                     createdBy: `${users[0].username}`,
                     unitPrice: 0.023,
+                    unitSellingPrice: 0.023,
+                    unitPurchasePrice: 0.023,
                     additionalInfo: 'Slight increase in price since last quotation'
                 }, {
                     createdBy: `${users[0].username}`,
                     unitPrice: 0.040,
+                    unitSellingPrice: 0.040,
+                    unitPurchasePrice: 0.040,
                     additionalInfo: 'Increase in price owing to disruption in supply chain, similar to part BA9871-21Z. Willing to offer a discount if both items are purchased in bulk (in excess of 100 000 units)'
                 }],
                 description: 'RFID transmitter',
@@ -182,11 +206,11 @@ const suppliers = [
 const numSupplierDataFillers = 8;
 for (let i = 0; i < numSupplierDataFillers; i++) {
     let supplier = {
-        name: `No. ${i+1} Industries`,
+        name: `No. ${i + 1} Industries`,
         address: `Blk 10${i} Woodlands Industrial Avenue`,
         telephone: `+65 6210000${i}`,
         fax: `+65 6310000${i}`,
-        additionalInfo: `${i+1}-th Suppliers`,
+        additionalInfo: `${i + 1}-th Suppliers`,
     }
     supplier.parts = [];
     for (let j = 0; j < 3; j++) {
@@ -194,15 +218,21 @@ for (let i = 0; i < numSupplierDataFillers; i++) {
             partNumber: `PN10${j}`,
             priceHistory: [{
                 createdBy: `${users[0].username}`,
-                unitPrice: 0.01
+                unitPrice: 0.01,
+                unitSellingPrice: 0.01,
+                unitPurchasePrice: 0.01,
             }, {
                 createdBy: `${users[0].username}`,
-                unitPrice: 0.02
+                unitPrice: 0.02,
+                unitSellingPrice: 0.02,
+                unitPurchasePrice: 0.02,
             }, {
                 createdBy: `${users[0].username}`,
-                unitPrice: 0.03
+                unitPrice: 0.03,
+                unitSellingPrice: 0.03,
+                unitPurchasePrice: 0.03,
             }],
-            description: `Part ${j} by ${i+1}-th Supplier`
+            description: `Part ${j} by ${i + 1}-th Supplier`
         })
     }
     suppliers.push(supplier);
@@ -243,8 +273,8 @@ for (let i = 0; i < numCustomerDataFillers; i++) {
         address: `Blk 10${i} Customer Lane`,
         telephone: `+65 6892000${i}`,
         fax: `+65 6201089${i}`,
-        email: `info@customer${i+1}.com`,
-        pointOfContact: `Point of Contact ${i+1}`,
+        email: `info@customer${i + 1}.com`,
+        pointOfContact: `Point of Contact ${i + 1}`,
         additionalInfo: 'This was an auto-generated customer'
     }
     customers.push(customer);
@@ -260,8 +290,8 @@ const salesOrders = [
         latestStatus: SO_STATES.CONFIRMED,
         customer: customers[0].name,        // Must be translated into Customer ObjID
         orderNumber: 'SO-000001',           // This field is not used by `DatabaseInteractor`
-                                            // `SalesOrderSchema.setOrderNumber()` used instead
-                                            // Just for documentation purposes. 
+        // `SalesOrderSchema.setOrderNumber()` used instead
+        // Just for documentation purposes. 
         additionalInfo: 'First Ever Sales Order!',
         orders: [
             {
@@ -316,8 +346,8 @@ const salesOrders = [
         latestStatus: SO_STATES.CONFIRMED,
         customer: customers[1].name,        // Must be translated into Customer ObjID
         orderNumber: 'SO-000002',           // This field is not used by `DatabaseInteractor`
-                                            // `SalesOrderSchema.setOrderNumber()` used instead
-                                            // Just for documentation purposes. 
+        // `SalesOrderSchema.setOrderNumber()` used instead
+        // Just for documentation purposes. 
         additionalInfo: 'Second Sales Order',
         orders: [
             {
@@ -365,8 +395,8 @@ const salesOrders = [
         latestStatus: SO_STATES.QUOTATION,
         customer: customers[2].name,        // Must be translated into Customer ObjID
         orderNumber: 'SO-000003',           // This field is not used by `DatabaseInteractor`
-                                            // `SalesOrderSchema.setOrderNumber()` used instead
-                                            // Just for documentation purposes. 
+        // `SalesOrderSchema.setOrderNumber()` used instead
+        // Just for documentation purposes. 
         additionalInfo: 'Third Sales Order.',
         orders: [
             {
@@ -390,8 +420,8 @@ const salesOrders = [
         latestStatus: SO_STATES.PREPARING,
         customer: customers[3].name,        // Must be translated into Customer ObjID
         orderNumber: 'SO-000004',           // This field is not used by `DatabaseInteractor`
-                                            // `SalesOrderSchema.setOrderNumber()` used instead
-                                            // Just for documentation purposes. 
+        // `SalesOrderSchema.setOrderNumber()` used instead
+        // Just for documentation purposes. 
         additionalInfo: 'Fourth Sales Order.',
         orders: [
             {
@@ -447,8 +477,8 @@ const purchaseOrders = [
         latestStatus: PO_STATES.CONFIRMED,
         supplier: suppliers[3].name,        // Must be translated into Supplier ObjID
         orderNumber: 'PO-000001',           // This field is not used by `DatabaseInteractor`
-                                            // `SalesOrderSchema.setOrderNumber()` used instead
-                                            // Just for documentation purposes. 
+        // `SalesOrderSchema.setOrderNumber()` used instead
+        // Just for documentation purposes. 
         additionalInfo: 'First Purchase Order',
         orders: [
             {
@@ -508,8 +538,8 @@ const purchaseOrders = [
         latestStatus: PO_STATES.CONFIRMED,
         supplier: suppliers[1].name,        // Must be translated into Supplier ObjID
         orderNumber: 'PO-000002',           // This field is not used by `DatabaseInteractor`
-                                            // `SalesOrderSchema.setOrderNumber()` used instead
-                                            // Just for documentation purposes. 
+        // `SalesOrderSchema.setOrderNumber()` used instead
+        // Just for documentation purposes. 
         additionalInfo: 'Second Purchase Order',
         orders: [
             {
@@ -545,8 +575,8 @@ const purchaseOrders = [
         latestStatus: PO_STATES.QUOTATION,
         supplier: suppliers[3].name,        // Must be translated into Supplier ObjID
         orderNumber: 'PO-000003',           // This field is not used by `DatabaseInteractor`
-                                            // `SalesOrderSchema.setOrderNumber()` used instead
-                                            // Just for documentation purposes. 
+        // `SalesOrderSchema.setOrderNumber()` used instead
+        // Just for documentation purposes. 
         additionalInfo: 'Third Purchase Order',
         orders: [
             {

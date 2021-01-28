@@ -198,6 +198,8 @@ router.post('/',
         if (unitPrice) {
             newPart.priceHistory.push({ createdBy: req.user.username, // set by `isAuthenticated` middleware
                                         unitPrice, 
+                                        unitSellingPrice:unitPrice, 
+                                        unitPurchasePrice:unitPrice, 
                                         additionalInfo: priceAdditionalInfo });
         }
         await newPart.save();
@@ -255,6 +257,8 @@ router.patch('/:partObjID',
             part.priceHistory.push({
                 createdBy: req.user.username, // set by `isAuthenticated` middleware
                 unitPrice: unitPrice, 
+                unitSellingPrice: unitPrice, 
+                unitPurchasePrice: unitPrice, 
                 additionalInfo: priceAdditionalInfo
             })
         }

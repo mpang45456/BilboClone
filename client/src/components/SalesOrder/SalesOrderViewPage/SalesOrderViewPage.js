@@ -78,6 +78,8 @@ export default function SalesOrderViewPage(props) {
             await bax.get(`/api/v1/salesOrder/${props.match.params.salesOrderID}/state/latest?${query}`)
                 .then(res => {
                     if (res.status === 200) {
+                    console.log(res.data)
+
                         stateData = res.data;
                     }
                 }).catch(err => {
@@ -90,7 +92,7 @@ export default function SalesOrderViewPage(props) {
                 await bax.get(`/api/v1/part/${part.part}?${query}`)
                          .then(res => {
                              part.partNumber = `${res.data.partNumber} (${res.data.supplier.name})`;
-                             part.latestPrice = res.data.priceHistory[res.data.priceHistory.length - 1].unitPrice;
+                             part.latestPrice = res.data.priceHistory[res.data.priceHistory.length - 1].unitSellingPrice;
                          })
             })).then(_ => {
                 setSalesOrderStateData(stateData);

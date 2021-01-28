@@ -30,75 +30,85 @@ import { theme } from '../../../Theme';
 export default function ExistingPartsFormSection(props) {
     return (
         <Form.List name="partsExisting">
-        {(fields, { add, remove }) => {
-            return (
-            <div>
-                {fields.map((field, index) => (
-                <Row key={field.key} style={{ width: '100%' }} >
-                    {/* Displays part number, but actually need partObjID during API call */}
-                    <Form.Item
-                        {...field}
-                        name={[field.name, 'partNumber']}
-                        fieldKey={[field.fieldKey, 'partNumber']}
-                        key={`${field.fieldKey}-partNumber`}
-                        style={{width: '20%', marginRight: '5px'}}
-                        rules={[{ required: true, message: 'Missing partNumber' }]}
-                    >
-                        <Input disabled={true}></Input>
-                    </Form.Item>
-                    <Form.Item
-                        {...field}
-                        style={{width: '15%', marginRight: '5px'}}
-                        name={[field.name, 'quantity']}
-                        fieldKey={[field.fieldKey, 'quantity']}
-                        key={`${field.fieldKey}-quantity`}
-                        rules={[{ required: true, message: 'Missing quantity' }]}
-                    >
-                        <InputNumber placeholder="Quantity" style={{ width: '100%' }}/>
-                    </Form.Item>
-                    <Form.Item
-                        {...field}
-                        style={{width: '55%', marginRight: '5px'}}
-                        name={[field.name, 'additionalInfo']}
-                        fieldKey={[field.fieldKey, 'additionalInfo']}
-                        key={`${field.fieldKey}-additionalInfo`}
-                    >
-                        <Input.TextArea placeholder="Additional Information" 
+            {(fields, { add, remove }) => {
+                return (
+                    <div>
+                        {fields.map((field, index) => (
+                            <Row key={field.key} style={{ width: '100%' }} >
+                                {/* Displays part number, but actually need partObjID during API call */}
+                                <Form.Item
+                                    {...field}
+                                    name={[field.name, 'partNumber']}
+                                    fieldKey={[field.fieldKey, 'partNumber']}
+                                    key={`${field.fieldKey}-partNumber`}
+                                    style={{ width: '20%', marginRight: '5px' }}
+                                    rules={[{ required: true, message: 'Missing partNumber' }]}
+                                >
+                                    <Input disabled={true}></Input>
+                                </Form.Item>
+                                <Form.Item
+                                    {...field}
+                                    style={{ width: '8%', marginRight: '5px' }}
+                                    name={[field.name, 'quantity']}
+                                    fieldKey={[field.fieldKey, 'quantity']}
+                                    key={`${field.fieldKey}-quantity`}
+                                    rules={[{ required: true, message: 'Missing quantity' }]}
+                                >
+                                    <InputNumber placeholder="Quantity" style={{ width: '100%' }} />
+                                </Form.Item>
+                                <Form.Item
+                                    {...field}
+                                    style={{ width: '7%', marginRight: '5px' }}
+                                    name={[field.name, 'latestPrice']}
+                                    fieldKey={[field.fieldKey, 'latestPrice']}
+                                    key={`${field.fieldKey}-latestPrice`}
+                                    rules={[{ required: true, message: 'Missing Purchase Price' }]}
+                                >
+                                    <InputNumber placeholder="Purchase Price" style={{ width: '100%' }} />
+                                </Form.Item>
+                                <Form.Item
+                                    {...field}
+                                    style={{ width: '55%', marginRight: '5px' }}
+                                    name={[field.name, 'additionalInfo']}
+                                    fieldKey={[field.fieldKey, 'additionalInfo']}
+                                    key={`${field.fieldKey}-additionalInfo`}
+                                >
+                                    <Input.TextArea placeholder="Additional Information"
                                         rows={1}
-                        />
-                    </Form.Item>
-    
-                    <BilboHoverableIconButton
-                        style={{fontSize: '15px'}}
-                        shape='circle'
-                        transformcolor={theme.colors.brightRed}
-                        onClick={() => { remove(field.name); }} >
-                        <MinusCircleOutlined />
-                    </BilboHoverableIconButton>
-                    
-                    {/* Ensures that form will have partObjID during submission */}
-                    <Form.Item
-                        {...field}
-                        name={[field.name, '_id']}
-                        fieldKey={[field.fieldKey, '_id']}
-                        key={`${field.fieldKey}-part`}
-                    >
-                        <Input style={{ display: 'none'}} />
-                    </Form.Item>
-                    {/* Ensures that latest price info is available for total order value calculation */}
-                    <Form.Item
-                        {...field}
-                        name={[field.name, 'latestPrice']}
-                        fieldKey={[field.fieldKey, 'latestPrice']}
-                        key={`${field.fieldKey}-latestPrice`}
-                    >
-                        <Input style={{ display: 'none'}}></Input>
-                    </Form.Item>
-                </Row>
-                ))}
-            </div>
-            );
-        }}
+                                    />
+                                </Form.Item>
+
+                                <BilboHoverableIconButton
+                                    style={{ fontSize: '15px' }}
+                                    shape='circle'
+                                    transformcolor={theme.colors.brightRed}
+                                    onClick={() => { remove(field.name); }} >
+                                    <MinusCircleOutlined />
+                                </BilboHoverableIconButton>
+
+                                {/* Ensures that form will have partObjID during submission */}
+                                <Form.Item
+                                    {...field}
+                                    name={[field.name, '_id']}
+                                    fieldKey={[field.fieldKey, '_id']}
+                                    key={`${field.fieldKey}-part`}
+                                >
+                                    <Input style={{ display: 'none' }} />
+                                </Form.Item>
+                                {/* Ensures that latest price info is available for total order value calculation */}
+                                <Form.Item
+                                    {...field}
+                                    name={[field.name, 'latestPrice']}
+                                    fieldKey={[field.fieldKey, 'latestPrice']}
+                                    key={`${field.fieldKey}-latestPrice`}
+                                >
+                                    <Input style={{ display: 'none' }}></Input>
+                                </Form.Item>
+                            </Row>
+                        ))}
+                    </div>
+                );
+            }}
         </Form.List>
     )
 }

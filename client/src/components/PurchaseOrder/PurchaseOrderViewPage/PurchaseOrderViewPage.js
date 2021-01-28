@@ -88,7 +88,7 @@ export default function PurchaseOrderViewPage(props) {
                 await bax.get(`/api/v1/part/${part.part}?${query}`)
                          .then(res => {
                              part.partNumber = `${res.data.partNumber} (${res.data.supplier.name})`;
-                             part.latestPrice = res.data.priceHistory[res.data.priceHistory.length - 1].unitPrice;
+                             part.latestPrice = res.data.priceHistory[res.data.priceHistory.length - 1].unitPurchasePrice;
                          })
             })).then(_ => {
                 setPurchaseOrderStateData(stateData);

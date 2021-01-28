@@ -44,7 +44,10 @@ export default function PriceHistoryTabContent(props) {
                             <BilboTimelineWithTrailingEnd.Item label={createdAtTime} 
                                                  key={index}>
                                 <BilboTimelineParagraph>
-                                    {price.unitPrice}
+                                    Selling Price-{price.unitSellingPrice}
+                                </BilboTimelineParagraph>
+                                <BilboTimelineParagraph>
+                                    Purchase Price-{price.unitPurchasePrice}
                                 </BilboTimelineParagraph>
                                 <BilboTimelineParagraphDescription>
                                     {price.additionalInfo}

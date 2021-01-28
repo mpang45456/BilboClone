@@ -320,6 +320,17 @@ router.post('/:purchaseOrderObjID/state',
         for (let part of parts) {
             const partDoc = await PartModel.findOne({ _id: part.part });
             if (!partDoc) { return res.status(400).send('Invalid Part ID'); }
+            let data = await PartModel.findOneAndUpdate({ _id: part.part }, {
+                "$push": {
+                    priceHistory: {
+                        createdBy: req.user.username,
+                        unitPrice: partDoc.priceHistory[partDoc.priceHistory.length - 1].unitPrice,
+                        unitSellingPrice: partDoc.priceHistory[partDoc.priceHistory.length - 1].unitSellingPrice,
+                        unitPurchasePrice: part.unitPurchasePrice,
+                        additionalInfo: "Purchase order Price Update"
+                    }
+                }
+            },{new:true})
         }
                                                         
         // Update Purchase Order Meta Data

@@ -179,12 +179,24 @@ function PartList(props) {
                                                      'part number')
         },
         {
-            title: 'Latest Unit Price ($)',
+            title: 'Latest Unit Selling Price ($)',
             key: 'priceHistory',
             width: '10%',
             render: (text, record) => {
                 if (record.priceHistory[record.priceHistory.length - 1]) {
-                    return record.priceHistory[record.priceHistory.length - 1].unitPrice;
+                    return record.priceHistory[record.priceHistory.length - 1].unitSellingPrice;
+                } else {
+                    return undefined;
+                }
+            }
+        },
+        {
+            title: 'Latest Unit Purchase Price ($)',
+            key: 'priceHistory',
+            width: '10%',
+            render: (text, record) => {
+                if (record.priceHistory[record.priceHistory.length - 1]) {
+                    return record.priceHistory[record.priceHistory.length - 1].unitPurchasePrice;
                 } else {
                     return undefined;
                 }
