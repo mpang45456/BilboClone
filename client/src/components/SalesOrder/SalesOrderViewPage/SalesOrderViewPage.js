@@ -91,10 +91,12 @@ export default function SalesOrderViewPage(props) {
                 const query = queryString.stringify({inc: ['partNumber', 'priceHistory'], supplierPopulate: ['name']});
                 await bax.get(`/api/v1/part/${part.part}?${query}`)
                          .then(res => {
+                             console.log("priceHistory",res.data.priceHistory)
                              part.partNumber = `${res.data.partNumber} (${res.data.supplier.name})`;
                              part.latestPrice = res.data.priceHistory[res.data.priceHistory.length - 1].unitSellingPrice;
                          })
             })).then(_ => {
+                console.log("Data from api",stateData)
                 setSalesOrderStateData(stateData);
                 setIsLoadingSalesOrderDetails(false);
             }).catch(err => {

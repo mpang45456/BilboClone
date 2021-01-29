@@ -33,6 +33,16 @@ export default function PartAllocationFormList(props) {
                         </Form.Item>
                         <Form.Item
                             {...field}
+                            style={{width: '10%', marginRight: '5px'}}
+                            name={[field.name, 'latestPrice']}
+                            fieldKey={[field.fieldKey, 'latestPrice']}
+                            key={`${field.fieldKey}-latestPrice`}
+                            rules={[{ required: true, message: 'Missing selling price' }]}
+                        >
+                            <InputNumber disabled={true} placeholder="Quantity" style={{ width: '100%' }}/>
+                        </Form.Item>
+                        <Form.Item
+                            {...field}
                             style={{width: '30%', marginRight: '5px'}}
                             name={[field.name, 'additionalInfo']}
                             fieldKey={[field.fieldKey, 'additionalInfo']}

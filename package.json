@@ -5,7 +5,7 @@
   "main": "server/server.js",
   "scripts": {
     "start": "NODE_ENV=prod echo \"Meant for prod\"",
-    "start-dev": "NODE_ENV=dev LOG_LEVEL=debug node server/server.js | ./node_modules/.bin/pino-pretty",
+    "start-dev": "NODE_ENV=dev LOG_LEVEL=debug nodemon server/server.js | ./node_modules/.bin/pino-pretty",
     "mongod": "mongod --dbpath ./server/data/db",
     "test-server": "PORT=8002 NODE_ENV=test LOG_LEVEL=silent jest --detectOpenHandles --testTimeout=10000 --forceExit",
     "cypress:open": "cypress open",

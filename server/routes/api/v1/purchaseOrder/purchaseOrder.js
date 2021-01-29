@@ -326,7 +326,7 @@ router.post('/:purchaseOrderObjID/state',
                         createdBy: req.user.username,
                         unitPrice: partDoc.priceHistory[partDoc.priceHistory.length - 1].unitPrice,
                         unitSellingPrice: partDoc.priceHistory[partDoc.priceHistory.length - 1].unitSellingPrice,
-                        unitPurchasePrice: part.unitPurchasePrice,
+                        unitPurchasePrice: part.unitPurchasePrice?part.unitPurchasePrice:(part.latestPrice?part.latestPrice:partDoc.priceHistory[partDoc.priceHistory.length - 1].unitPurchasePrice),
                         additionalInfo: "Purchase order Price Update"
                     }
                 }

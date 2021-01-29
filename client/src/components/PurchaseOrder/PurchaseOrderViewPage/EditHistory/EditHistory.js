@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { BilboTimeline,
-         BilboTimelineParagraph,
-         BilboTimelineParagraphDescription,
-         BilboDividerWithText } from '../../../UtilComponents';
+import {
+    BilboTimeline,
+    BilboTimelineParagraph,
+    BilboTimelineParagraphDescription,
+    BilboDividerWithText
+} from '../../../UtilComponents';
 import { Row, Timeline, Spin } from 'antd';
 import PropTypes from 'prop-types';
 import { bax, redirectToErrorPage } from '../../../../context/AuthContext';
@@ -38,14 +40,14 @@ export default function EditHistory(props) {
 
     useEffect(() => {
         // Load Edit History (to populate <Timeline/>)
-        const query = queryString.stringify({inc: ['createdAt', 'status', 'updatedBy']});
+        const query = queryString.stringify({ inc: ['createdAt', 'status', 'updatedBy'] });
         bax.get(`/api/v1/purchaseOrder/${props.purchaseOrderMetaData._id}/state?${query}`)
             .then(res => {
                 setEditHistory(res.data);
             }).catch(err => {
                 redirectToErrorPage(err, history)
             })
-        
+
         // Get State Data (for selected index, initially set to 0,
         // which is guaranteed to exist)
         getPurchaseOrderStateData(selectedPurchaseOrderStateIndex);
@@ -53,7 +55,7 @@ export default function EditHistory(props) {
 
     // Get State Data for display (on right-hand side)
     const getPurchaseOrderStateData = (index) => {
-        (async function() {
+        (async function () {
             // Get State Data
             let stateData = null;
             const query = queryString.stringify({ populateFulfilledFor: true });
@@ -65,14 +67,15 @@ export default function EditHistory(props) {
                 }).catch(err => {
                     redirectToErrorPage(err, history);
                 })
-    
+
             // Populate State Data with Part's Part Number and Supplier Name
             await Promise.all(stateData.parts.map(async part => {
-                const query = queryString.stringify({inc: ['partNumber'], supplierPopulate: ['name']});
+                const query = queryString.stringify({ inc: ['partNumber', , 'priceHistory'], supplierPopulate: ['name'] });
                 await bax.get(`/api/v1/part/${part.part}?${query}`)
-                         .then(res => {
-                             part.partNumber = `${res.data.partNumber} (${res.data.supplier.name})`;
-                         })
+                    .then(res => {
+                        part.partNumber = `${res.data.partNumber} (${res.data.supplier.name})`;
+                        part.latestPrice = res.data.priceHistory[res.data.priceHistory.length - 1].unitPurchasePrice;
+                    })
             })).then(_ => {
                 setSelectedPurchaseOrderStateData(stateData);
                 setIsLoadingPurchaseOrderStateDetails(false);
@@ -92,11 +95,12 @@ export default function EditHistory(props) {
     return (
         <Row>
             {/* Navigate History of Changes (Left-Side) */}
-            <div style={{width: '30%', 
-                         display: 'inline', 
-                         paddingRight: '20px', 
-                         borderRight: `2px solid ${theme.colors.deepRed}`
-                        }}
+            <div style={{
+                width: '30%',
+                display: 'inline',
+                paddingRight: '20px',
+                borderRight: `2px solid ${theme.colors.deepRed}`
+            }}
             >
                 <BilboDividerWithText orientation='left'>History of Changes</BilboDividerWithText>
                 <BilboTimeline mode='left'>
@@ -104,15 +108,15 @@ export default function EditHistory(props) {
                         editHistory.map((editHistoryInstance, index) => {
                             let createdAtTime = moment(editHistoryInstance.createdAt).format('Do MMM YY, h:mm:ss');
                             return (
-                                <Timeline.Item label={createdAtTime} 
-                                               key={index} 
-                                               onClick={() => onTimelineItemClick(index)}
-                                               color={index === selectedPurchaseOrderStateIndex ? 'blue' : 'gray' }
+                                <Timeline.Item label={createdAtTime}
+                                    key={index}
+                                    onClick={() => onTimelineItemClick(index)}
+                                    color={index === selectedPurchaseOrderStateIndex ? 'blue' : 'gray'}
                                 >
                                     <BilboTimelineParagraph>
                                         {`Status: ${CONFIG.PURCHASE_ORDER_STEPS[CONFIG.PURCHASE_ORDER_STEPS.findIndex(statusObj => statusObj.status === editHistoryInstance.status)].title}`}
                                     </BilboTimelineParagraph>
-                                    <BilboTimelineParagraphDescription style={{fontStyle: 'italic'}}>
+                                    <BilboTimelineParagraphDescription style={{ fontStyle: 'italic' }}>
                                         <strong>- {editHistoryInstance.updatedBy}</strong>
                                     </BilboTimelineParagraphDescription>
                                 </Timeline.Item>
@@ -122,16 +126,17 @@ export default function EditHistory(props) {
                 </BilboTimeline>
             </div>
             {/* Display State Data Snapshot (Right-Side) */}
-            <div style={{width: '70%', display: 'inline', paddingLeft: '20px'}}>
-                <PurchaseOrderMetaDataDisplaySection 
+            <div style={{ width: '70%', display: 'inline', paddingLeft: '20px' }}>
+                <PurchaseOrderMetaDataDisplaySection
                     purchaseOrderMetaData={props.purchaseOrderMetaData}
                 />
                 {
                     isEmpty(selectedPurchaseOrderStateData)
-                    ? <Spin spinning={isLoadingPurchaseOrderStateDetails} />
-                    : <PurchaseOrderStateDataDisplaySection 
-                        purchaseOrderStateData={selectedPurchaseOrderStateData}
-                      />
+                        ? <Spin spinning={isLoadingPurchaseOrderStateDetails} />
+                        : <PurchaseOrderStateDataDisplaySection
+                            smallContainer={true}
+                            purchaseOrderStateData={selectedPurchaseOrderStateData}
+                        />
                 }
             </div>
         </Row>

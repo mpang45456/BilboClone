@@ -338,17 +338,18 @@ router.post('/:salesOrderObjID/state',
             for (let part of parts) {
                 const partDoc = await PartModel.findOne({ _id: part.part });
                 if (!partDoc) { return res.status(400).send('Invalid Part ID'); }
+                console.log("this is how it is called", part)
                 let data = await PartModel.findOneAndUpdate({ _id: part.part }, {
                     "$push": {
                         priceHistory: {
                             createdBy: req.user.username,
                             unitPrice: partDoc.priceHistory[partDoc.priceHistory.length - 1].unitPrice,
                             unitPurchasePrice: partDoc.priceHistory[partDoc.priceHistory.length - 1].unitPurchasePrice,
-                            unitSellingPrice: part.unitSellingPrice,
+                            unitSellingPrice: part.unitSellingPrice ? part.unitSellingPrice : (part.latestPrice ? part.latestPrice : partDoc.priceHistory[partDoc.priceHistory.length - 1].unitSellingPrice),
                             additionalInfo: "Sales order Price Update"
                         }
                     }
-                },{new:true})
+                }, { new: true })
                 console.log(data)
             }
 

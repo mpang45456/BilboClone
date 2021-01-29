@@ -28,6 +28,7 @@ export default function SalesOrderStateDataDisplaySection(props) {
                             <Row style={{width: '100%'}}>
                                 <Input disabled={true} value={partInfo.partNumber} style={{width: '30%', marginRight: '5px'}}/>
                                 <InputNumber disabled={true} value={partInfo.quantity} style={{width: '10%', marginRight: '5px'}}/>
+                                <InputNumber disabled={true} value={partInfo.latestPrice} style={{width: '10%', marginRight: '5px'}}/>
                                 <Input.TextArea disabled={true} rows={1} value={partInfo.additionalInfo} style={{width: '40%', marginRight: '5px'}}/>
                                 <div>
                                     {partInfo.fulfilledBy.map((fulfilledByTarget, innerIndex) => {

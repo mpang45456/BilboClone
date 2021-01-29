@@ -91,6 +91,7 @@ export default function PurchaseOrderViewPage(props) {
                              part.latestPrice = res.data.priceHistory[res.data.priceHistory.length - 1].unitPurchasePrice;
                          })
             })).then(_ => {
+                console.log(stateData)
                 setPurchaseOrderStateData(stateData);
                 setIsLoadingPurchaseOrderDetails(false);
             }).catch(err => {
