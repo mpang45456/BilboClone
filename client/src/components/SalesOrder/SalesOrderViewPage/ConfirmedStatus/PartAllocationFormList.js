@@ -16,8 +16,18 @@ export default function PartAllocationFormList(props) {
                             name={[field.name, 'partNumber']}
                             fieldKey={[field.fieldKey, 'partNumber']}
                             key={`${field.fieldKey}-partNumber`}
-                            style={{width: '20%', marginRight: '5px'}}
+                            style={{width: '15%', marginRight: '5px'}}
                             rules={[{ required: true, message: 'Missing partNumber' }]}
+                        >
+                            <Input disabled={true}></Input>
+                        </Form.Item>
+                        <Form.Item
+                            {...field}
+                            name={[field.name, 'partName']}
+                            fieldKey={[field.fieldKey, 'partName']}
+                            key={`${field.fieldKey}-partName`}
+                            style={{width: '15%', marginRight: '5px'}}
+                            rules={[{ required: true, message: 'Missing partName' }]}
                         >
                             <Input disabled={true}></Input>
                         </Form.Item>
@@ -43,7 +53,7 @@ export default function PartAllocationFormList(props) {
                         </Form.Item>
                         <Form.Item
                             {...field}
-                            style={{width: '30%', marginRight: '5px'}}
+                            style={{width: '25%', marginRight: '5px'}}
                             name={[field.name, 'additionalInfo']}
                             fieldKey={[field.fieldKey, 'additionalInfo']}
                             key={`${field.fieldKey}-additionalInfo`}

@@ -35,7 +35,7 @@ async function getNextOrderNumber(counterName) {
     const update = { $inc: { sequenceValue: 1 } };
     const options = { new: true }; // returns doc AFTER `update` is applied
     const counterDoc = await CounterModel.findOneAndUpdate(filter, update, options);
-    
+
     let prefix = null;
     switch (counterName) {
         case 'salesOrder':
@@ -47,7 +47,7 @@ async function getNextOrderNumber(counterName) {
         default:
             throw new Error(`Invalid counterName: ${counterName}`);
     }
-    
+
     // Pad with leading zeros (6 digits in total)
     // FIXME: This means that there is an upper-bound of 999999 number of orders
     const suffix = ('000000' + counterDoc.sequenceValue).slice(-6);
@@ -63,7 +63,7 @@ const crypto = require('crypto');
 const { PermissionsTransformer } = require('../routes/api/v1/auth/permissions');
 const pt = new PermissionsTransformer();
 const UserSchema = new Schema({
-    username: { type: String, unique: true, index: true, required: true }, 
+    username: { type: String, unique: true, index: true, required: true },
     hash: { type: String },
     salt: { type: String },
     permissions: {
@@ -71,20 +71,20 @@ const UserSchema = new Schema({
         validate: {
             validator: (v) => pt.isValidPermissions(v),
             message: props => `${props.value} is not a valid permission set`
-        }, 
+        },
         required: true
     },
-    name: { type: String, required: true }, 
+    name: { type: String, required: true },
     position: { type: String, required: true },
     reportsTo: { type: String, required: true }
 })
 
-UserSchema.methods.setPassword = function(password) {
+UserSchema.methods.setPassword = function (password) {
     this.salt = crypto.randomBytes(16).toString('hex');
     this.hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex');
 };
 
-UserSchema.methods.isValidPassword = function(password) {
+UserSchema.methods.isValidPassword = function (password) {
     const hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex');
     return this.hash === hash;
 };
@@ -102,17 +102,19 @@ const PriceHistorySchema = new Schema({
     unitSellingPrice: { type: Number, required: true },
     unitPurchasePrice: { type: Number, required: true },
     additionalInfo: { type: String }
-}, { timestamps: true}) // Has `createdAt` and `updatedAt` fields
+}, { timestamps: true }) // Has `createdAt` and `updatedAt` fields
 
 const PartSchema = new Schema({
     supplier: { type: Schema.Types.ObjectId, ref: 'Supplier', required: true, index: true },
-    partNumber: { type: String, required: true, index: true},
+    partNumber: { type: String, required: true, index: true },
     priceHistory: [PriceHistorySchema],
     description: { type: String, default: '' },
-    status: { type: String, 
-              enum: ['ARCHIVED', 'ACTIVE'], 
-              default: 'ACTIVE', 
-              required: true },
+    status: {
+        type: String,
+        enum: ['ARCHIVED', 'ACTIVE'],
+        default: 'ACTIVE',
+        required: true
+    },
     additionalInfo: { type: String, default: '' }
 })
 
@@ -128,8 +130,8 @@ const SupplierSchema = new Schema({
     address: { type: String, default: '' },
     telephone: { type: String, default: '' },
     fax: { type: String, default: '' },
-    parts: [{ type: Schema.Types.ObjectId, ref: 'Part'}], // Must be carefully kept in sync with PartModel
-    additionalInfo: { type: String, default: ''}
+    parts: [{ type: Schema.Types.ObjectId, ref: 'Part' }], // Must be carefully kept in sync with PartModel
+    additionalInfo: { type: String, default: '' }
 })
 
 const SupplierModel = mongoose.model('Supplier', SupplierSchema);
@@ -141,12 +143,12 @@ const SupplierModel = mongoose.model('Supplier', SupplierSchema);
  */
 const CustomerSchema = new Schema({
     name: { type: String, required: true, unique: true, index: true },
-    address: { type: String, default: ''},
-    telephone: { type: String, default: ''},
+    address: { type: String, default: '' },
+    telephone: { type: String, default: '' },
     fax: { type: String, default: '' },
-    email: { type: String, default: ''},
+    email: { type: String, default: '' },
     pointOfContact: { type: String, required: true },
-    additionalInfo: { type: String, default: ''}
+    additionalInfo: { type: String, default: '' }
 })
 
 const CustomerModel = mongoose.model('Customer', CustomerSchema);
@@ -157,23 +159,31 @@ const CustomerModel = mongoose.model('Customer', CustomerSchema);
  * ------------------
  */
 const SalesOrderPartFulfillmentSchema = new Schema({
-    purchaseOrder: { type: Schema.Types.ObjectId, 
-                     ref: 'PurchaseOrder', 
-                     required: true },
+    purchaseOrder: {
+        type: Schema.Types.ObjectId,
+        ref: 'PurchaseOrder',
+        required: true
+    },
     quantity: { type: Number, required: true }
 })
 const SalesOrderPartInfoSchema = new Schema({
-    part: { type: Schema.Types.ObjectId, 
-            ref: 'Part', 
-            required: true},
+    part: {
+        type: Schema.Types.ObjectId,
+        ref: 'Part',
+        required: true
+    },
+    partPrice: { type: Number, required: true },
+    partName: { type: String, required: true },
     quantity: { type: Number, required: true },
     additionalInfo: { type: String, default: true },
     fulfilledBy: [SalesOrderPartFulfillmentSchema]
 })
 const SalesOrderStateSchema = new Schema({
-    status: { type: String, 
-              required: true,
-              enum: Object.keys(SO_STATES) },
+    status: {
+        type: String,
+        required: true,
+        enum: Object.keys(SO_STATES)
+    },
     additionalInfo: { type: String, default: '' },
     parts: [SalesOrderPartInfoSchema],
     updatedBy: { type: String, required: true }, // User.username
@@ -181,15 +191,17 @@ const SalesOrderStateSchema = new Schema({
 const SalesOrderSchema = new Schema({
     createdBy: { type: String, required: true, index: true }, // User.username
     orderNumber: { type: String, required: true, unique: true, index: true },
-    latestStatus: { type: String, 
-                    required: true,
-                    enum: Object.keys(SO_STATES) },
+    latestStatus: {
+        type: String,
+        required: true,
+        enum: Object.keys(SO_STATES)
+    },
     customer: { type: Schema.Types.ObjectId, ref: 'Customer', required: true },
     additionalInfo: { type: String, default: '' },
     orders: [{ type: Schema.Types.ObjectId, ref: 'SalesOrderState' }]
 }, { timestamps: true })
 // Used in dev/prod env. Test env will set orderNumber manually.
-SalesOrderSchema.methods.setOrderNumber = async function() {
+SalesOrderSchema.methods.setOrderNumber = async function () {
     this.orderNumber = await getNextOrderNumber('salesOrder');
 }
 
@@ -202,23 +214,31 @@ const SalesOrderModel = mongoose.model('SalesOrder', SalesOrderSchema);
  * ---------------------
  */
 const PurchaseOrderPartFulfillmentSchema = new Schema({
-    salesOrder: { type: Schema.Types.ObjectId,
-                  ref: 'SalesOrder', 
-                  required: true },
+    salesOrder: {
+        type: Schema.Types.ObjectId,
+        ref: 'SalesOrder',
+        required: true
+    },
     quantity: { type: Number, required: true }
 })
 const PurchaseOrderPartInfoSchema = new Schema({
-    part: { type: Schema.Types.ObjectId,
-            ref: 'Part',
-            required: true },
+    part: {
+        type: Schema.Types.ObjectId,
+        ref: 'Part',
+        required: true
+    },
+    partPrice: { type: Number, required: true },
+    partName: { type: String, required: true },
     quantity: { type: Number, required: true },
     additionalInfo: { type: String, default: true },
     fulfilledFor: [PurchaseOrderPartFulfillmentSchema]
 })
 const PurchaseOrderStateSchema = new Schema({
-    status: { type: String, 
-              required: true,
-              enum: Object.keys(PO_STATES)},
+    status: {
+        type: String,
+        required: true,
+        enum: Object.keys(PO_STATES)
+    },
     additionalInfo: { type: String, default: '' },
     parts: [PurchaseOrderPartInfoSchema],
     updatedBy: { type: String, required: true }, // User.username
@@ -226,15 +246,17 @@ const PurchaseOrderStateSchema = new Schema({
 const PurchaseOrderSchema = new Schema({
     createdBy: { type: String, required: true, index: true }, // User.username
     orderNumber: { type: String, required: true, unique: true, index: true },
-    latestStatus: { type: String, 
-                    required: true,
-                    enum: Object.keys(PO_STATES) },
+    latestStatus: {
+        type: String,
+        required: true,
+        enum: Object.keys(PO_STATES)
+    },
     supplier: { type: Schema.Types.ObjectId, ref: 'Supplier', required: true },
     additionalInfo: { type: String, default: '' },
     orders: [{ type: Schema.Types.ObjectId, ref: 'PurchaseOrderState' }]
 }, { timestamps: true })
 // Used in dev/prod env. Test env will set orderNumber manually.
-PurchaseOrderSchema.methods.setOrderNumber = async function() {
+PurchaseOrderSchema.methods.setOrderNumber = async function () {
     this.orderNumber = await getNextOrderNumber('purchaseOrder');
 }
 
@@ -255,7 +277,7 @@ module.exports = {
     CustomerModel,
     SalesOrderStateModel,
     SalesOrderModel,
-    PurchaseOrderStateModel, 
+    PurchaseOrderStateModel,
     PurchaseOrderModel,
     CounterModel,
     getNextOrderNumber,

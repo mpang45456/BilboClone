@@ -74,7 +74,8 @@ export default function EditHistory(props) {
                 await bax.get(`/api/v1/part/${part.part}?${query}`)
                     .then(res => {
                         part.partNumber = `${res.data.partNumber} (${res.data.supplier.name})`;
-                        part.latestPrice = res.data.priceHistory[res.data.priceHistory.length - 1].unitPurchasePrice;
+                        // part.latestPrice = res.data.priceHistory[res.data.priceHistory.length - 1].unitPurchasePrice;
+                        part.latestPrice = part.partPrice;
                     })
             })).then(_ => {
                 setSelectedPurchaseOrderStateData(stateData);

@@ -338,7 +338,6 @@ router.post('/:salesOrderObjID/state',
             for (let part of parts) {
                 const partDoc = await PartModel.findOne({ _id: part.part });
                 if (!partDoc) { return res.status(400).send('Invalid Part ID'); }
-                console.log("this is how it is called", part)
                 let data = await PartModel.findOneAndUpdate({ _id: part.part }, {
                     "$push": {
                         priceHistory: {
@@ -350,7 +349,6 @@ router.post('/:salesOrderObjID/state',
                         }
                     }
                 }, { new: true })
-                console.log(data)
             }
 
             // Perform Allocation of Parts to Purchase Orders

@@ -36,9 +36,9 @@ export default function NewPartsFormSection(props) {
 
         const updatedPartSelections = [...partSearches];
         let filter = JSON.stringify({
-            "partNumber": { "$regex": searchValue, "$options": "i"},
+            "partNumber": { "$regex": searchValue, "$options": "i" },
         })
-        let query = queryString.stringify({inc: ['partNumber', 'priceHistory'], supplierPopulate: 'name', filter})
+        let query = queryString.stringify({ inc: ['partNumber', 'priceHistory'], supplierPopulate: 'name', filter })
         bax.get(`/api/v1/part?${query}`, { withCredentials: true })
             .then(res => {
                 // Ensure correct order of callback
@@ -65,59 +65,70 @@ export default function NewPartsFormSection(props) {
     // Note: `index` is the index of the dynamically added field
     const onSelect = (index, option) => {
         // Find selected part and its latest price
-        const selectedPartIndex = partSearches[index].partsData.findIndex(data => data._id === option.key);
+        const selectedPartIndex = partSearches[index].partsData.findIndex(data => data._id === option.value);
         const priceHistory = partSearches[index].partsData[selectedPartIndex].priceHistory;
-        const selectedPartLatestPrice = priceHistory[priceHistory.length - 1].unitPrice;
+        const selectedPartLatestPrice = priceHistory[priceHistory.length - 1].unitPurchasePrice;
 
         // Set latest price in form's state
         const newPartsFormValues = props.form.getFieldsValue().partsNew;
         newPartsFormValues[index].latestPrice = selectedPartLatestPrice;
-        props.form.setFieldsValue({'partsNew': newPartsFormValues});
+        newPartsFormValues[index].partName = option.key;
+        props.form.setFieldsValue({ 'partsNew': newPartsFormValues });
     }
 
     return (
         <Form.List name="partsNew">
-        {(fields, { add, remove }) => {
-            return (
-            <div>
-                {fields.map((field, index) => (
-                <Row key={field.key} style={{ width: '100%' }} >
-                    <Form.Item
-                        {...field}
-                        name={[field.name, 'part']}
-                        fieldKey={[field.fieldKey, 'part']}
-                        key={`${field.fieldKey}-part`}
-                        style={{width: '20%', marginRight: '5px'}}
-                        rules={[{ required: true, message: 'Missing part' }]}
-                    >
-                        <Select placeholder='Select Part Number'
-                                notFoundContent={partSearches[index].isGettingPartData ? <Spin size='small'/>: null}
-                                filterOption={false}
-                                showSearch={true}
-                                onSelect={(_, option) => onSelect(index, option)}
-                                onSearch={(searchValue) => getPartData(searchValue, index)} >
-                            {
-                                partSearches[index].partsData.map(partData => {
-                                    return (
-                                        <Option key={partData._id}
-                                                value={partData._id} >
-                                            {`${partData.partNumber} (${partData.supplier.name})`}
-                                        </Option>
-                                    )
-                                })
-                            }
-                        </Select>
-                    </Form.Item>
-                    <Form.Item
-                        {...field}
-                        style={{width: '8%', marginRight: '5px'}}
-                        name={[field.name, 'quantity']}
-                        fieldKey={[field.fieldKey, 'quantity']}
-                        key={`${field.fieldKey}-quantity`}
-                        rules={[{ required: true, message: 'Missing quantity' }]}
-                    >
-                        <InputNumber placeholder="Quantity" style={{ width: '100%' }}/>
-                    </Form.Item>
+            {(fields, { add, remove }) => {
+                return (
+                    <div>
+                        {fields.map((field, index) => (
+                            <Row key={field.key} style={{ width: '100%' }} >
+                                <Form.Item
+                                    {...field}
+                                    name={[field.name, 'part']}
+                                    fieldKey={[field.fieldKey, 'part']}
+                                    key={`${field.fieldKey}-part`}
+                                    style={{ width: '15%', marginRight: '5px' }}
+                                    rules={[{ required: true, message: 'Missing part' }]}
+                                >
+                                    <Select placeholder='Select Part Number'
+                                        notFoundContent={partSearches[index].isGettingPartData ? <Spin size='small' /> : null}
+                                        filterOption={false}
+                                        showSearch={true}
+                                        onSelect={(_, option) => onSelect(index, option)}
+                                        onSearch={(searchValue) => getPartData(searchValue, index)} >
+                                        {
+                                            partSearches[index].partsData.map(partData => {
+                                                return (
+                                                    <Option key={partData.partNumber}
+                                                        value={partData._id} >
+                                                        {`${partData.partNumber} (${partData.supplier.name})`}
+                                                    </Option>
+                                                )
+                                            })
+                                        }
+                                    </Select>
+                                </Form.Item>
+                                <Form.Item
+                                    {...field}
+                                    name={[field.name, 'partName']}
+                                    fieldKey={[field.fieldKey, 'partName']}
+                                    key={`${field.fieldKey}-partName`}
+                                    style={{ width: '15%', marginRight: '5px' }}
+                                    rules={[{ required: true, message: 'Missing partName' }]}
+                                >
+                                    <Input placeholder="Part Number"></Input>
+                                </Form.Item>
+                                <Form.Item
+                                    {...field}
+                                    style={{ width: '8%', marginRight: '5px' }}
+                                    name={[field.name, 'quantity']}
+                                    fieldKey={[field.fieldKey, 'quantity']}
+                                    key={`${field.fieldKey}-quantity`}
+                                    rules={[{ required: true, message: 'Missing quantity' }]}
+                                >
+                                    <InputNumber placeholder="Quantity" style={{ width: '100%' }} />
+                                </Form.Item>
                                 <Form.Item
                                     {...field}
                                     style={{ width: '7%', marginRight: '5px' }}
@@ -128,47 +139,47 @@ export default function NewPartsFormSection(props) {
                                 >
                                     <InputNumber placeholder="Purchase Price" style={{ width: '100%' }} />
                                 </Form.Item>
-                    <Form.Item
-                        {...field}
-                        style={{width: '55%', marginRight: '5px'}}
-                        name={[field.name, 'additionalInfo']}
-                        fieldKey={[field.fieldKey, 'additionalInfo']}
-                        key={`${field.fieldKey}-additionalInfo`}
-                    >
-                        <Input.TextArea placeholder="Additional Information" 
+                                <Form.Item
+                                    {...field}
+                                    style={{ width: '45%', marginRight: '5px' }}
+                                    name={[field.name, 'additionalInfo']}
+                                    fieldKey={[field.fieldKey, 'additionalInfo']}
+                                    key={`${field.fieldKey}-additionalInfo`}
+                                >
+                                    <Input.TextArea placeholder="Additional Information"
                                         rows={1}
-                        />
-                    </Form.Item>
-    
-                    <BilboHoverableIconButton
-                        style={{fontSize: '15px'}}
-                        shape='circle'
-                        transformcolor={theme.colors.brightRed}
-                        onClick={() => { remove(field.name); }} >
-                        <MinusCircleOutlined />
-                    </BilboHoverableIconButton>
-                </Row>
-                ))}
+                                    />
+                                </Form.Item>
 
-                <Form.Item>
-                <Button
-                    type="dashed"
-                    onClick={() => {
-                    const updatedPartSelections = [...partSearches];
-                    updatedPartSelections.push({
-                        isGettingPartData: false,
-                        partsData: [],
-                    })
-                    setPartSearches(updatedPartSelections);
-                    add();
-                    }}
-                >
-                    <PlusOutlined /> Add Another Part
+                                <BilboHoverableIconButton
+                                    style={{ fontSize: '15px' }}
+                                    shape='circle'
+                                    transformcolor={theme.colors.brightRed}
+                                    onClick={() => { remove(field.name); }} >
+                                    <MinusCircleOutlined />
+                                </BilboHoverableIconButton>
+                            </Row>
+                        ))}
+
+                        <Form.Item>
+                            <Button
+                                type="dashed"
+                                onClick={() => {
+                                    const updatedPartSelections = [...partSearches];
+                                    updatedPartSelections.push({
+                                        isGettingPartData: false,
+                                        partsData: [],
+                                    })
+                                    setPartSearches(updatedPartSelections);
+                                    add();
+                                }}
+                            >
+                                <PlusOutlined /> Add Another Part
                 </Button>
-                </Form.Item>
-            </div>
-            );
-        }}
+                        </Form.Item>
+                    </div>
+                );
+            }}
         </Form.List>
     )
 }

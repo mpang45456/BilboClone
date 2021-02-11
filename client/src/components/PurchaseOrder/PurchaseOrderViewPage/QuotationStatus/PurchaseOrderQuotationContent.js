@@ -63,6 +63,8 @@ export default function PurchaseOrderQuotationContent(props) {
                 reqBody.parts.push({
                     part: partInfo.part,
                     unitPurchasePrice: partInfo.latestPrice,
+                    partName: partInfo.partName,
+                    partPrice: partInfo.partPrice,
                     quantity: partInfo.quantity,
                     additionalInfo: partInfo.additionalInfo ? partInfo.additionalInfo : '',
                     fulfilledFor: [],
@@ -73,6 +75,8 @@ export default function PurchaseOrderQuotationContent(props) {
                 reqBody.parts.push({
                     ...partInfo,
                     unitPurchasePrice: partInfo.latestPrice,
+                    partName: partInfo.partName,
+                    partPrice: partInfo.partPrice,
                     additionalInfo: partInfo.additionalInfo ? partInfo.additionalInfo : '',
                     fulfilledFor: [],
                 })

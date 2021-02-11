@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { BilboDividerWithText, 
-         BilboDivider } from '../../../UtilComponents';
+import {
+    BilboDividerWithText,
+    BilboDivider
+} from '../../../UtilComponents';
 import { Space, Modal, Row, message, Form, Button, Statistic } from 'antd';
 const { confirm } = Modal;
 import { ExclamationCircleOutlined } from "@ant-design/icons";
@@ -51,16 +53,19 @@ export default function SalesOrderQuotationContent(props) {
     const submitForm = async (submissionType) => {
         const sendRequest = () => {
             // Prepare request body
-            let reqBody = { additionalInfo: stateAdditionalInfo,
-                            parts: [] };
+            let reqBody = {
+                additionalInfo: stateAdditionalInfo,
+                parts: []
+            };
             // Prepare existing parts
             let formParts = form.getFieldsValue();
             formParts.partsExisting && formParts.partsExisting.map(partInfo => {
-                console.log("partInfo",partInfo)
                 reqBody.parts.push({
                     part: partInfo.part,
-                    unitSellingPrice:partInfo.latestPrice,
+                    unitSellingPrice: partInfo.latestPrice,
                     quantity: partInfo.quantity,
+                    partName: partInfo.partName,
+                    partPrice: partInfo.latestPrice,
                     additionalInfo: partInfo.additionalInfo ? partInfo.additionalInfo : '',
                     fulfilledBy: [],
                 })
@@ -69,16 +74,17 @@ export default function SalesOrderQuotationContent(props) {
             formParts.partsNew && formParts.partsNew.map(partInfo => {
                 reqBody.parts.push({
                     ...partInfo,
-                    unitSellingPrice:partInfo.latestPrice,
+                    unitSellingPrice: partInfo.latestPrice,
+                    partName: partInfo.partName,
+                    partPrice: partInfo.latestPrice,
                     additionalInfo: partInfo.additionalInfo ? partInfo.additionalInfo : '',
                     fulfilledBy: [],
                 })
             })
-    
+
             if (submissionType === 'saveChanges') {
                 reqBody.status = SO_STATES.QUOTATION;
                 setSaveChangesLoading(true);
-                console.log("reqBody",reqBody)
                 bax.post(`/api/v1/salesOrder/${props.salesOrderMetaData._id}/state`, reqBody)
                     .then(res => {
                         if (res.status === 200) {
@@ -114,7 +120,7 @@ export default function SalesOrderQuotationContent(props) {
         form.validateFields()
             .then(_ => {
                 sendRequest();
-            }).catch(err => { 
+            }).catch(err => {
                 // Do nothing (UI will display validation errors)
             });
     }
@@ -130,7 +136,7 @@ export default function SalesOrderQuotationContent(props) {
         let totalValue = 0;
         // Find total value for existing parts
         allFormValues.partsExisting && allFormValues.partsExisting.map(partInfo => {
-            if (partInfo.quantity && 
+            if (partInfo.quantity &&
                 typeof partInfo.quantity === 'number' &&
                 partInfo.latestPrice &&
                 typeof partInfo.latestPrice === 'number') {
@@ -140,7 +146,7 @@ export default function SalesOrderQuotationContent(props) {
         // Find total value for new parts
         allFormValues.partsNew && allFormValues.partsNew.map(partInfo => {
             if (partInfo &&
-                partInfo.quantity && 
+                partInfo.quantity &&
                 typeof partInfo.quantity === 'number' &&
                 partInfo.latestPrice &&
                 typeof partInfo.latestPrice === 'number') {
@@ -153,48 +159,48 @@ export default function SalesOrderQuotationContent(props) {
 
     return (
         <>
-            <SalesOrderMetaDataDisplaySection 
-                salesOrderMetaData={props.salesOrderMetaData} 
-            />
-            
-            <SalesOrderStateAdditionalInfoEditableSection 
-                stateAdditionalInfo={stateAdditionalInfo}
-                setStateAdditionalInfo={setStateAdditionalInfo} 
+            <SalesOrderMetaDataDisplaySection
+                salesOrderMetaData={props.salesOrderMetaData}
             />
 
-            <Form name="quotationStatusForm" 
-                    form={form}
-                    initialValues={{
-                        // populate `partsExisting` form section with
-                        // existing parts data (from sales order state)
-                        partsExisting: props.salesOrderStateData.parts
-                    }}
-                    onValuesChange={onFormValuesChange}
-                    autoComplete="off">
+            <SalesOrderStateAdditionalInfoEditableSection
+                stateAdditionalInfo={stateAdditionalInfo}
+                setStateAdditionalInfo={setStateAdditionalInfo}
+            />
+
+            <Form name="quotationStatusForm"
+                form={form}
+                initialValues={{
+                    // populate `partsExisting` form section with
+                    // existing parts data (from sales order state)
+                    partsExisting: props.salesOrderStateData.parts
+                }}
+                onValuesChange={onFormValuesChange}
+                autoComplete="off">
 
                 <BilboDividerWithText orientation='left'>Part Details</BilboDividerWithText>
                 <ExistingPartsFormSection />
-                <NewPartsFormSection form={form}/>
-        
+                <NewPartsFormSection form={form} />
+
                 <BilboDividerWithText orientation='left'>Order Summary</BilboDividerWithText>
                 <Statistic title='Total Sales Order Value'
-                           value={totalSalesOrderValue}
-                           precision={2}
-                           prefix='$'
+                    value={totalSalesOrderValue}
+                    precision={2}
+                    prefix='$'
                 />
                 <BilboDivider />
                 <Row justify='end'>
-                    <Space direction='vertical' style={{display: 'block', width: '20%'}}>
+                    <Space direction='vertical' style={{ display: 'block', width: '20%' }}>
                         <Row style={{ display: 'flex', alignContent: 'space-between' }}>
-                            <Button style={{flexGrow: 1}} type="default" onClick={onCancel}>
+                            <Button style={{ flexGrow: 1 }} type="default" onClick={onCancel}>
                                 Cancel
                             </Button>
-                            <Button style={{flexGrow: 1}} type="default" loading={saveChangesLoading} onClick={() => submitForm('saveChanges')}>
+                            <Button style={{ flexGrow: 1 }} type="default" loading={saveChangesLoading} onClick={() => submitForm('saveChanges')}>
                                 Save Changes
                             </Button>
                         </Row>
-                        
-                        <Button style={{width: '100%'}} type="primary" loading={proceedNextStatusLoading} onClick={() => submitForm('proceedNextStatus')}>
+
+                        <Button style={{ width: '100%' }} type="primary" loading={proceedNextStatusLoading} onClick={() => submitForm('proceedNextStatus')}>
                             Confirm and Proceed
                         </Button>
                     </Space>

@@ -2,20 +2,20 @@ const mongoose = require('mongoose');
 const CONFIG = require('../config');
 const logger = require('../utils');
 
-const { UserModel, 
-        PartModel, 
-        SupplierModel, 
-        CustomerModel,
-        SalesOrderStateModel,
-        SalesOrderModel,
-        PurchaseOrderStateModel,
-        PurchaseOrderModel,
-        CounterModel } = require('./database');
-const { users, 
-        suppliers, 
-        customers, 
-        salesOrders, 
-        purchaseOrders } = require('./databaseBootstrap');
+const { UserModel,
+    PartModel,
+    SupplierModel,
+    CustomerModel,
+    SalesOrderStateModel,
+    SalesOrderModel,
+    PurchaseOrderStateModel,
+    PurchaseOrderModel,
+    CounterModel } = require('./database');
+const { users,
+    suppliers,
+    customers,
+    salesOrders,
+    purchaseOrders } = require('./databaseBootstrap');
 
 // TODO: It is possible to get rid of import statements
 // in whatever class that uses `DatabaseInteractor` if 
@@ -52,15 +52,15 @@ class DatabaseInteractor {
      * Initialise a connection to the database.
      * @param {boolean} resetAndSeedDatabase 
      */
-    async initConnection(resetAndSeedDatabase=false) {
+    async initConnection(resetAndSeedDatabase = false) {
         mongoose.set('useCreateIndex', true);
         mongoose.set('useFindAndModify', false);
         try {
-            await mongoose.connect(CONFIG.DATABASE_URL, 
-                                   {useNewUrlParser: true, useUnifiedTopology: true});
+            await mongoose.connect(CONFIG.DATABASE_URL,
+                { useNewUrlParser: true, useUnifiedTopology: true });
             logger.info("Connection to MongoDB is open");
             if (resetAndSeedDatabase) { await this.__resetAndSeedDatabase(); }
-        } catch(err) {
+        } catch (err) {
             logger.error(`Something went wrong while setting up the database: ${err}`);
         }
 
@@ -118,11 +118,15 @@ class DatabaseInteractor {
      * `setOrderNumber` method about the next order number. 
      */
     async __initCounters() {
-        const salesOrderCounter = new CounterModel({ counterName: 'salesOrder',
-                                                     sequenceValue: 0 });
+        const salesOrderCounter = new CounterModel({
+            counterName: 'salesOrder',
+            sequenceValue: 0
+        });
         await salesOrderCounter.save();
-        const purchaseOrderCounter = new CounterModel({ counterName: 'purchaseOrder',
-                                                        sequenceValue: 0 });
+        const purchaseOrderCounter = new CounterModel({
+            counterName: 'purchaseOrder',
+            sequenceValue: 0
+        });
         await purchaseOrderCounter.save();
     }
 
@@ -150,11 +154,13 @@ class DatabaseInteractor {
      */
     async addUsers(...users) {
         for (let user of users) {
-            let userObj = new UserModel({ username: user.username, 
-                                          permissions: user.permissions, 
-                                          name: user.name, 
-                                          position: user.position,
-                                          reportsTo: user.reportsTo });
+            let userObj = new UserModel({
+                username: user.username,
+                permissions: user.permissions,
+                name: user.name,
+                position: user.position,
+                reportsTo: user.reportsTo
+            });
             userObj.setPassword(user.password);
             await userObj.save();
         }
@@ -172,19 +178,19 @@ class DatabaseInteractor {
         for (let supplier of suppliersWithParts) {
             // Add Suppliers
             let supplierDoc = new SupplierModel({
-                name: supplier.name, 
+                name: supplier.name,
                 address: supplier.address,
-                telephone: supplier.telephone, 
-                fax: supplier.fax, 
+                telephone: supplier.telephone,
+                fax: supplier.fax,
                 additionalInfo: supplier.additionalInfo
             })
-            
+
             // Add Parts 
             for (let part of supplier.parts) {
                 let partDoc = PartModel({
                     supplier: supplierDoc,
-                    partNumber: part.partNumber, 
-                    priceHistory: part.priceHistory, 
+                    partNumber: part.partNumber,
+                    priceHistory: part.priceHistory,
                     description: part.description,
                     status: part.status,
                     additionalInfo: part.additionalInfo
@@ -208,11 +214,11 @@ class DatabaseInteractor {
     async addCustomers(...customers) {
         for (let customer of customers) {
             let customerDoc = CustomerModel({
-                name: customer.name, 
-                address: customer.address, 
-                telephone: customer.telephone, 
+                name: customer.name,
+                address: customer.address,
+                telephone: customer.telephone,
                 fax: customer.fax,
-                email: customer.email, 
+                email: customer.email,
                 pointOfContact: customer.pointOfContact,
                 additionalInfo: customer.additionalInfo
             })
@@ -241,6 +247,8 @@ class DatabaseInteractor {
                         return {
                             part: partDoc.id,
                             quantity: part.quantity,
+                            partPrice: partDoc.priceHistory[partDoc.priceHistory.length - 1].unitSellingPrice,
+                            partName: part.partNumber,
                             additionalInfo: part.additionalInfo,
                             fulfilledBy: part.fulfilledBy,
                         }
@@ -252,7 +260,7 @@ class DatabaseInteractor {
                     updatedBy: soState.updatedBy,
                     parts: allParts,
                 })
-                
+
                 soDoc.orders.push(soStateDoc);
                 await soStateDoc.save();
             }
@@ -282,6 +290,8 @@ class DatabaseInteractor {
                         return {
                             part: partDoc.id,
                             quantity: part.quantity,
+                            partPrice: partDoc.priceHistory[partDoc.priceHistory.length - 1].unitPurchasePrice,
+                            partName: part.partNumber,
                             additionalInfo: part.additionalInfo,
                             fufilledFor: part.fufilledFor,
                         }
@@ -293,7 +303,7 @@ class DatabaseInteractor {
                     updatedBy: poState.updatedBy,
                     parts: allParts,
                 })
-                
+
                 poDoc.orders.push(poStateDoc);
                 await poStateDoc.save();
             }

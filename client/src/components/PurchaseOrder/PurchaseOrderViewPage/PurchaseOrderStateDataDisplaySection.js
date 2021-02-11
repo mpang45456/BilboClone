@@ -25,14 +25,14 @@ export default function PurchaseOrderStateDataDisplaySection(props) {
             <BilboDividerWithText orientation='left'>Part Details</BilboDividerWithText>
             {
                 props.purchaseOrderStateData.parts.map((partInfo, index) => {
-                    console.log(partInfo)
                     return (
                         <div key={index}>
                             <Row style={{ width: '100%' }}>
-                                <Input disabled={true} value={partInfo.partNumber} style={{ width: '30%', marginRight: '5px' }} />
-                                <InputNumber disabled={true} value={partInfo.quantity} style={{ width: props.smallContainer ? '13%' : '8%', marginRight: '5px' }} />
+                            <Input disabled={true} value={partInfo.partNumber} style={{ width: '20%', marginRight: '5px' }} />
+                                <Input disabled={true} value={partInfo.partName} style={{ width: '20%', marginRight: '5px' }} />
                                 <InputNumber disabled={true} value={partInfo.latestPrice} style={{ width: props.smallContainer ? '13%' : '7%', marginRight: '5px' }} />
-                                <Input.TextArea disabled={true} rows={1} value={partInfo.additionalInfo} style={{ width: '40%', marginRight: '5px' }} />
+                                <InputNumber disabled={true} value={partInfo.quantity} style={{ width: props.smallContainer ? '13%' : '8%', marginRight: '5px' }} />
+                                <Input.TextArea disabled={true} rows={1} value={partInfo.additionalInfo} style={{ width: '30%', marginRight: '5px' }} />
                                 <div>
                                     {partInfo.fulfilledFor.map((fulfilledForTarget, innerIndex) => {
                                         return (

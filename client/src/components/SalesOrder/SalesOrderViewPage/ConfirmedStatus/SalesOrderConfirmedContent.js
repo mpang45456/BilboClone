@@ -93,6 +93,8 @@ export default function SalesOrderConfirmedContent(props) {
         formData.parts && formData.parts.map(partInfo => {
             reqBody.parts.push({
                 part: partInfo.part,
+                partName: partInfo.partName,
+                partPrice: partInfo.partPrice,
                 quantity: partInfo.quantity,
                 additionalInfo: partInfo.additionalInfo,
                 fulfilledBy: partInfo.fulfilledBy,

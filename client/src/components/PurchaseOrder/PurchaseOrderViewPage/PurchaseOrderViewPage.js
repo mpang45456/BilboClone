@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { ShowMoreButton, 
-         BilboTabs,
-         BilboPageHeader, 
-         BilboDivider, 
-         BilboDisplayOnlySteps } from '../../UtilComponents';
+import {
+    ShowMoreButton,
+    BilboTabs,
+    BilboPageHeader,
+    BilboDivider,
+    BilboDisplayOnlySteps
+} from '../../UtilComponents';
 import { Menu, Modal, Tabs, Spin, message } from 'antd';
 const { TabPane } = Tabs;
 const { confirm } = Modal;
@@ -55,11 +57,11 @@ import { isEmpty } from 'lodash';
 export default function PurchaseOrderViewPage(props) {
     const { permissionsList } = useAuth();
     const history = useHistory();
-    const [ purchaseOrderMetaData, setPurchaseOrderMetaData ] = useState({});
-    const [ purchaseOrderStateData, setPurchaseOrderStateData ] = useState({});
-    const [ isLoadingPurchaseOrderDetails, setIsLoadingPurchaseOrderDetails] = useState(true);
+    const [purchaseOrderMetaData, setPurchaseOrderMetaData] = useState({});
+    const [purchaseOrderStateData, setPurchaseOrderStateData] = useState({});
+    const [isLoadingPurchaseOrderDetails, setIsLoadingPurchaseOrderDetails] = useState(true);
     useEffect(() => {
-        (async function() {
+        (async function () {
             // Get Meta-Data
             await bax.get(`/api/v1/purchaseOrder/${props.match.params.purchaseOrderID}`)
                 .then(res => {
@@ -69,7 +71,7 @@ export default function PurchaseOrderViewPage(props) {
                 }).catch(err => {
                     redirectToErrorPage(err, history);
                 })
-    
+
             // Get State Data
             let stateData = null;
             const query = queryString.stringify({ populateFulfilledFor: true });
@@ -84,14 +86,16 @@ export default function PurchaseOrderViewPage(props) {
 
             // Populate State Data with Part's Part Number and Supplier Name
             await Promise.all(stateData.parts.map(async part => {
-                const query = queryString.stringify({inc: ['partNumber', 'priceHistory'], supplierPopulate: ['name']});
+                const query = queryString.stringify({ inc: ['partNumber', 'priceHistory'], supplierPopulate: ['name'] });
                 await bax.get(`/api/v1/part/${part.part}?${query}`)
-                         .then(res => {
-                             part.partNumber = `${res.data.partNumber} (${res.data.supplier.name})`;
-                             part.latestPrice = res.data.priceHistory[res.data.priceHistory.length - 1].unitPurchasePrice;
-                         })
+                    .then(res => {
+                        part.partNumber = `${res.data.partNumber} (${res.data.supplier.name})`;
+                        part.partName = `${part.partName}`;
+                        //  part.latestPrice = res.data.priceHistory[res.data.priceHistory.length - 1].unitPurchasePrice;
+                        part.latestPrice = part.partPrice;
+                        part.partPrice = part.partPrice;
+                    })
             })).then(_ => {
-                console.log(stateData)
                 setPurchaseOrderStateData(stateData);
                 setIsLoadingPurchaseOrderDetails(false);
             }).catch(err => {
@@ -110,30 +114,30 @@ export default function PurchaseOrderViewPage(props) {
     function renderSwitcher(latestStatus) {
         switch (latestStatus) {
             case 'QUOTATION':
-                return <PurchaseOrderQuotationContent 
-                            purchaseOrderStateData={purchaseOrderStateData} 
-                            purchaseOrderMetaData={purchaseOrderMetaData}
-                            />
+                return <PurchaseOrderQuotationContent
+                    purchaseOrderStateData={purchaseOrderStateData}
+                    purchaseOrderMetaData={purchaseOrderMetaData}
+                />
             case 'CONFIRMED':
-                return <PurchaseOrderConfirmedContent 
-                            purchaseOrderStateData={purchaseOrderStateData} 
-                            purchaseOrderMetaData={purchaseOrderMetaData}
-                            />
+                return <PurchaseOrderConfirmedContent
+                    purchaseOrderStateData={purchaseOrderStateData}
+                    purchaseOrderMetaData={purchaseOrderMetaData}
+                />
             case 'RECEIVED':
-                return <PurchaseOrderReceivedContent 
-                            purchaseOrderStateData={purchaseOrderStateData} 
-                            purchaseOrderMetaData={purchaseOrderMetaData}
-                            />
+                return <PurchaseOrderReceivedContent
+                    purchaseOrderStateData={purchaseOrderStateData}
+                    purchaseOrderMetaData={purchaseOrderMetaData}
+                />
             case 'FULFILLED':
-                return <PurchaseOrderFulfilledContent 
-                            purchaseOrderStateData={purchaseOrderStateData} 
-                            purchaseOrderMetaData={purchaseOrderMetaData}
-                            />
+                return <PurchaseOrderFulfilledContent
+                    purchaseOrderStateData={purchaseOrderStateData}
+                    purchaseOrderMetaData={purchaseOrderMetaData}
+                />
             case 'CANCELLED':
-                return <PurchaseOrderCancelledContent 
-                            purchaseOrderStateData={purchaseOrderStateData} 
-                            purchaseOrderMetaData={purchaseOrderMetaData}
-                            />
+                return <PurchaseOrderCancelledContent
+                    purchaseOrderStateData={purchaseOrderStateData}
+                    purchaseOrderMetaData={purchaseOrderMetaData}
+                />
             default:
                 return <Spin>Loading</Spin>
         }
@@ -141,12 +145,12 @@ export default function PurchaseOrderViewPage(props) {
 
     return (
         <div>
-            <Spin spinning={isLoadingPurchaseOrderDetails}> 
-                <BilboPageHeader 
+            <Spin spinning={isLoadingPurchaseOrderDetails}>
+                <BilboPageHeader
                     title='Purchase Order Details'
                     onBack={() => history.push(CONFIG.PURCHASE_ORDER_URL)}
                     extra={[
-                        <CancelPurchaseOrderShowMoreButton 
+                        <CancelPurchaseOrderShowMoreButton
                             key='cancelPurchaseOrderShowMoreButton'
                             purchaseOrderState={purchaseOrderStateData}
                             purchaseOrderID={props.match.params.purchaseOrderID}
@@ -157,18 +161,18 @@ export default function PurchaseOrderViewPage(props) {
                 <BilboDivider />
                 <BilboTabs type='card'>
                     <TabPane tab='Details' key='1'>
-                        <BilboDisplayOnlySteps 
+                        <BilboDisplayOnlySteps
                             activeStepIndex={CONFIG.PURCHASE_ORDER_STEPS.findIndex(statusObj => statusObj.status === purchaseOrderStateData.status)}
                             allStatusAndTitle={CONFIG.PURCHASE_ORDER_STEPS} />
-                        { 
+                        {
                             !isEmpty(purchaseOrderMetaData) &&
                             !isEmpty(purchaseOrderStateData) &&
-                            renderSwitcher(purchaseOrderMetaData.latestStatus) 
+                            renderSwitcher(purchaseOrderMetaData.latestStatus)
                         }
                     </TabPane>
                     <TabPane tab='Edit History' key='2'>
-                        <EditHistory 
-                            purchaseOrderMetaData={purchaseOrderMetaData} 
+                        <EditHistory
+                            purchaseOrderMetaData={purchaseOrderMetaData}
                         />
                     </TabPane>
                 </BilboTabs>
@@ -185,7 +189,7 @@ function CancelPurchaseOrderShowMoreButton(props) {
     const history = useHistory();
 
     // Handler when Delete Button is clicked on (will display a modal)
-    const buttonClicked = ({item, key, keyPath, domEvent}) => {
+    const buttonClicked = ({ item, key, keyPath, domEvent }) => {
         if (key === 'cancelPurchaseOrder') {
             confirm({
                 icon: <ExclamationCircleOutlined />,
@@ -211,15 +215,15 @@ function CancelPurchaseOrderShowMoreButton(props) {
 
     const menu = (
         <Menu onClick={buttonClicked}>
-            <Menu.Item 
+            <Menu.Item
                 key='cancelPurchaseOrder'
-                icon={<StopOutlined/>}>
+                icon={<StopOutlined />}>
                 Cancel Purchase Order
             </Menu.Item>
         </Menu>
     )
     return (
-        <ShowMoreButton 
+        <ShowMoreButton
             dropdownKey='cancelPurchaseOrderShowMoreDropdown'
             menu={menu}
             disabled={props.disabled}
